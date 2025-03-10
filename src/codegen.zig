@@ -265,10 +265,11 @@ pub const CodeGen = struct {
                 try self.environment.create_scope();
                 defer self.environment.drop_scope();
 
-                const ptr = self.environment.get_variable(name.?);
+                var ptr: ?*Variable = null;
 
                 // Needed for recursive functions
                 if (name != null) {
+                    ptr = self.environment.get_variable(name.?);
                     try self.environment.add_variable(name.?, try self.create_variable(.{
                         .value = function,
                         .type = function_type,
@@ -309,7 +310,7 @@ pub const CodeGen = struct {
                 core.LLVMPositionBuilderAtEnd(self.builder, builder_pos);
 
                 // Global functions
-                if (self.environment.scope_stack.items.len == 2) {
+                if (name == null or self.environment.scope_stack.items.len == 2) {
                     return try self.create_variable(.{
                         .value = function,
                         .type = function_type,
