@@ -30,19 +30,16 @@ pub const Node = union(enum) {
         condition: *Node,
         statements: []*Node,
     },
-    EQUALITY_EXPRESSION: struct {
-        lhs: *Node,
-        rhs: *Node,
-    },
+    EQUALITY_EXPRESSION: struct { lhs: *Node, rhs: *Node, typ: EqualityExpressionType },
     ADDITIVE_EXPRESSION: struct {
         addition: bool,
         lhs: *Node,
         rhs: *Node,
     },
     MULTIPLICATIVE_EXPRESSION: struct {
-        multiplication: bool,
         lhs: *Node,
         rhs: *Node,
+        typ: MultiplicativeExpressionType,
     },
     UNARY_EXPRESSION: struct {
         negation: bool,
@@ -77,6 +74,18 @@ pub const Node = union(enum) {
     RETURN_STATEMENT: struct {
         expression: *Node,
     },
+};
+
+pub const EqualityExpressionType = enum {
+    EQ,
+    LT,
+    GT,
+};
+
+pub const MultiplicativeExpressionType = enum {
+    MUL,
+    DIV,
+    MOD,
 };
 
 pub const Parser = struct {
@@ -266,20 +275,38 @@ pub const Parser = struct {
             return ParserError.ParsingError;
     }
 
-    // EqualityExpression ::= AdditiveExpression "==" AdditiveExpression
+    // EqualityExpression ::= AdditiveExpression ("==" | "<" | ">") AdditiveExpression
     fn parse_equality_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing equality expression {any}\n", .{self.peek_token()});
 
         const lhs = try self.parse_additive_expression();
 
-        _ = try self.parse_token(tokenizer.TokenType.EQUALS);
-        _ = try self.parse_token(tokenizer.TokenType.EQUALS);
+        var typ: EqualityExpressionType = undefined;
+
+        if (self.accept_parse(struct {
+            fn parse(iself: *Parser) ParserError!*Node {
+                _ = try iself.parse_token(tokenizer.TokenType.EQUALS);
+                _ = try iself.parse_token(tokenizer.TokenType.EQUALS);
+                return try iself.create_node(.{ .PROGRAM = .{
+                    .statements = &[_]*Node{},
+                } });
+            }
+        }.parse) != null) {
+            typ = .EQ;
+        } else if (self.accept_token(tokenizer.TokenType.LESS) != null) {
+            typ = .LT;
+        } else if (self.accept_token(tokenizer.TokenType.GREATER) != null) {
+            typ = .GT;
+        } else {
+            return ParserError.ParsingError;
+        }
 
         const rhs = try self.parse_additive_expression();
 
         return self.create_node(.{ .EQUALITY_EXPRESSION = .{
             .lhs = lhs,
             .rhs = rhs,
+            .typ = typ,
         } });
     }
 
@@ -307,24 +334,30 @@ pub const Parser = struct {
         return lhs;
     }
 
-    // MultiplicativeExpression ::= UnaryExpression (("*" | "/") UnaryExpression)*
+    // MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)*
     fn parse_multiplicative_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing additive expression {any}\n", .{self.peek_token()});
 
         var lhs = try self.parse_unary_expression();
 
         while (true) {
-            const mul = self.accept_token(tokenizer.TokenType.MUL);
-            const div = self.accept_token(tokenizer.TokenType.DIV);
-
-            if (mul == null and div == null) break;
+            var typ: MultiplicativeExpressionType = undefined;
+            if (self.accept_token(tokenizer.TokenType.MUL) != null) {
+                typ = .MUL;
+            } else if (self.accept_token(tokenizer.TokenType.DIV) != null) {
+                typ = .DIV;
+            } else if (self.accept_token(tokenizer.TokenType.MOD) != null) {
+                typ = .MOD;
+            } else {
+                break;
+            }
 
             const rhs = try self.parse_unary_expression();
 
             lhs = try self.create_node(.{ .MULTIPLICATIVE_EXPRESSION = .{
-                .multiplication = mul != null,
                 .lhs = lhs,
                 .rhs = rhs,
+                .typ = typ,
             } });
         }
 

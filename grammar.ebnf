@@ -16,11 +16,11 @@ FunctionArguments ::= Expression ("," Expression)*
 
 Expression ::= EqualityExpression | AdditiveExpression
 
-EqualityExpression ::= AdditiveExpression "==" AdditiveExpression
+EqualityExpression ::= AdditiveExpression ("==" | "<" | ">") AdditiveExpression
 
 AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpression)*
 
-MultiplicativeExpression ::= UnaryExpression (("*" | "/") UnaryExpression)*
+MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)*
 
 UnaryExpression ::= ("!" | "-") UnaryExpression | PrimaryExpression
 

@@ -32,9 +32,10 @@ pub const CodeGen = struct {
     pub fn init(arena: std.mem.Allocator) !*CodeGen {
         // Initialize LLVM
         target.LLVMInitializeAllTargetInfos();
-        _ = target.LLVMInitializeAllTargets();
-        _ = target.LLVMInitializeAllAsmPrinters();
-        _ = target.LLVMInitializeAllAsmParsers();
+        target.LLVMInitializeAllTargetMCs();
+        target.LLVMInitializeAllTargets();
+        target.LLVMInitializeAllAsmPrinters();
+        target.LLVMInitializeAllAsmParsers();
 
         const module: types.LLVMModuleRef = core.LLVMModuleCreateWithName("module");
         const builder = core.LLVMCreateBuilder();
@@ -50,8 +51,7 @@ pub const CodeGen = struct {
 
         const printf_function_type = core.LLVMFunctionType(core.LLVMVoidType(), @constCast(&[_]types.LLVMTypeRef{
             core.LLVMPointerType(core.LLVMInt8Type(), 0),
-            core.LLVMInt64Type(),
-        }), 2, 1);
+        }), 1, 1);
         const printf_function = core.LLVMAddFunction(self.llvm_module, "printf", printf_function_type) orelse return CodeGenError.CompilationError;
         try self.environment.add_variable("printf", try self.create_variable(.{
             .value = printf_function,
@@ -72,10 +72,11 @@ pub const CodeGen = struct {
         // Generate code
         const triple = target_m.LLVMGetDefaultTargetTriple();
         var target_ref: types.LLVMTargetRef = undefined;
-        var message: [*c]u8 = undefined;
-        _ = target_m.LLVMGetTargetFromTriple(triple, &target_ref, &message);
-        std.debug.print("Target output: {s}.\n", .{message});
-        core.LLVMDisposeMessage(message);
+        var message: ?[*c]u8 = undefined;
+        const xd = target_m.LLVMGetTargetFromTriple(triple, &target_ref, &message.?);
+        std.debug.print("XD: {any}.\n", .{xd});
+        // std.debug.print("Target output: {any}.\n", .{message});
+        // core.LLVMDisposeMessage(message);
         const target_machine = target_m.LLVMCreateTargetMachine(
             target_ref,
             triple,
@@ -97,9 +98,9 @@ pub const CodeGen = struct {
         );
         std.debug.print("Object file generated: {s}\n", .{filename});
 
-        _ = analysis.LLVMVerifyModule(self.llvm_module, types.LLVMAbortProcessAction, &message);
-        std.debug.print("Verification output: {s}.\n", .{message});
-        core.LLVMDisposeMessage(message);
+        _ = analysis.LLVMVerifyModule(self.llvm_module, types.LLVMAbortProcessAction, &message.?);
+        // std.debug.print("Verification output: {any}.\n", .{message});
+        // core.LLVMDisposeMessage(message);
 
         // Clean up LLVM resources
         defer core.LLVMDisposeBuilder(self.builder);
@@ -165,9 +166,7 @@ pub const CodeGen = struct {
             .PRIMARY_EXPRESSION => |primary_expression| {
                 std.debug.assert(primary_expression == .IDENTIFIER);
                 function = self.environment.get_variable(primary_expression.IDENTIFIER.name) orelse return CodeGenError.CompilationError;
-                std.debug.print("STACK LVEL: {any} {s}\n", .{ function.stack_level.?, primary_expression.IDENTIFIER.name });
-                if (function.stack_level.? > 0) {
-                    std.debug.print("NOT GLOBAL FN! {s} {any}\n", .{ primary_expression.IDENTIFIER.name, function.stack_level });
+                if (core.LLVMGetValueKind(function.value) != types.LLVMFunctionValueKind) {
                     function.value = core.LLVMBuildLoad2(self.builder, core.LLVMPointerType(function.type, 0), function.value, "");
                 }
             },
@@ -212,7 +211,7 @@ pub const CodeGen = struct {
         for (if_statement.statements) |stmt| {
             try self.generate_statement(stmt);
         }
-        const merge_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "else_block");
+        const merge_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "merge_block");
         const last_instr = core.LLVMGetLastInstruction(then_block);
         if (core.LLVMIsATerminatorInst(last_instr) == null) {
             _ = core.LLVMBuildBr(self.builder, merge_block);
@@ -242,10 +241,8 @@ pub const CodeGen = struct {
         for (while_statement.statements) |stmt| {
             try self.generate_statement(stmt);
         }
-        const last_instr = core.LLVMGetLastInstruction(inner_block);
-        if (core.LLVMIsATerminatorInst(last_instr) == null) {
-            _ = core.LLVMBuildBr(self.builder, while_block);
-        }
+
+        _ = core.LLVMBuildBr(self.builder, while_block);
 
         core.LLVMPositionBuilderAtEnd(self.builder, outer_block);
     }
@@ -271,28 +268,22 @@ pub const CodeGen = struct {
                 const function_type = core.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse return CodeGenError.CompilationError;
                 const function = core.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name orelse "unnamed_func"}), function_type) orelse return CodeGenError.CompilationError;
                 const function_entry = core.LLVMAppendBasicBlock(function, "entrypoint") orelse return CodeGenError.CompilationError;
-
-                // Needed for recursive functions
-                if (name != null) {
-                    const ptr = self.environment.get_variable(name.?);
-                    // Global fn
-                    if (ptr == null) {
-                        try self.environment.add_variable(name.?, try self.create_variable(.{
-                            .value = function,
-                            .type = function_type,
-                            .stack_level = null,
-                        }));
-                    } else {
-                        _ = core.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
-                        ptr.?.type = function_type;
-                        try self.environment.add_variable(name.?, ptr.?);
-                    }
-                }
-
                 core.LLVMPositionBuilderAtEnd(self.builder, function_entry);
 
                 try self.environment.create_scope();
                 defer self.environment.drop_scope();
+
+                var ptr: ?*Variable = null;
+
+                // Needed for recursive functions
+                if (name != null) {
+                    ptr = self.environment.get_variable(name.?);
+                    try self.environment.add_variable(name.?, try self.create_variable(.{
+                        .value = function,
+                        .type = function_type,
+                        .stack_level = null,
+                    }));
+                }
 
                 const params = try self.arena.alloc(types.LLVMValueRef, function_definition.parameters.len);
                 core.LLVMGetParams(function, params.ptr);
@@ -323,17 +314,21 @@ pub const CodeGen = struct {
                     try self.generate_statement(stmt);
                 }
 
+                // TODO: This should be done with a defer when `builder_pos` is declared, but for some reason it doesn't work
                 core.LLVMPositionBuilderAtEnd(self.builder, builder_pos);
 
                 // Global functions
-                if (self.environment.scope_stack.items.len == 2) {
+                if (name == null or self.environment.scope_stack.items.len == 2) {
                     return try self.create_variable(.{
                         .value = function,
                         .type = function_type,
                         .stack_level = null,
                     });
                 }
-                return self.environment.get_variable(name.?) orelse unreachable;
+
+                _ = core.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
+                ptr.?.type = function_type;
+                return ptr.?;
             },
             .FUNCTION_CALL_STATEMENT => |*fn_call| {
                 if (name != null) {
@@ -371,18 +366,7 @@ pub const CodeGen = struct {
                     }
                     const loaded = core.LLVMBuildLoad2(self.builder, param_type, variable.value, "");
 
-                    if (name != null) {
-                        const ptr = self.environment.get_variable(name.?).?;
-                        _ = core.LLVMBuildStore(self.builder, loaded, ptr.value);
-                        ptr.type = variable.type;
-                        return ptr;
-                    }
-
-                    return try self.create_variable(.{
-                        .value = loaded,
-                        .type = variable.type,
-                        .stack_level = null,
-                    });
+                    return self.generate_literal(loaded, variable.type, name);
                 },
             },
             .ADDITIVE_EXPRESSION => |exp| {
@@ -396,44 +380,26 @@ pub const CodeGen = struct {
                     result = core.LLVMBuildSub(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                 }
 
-                if (name != null) {
-                    const ptr = self.environment.get_variable(name.?) orelse unreachable;
-                    _ = core.LLVMBuildStore(self.builder, result, ptr.value);
-                    ptr.type = core.LLVMInt64Type();
-
-                    return ptr;
-                } else {
-                    return try self.create_variable(.{
-                        .value = result,
-                        .type = core.LLVMInt64Type(),
-                        .stack_level = null,
-                    });
-                }
+                return self.generate_literal(result, core.LLVMInt64Type(), name);
             },
             .MULTIPLICATIVE_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
                 var result: types.LLVMValueRef = undefined;
-                if (exp.multiplication) {
-                    result = core.LLVMBuildMul(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
-                } else {
-                    result = core.LLVMBuildSDiv(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                switch (exp.typ) {
+                    .MUL => {
+                        result = core.LLVMBuildMul(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    },
+                    .DIV => {
+                        result = core.LLVMBuildSDiv(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    },
+                    .MOD => {
+                        result = core.LLVMBuildSRem(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    },
                 }
 
-                if (name != null) {
-                    const ptr = self.environment.get_variable(name.?) orelse unreachable;
-                    _ = core.LLVMBuildStore(self.builder, result, ptr.value);
-                    ptr.type = core.LLVMInt64Type();
-
-                    return ptr;
-                } else {
-                    return try self.create_variable(.{
-                        .value = result,
-                        .type = core.LLVMInt64Type(),
-                        .stack_level = null,
-                    });
-                }
+                return self.generate_literal(result, core.LLVMInt64Type(), name);
             },
             .UNARY_EXPRESSION => |exp| {
                 const k = try self.generate_expression_value(exp.expression, null);
@@ -452,48 +418,26 @@ pub const CodeGen = struct {
                     },
                 }
 
-                if (name != null) {
-                    const ptr = self.environment.get_variable(name.?) orelse unreachable;
-
-                    _ = core.LLVMBuildStore(self.builder, r, ptr.value);
-                    ptr.type = t;
-
-                    return ptr;
-                } else {
-                    return try self.create_variable(.{
-                        .value = r,
-                        .type = t,
-                        .stack_level = null,
-                    });
-                }
+                return self.generate_literal(r, t, name);
             },
             .EQUALITY_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
-                const cmp = core.LLVMBuildICmp(self.builder, types.LLVMIntEQ, lhs_value.value, rhs_value.value, "");
+                const op: c_uint = switch (exp.typ) {
+                    .EQ => types.LLVMIntEQ,
+                    .LT => types.LLVMIntSLT,
+                    .GT => types.LLVMIntSGT,
+                };
+                const cmp = core.LLVMBuildICmp(self.builder, op, lhs_value.value, rhs_value.value, "");
 
-                if (name != null) {
-                    const ptr = self.environment.get_variable(name.?) orelse unreachable;
-
-                    _ = core.LLVMBuildStore(self.builder, cmp, ptr.value);
-                    ptr.type = core.LLVMInt1Type();
-
-                    return ptr;
-                } else {
-                    return try self.create_variable(.{
-                        .value = cmp,
-                        .type = core.LLVMInt1Type(),
-                        .stack_level = null,
-                    });
-                }
+                return self.generate_literal(cmp, core.LLVMInt1Type(), name);
             },
             else => unreachable,
         };
     }
 
     fn generate_literal(self: *CodeGen, literal_val: types.LLVMValueRef, literal_type: types.LLVMTypeRef, name: ?[]const u8) !*Variable {
-        var variable: types.LLVMValueRef = undefined;
         if (name != null) {
             if (self.environment.scope_stack.items.len == 1) {
                 const ptr = try self.create_variable(.{
@@ -508,12 +452,10 @@ pub const CodeGen = struct {
             _ = core.LLVMBuildStore(self.builder, literal_val, ptr.value) orelse return CodeGenError.CompilationError;
             ptr.type = literal_type;
             return ptr;
-        } else {
-            variable = literal_val;
         }
 
         return try self.create_variable(.{
-            .value = variable,
+            .value = literal_val,
             .type = literal_type,
             .stack_level = null,
         });

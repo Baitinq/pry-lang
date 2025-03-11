@@ -2,7 +2,7 @@ let ten = () => i64 {
 	return () => i64 {
 		return 10;
 	}();
-}; /* TODO */
+};
 
 let main = () => i64 {
 	let i = 4;
