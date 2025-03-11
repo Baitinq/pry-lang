@@ -8,13 +8,6 @@ const llvm = @cImport({
     @cInclude("llvm-c/Target.h");
 });
 
-// Create aliases for clarity
-const core = llvm;
-const target_m = llvm;
-const types = llvm;
-const analysis = llvm;
-const target = llvm;
-
 const parser = @import("parser.zig");
 
 pub const CodeGenError = error{
@@ -23,22 +16,22 @@ pub const CodeGenError = error{
 };
 
 pub const CodeGen = struct {
-    llvm_module: types.LLVMModuleRef,
-    builder: types.LLVMBuilderRef,
+    llvm_module: llvm.LLVMModuleRef,
+    builder: llvm.LLVMBuilderRef,
     environment: *Environment,
 
     arena: std.mem.Allocator,
 
     pub fn init(arena: std.mem.Allocator) !*CodeGen {
         // Initialize LLVM
-        target.LLVMInitializeAllTargetInfos();
-        target.LLVMInitializeAllTargetMCs();
-        target.LLVMInitializeAllTargets();
-        target.LLVMInitializeAllAsmPrinters();
-        target.LLVMInitializeAllAsmParsers();
+        llvm.LLVMInitializeAllTargetInfos();
+        llvm.LLVMInitializeAllTargetMCs();
+        llvm.LLVMInitializeAllTargets();
+        llvm.LLVMInitializeAllAsmPrinters();
+        llvm.LLVMInitializeAllAsmParsers();
 
-        const module: types.LLVMModuleRef = core.LLVMModuleCreateWithName("module");
-        const builder = core.LLVMCreateBuilder();
+        const module: llvm.LLVMModuleRef = llvm.LLVMModuleCreateWithName("module");
+        const builder = llvm.LLVMCreateBuilder();
 
         const self = try arena.create(CodeGen);
         self.* = .{
@@ -49,10 +42,10 @@ pub const CodeGen = struct {
             .arena = arena,
         };
 
-        const printf_function_type = core.LLVMFunctionType(core.LLVMVoidType(), @constCast(&[_]types.LLVMTypeRef{
-            core.LLVMPointerType(core.LLVMInt8Type(), 0),
+        const printf_function_type = llvm.LLVMFunctionType(llvm.LLVMVoidType(), @constCast(&[_]llvm.LLVMTypeRef{
+            llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0),
         }), 1, 1);
-        const printf_function = core.LLVMAddFunction(self.llvm_module, "printf", printf_function_type) orelse return CodeGenError.CompilationError;
+        const printf_function = llvm.LLVMAddFunction(self.llvm_module, "printf", printf_function_type) orelse return CodeGenError.CompilationError;
         try self.environment.add_variable("printf", try self.create_variable(.{
             .value = printf_function,
             .type = printf_function_type,
@@ -67,45 +60,45 @@ pub const CodeGen = struct {
 
     pub fn deinit(self: *CodeGen) !void {
         // Dump module
-        core.LLVMDumpModule(self.llvm_module);
+        llvm.LLVMDumpModule(self.llvm_module);
 
         // Generate code
-        const triple = target_m.LLVMGetDefaultTargetTriple();
-        var target_ref: types.LLVMTargetRef = undefined;
+        const triple = llvm.LLVMGetDefaultTargetTriple();
+        var target_ref: llvm.LLVMTargetRef = undefined;
         var message: ?[*c]u8 = undefined;
-        const xd = target_m.LLVMGetTargetFromTriple(triple, &target_ref, &message.?);
+        const xd = llvm.LLVMGetTargetFromTriple(triple, &target_ref, &message.?);
         std.debug.print("XD: {any}.\n", .{xd});
         // std.debug.print("Target output: {any}.\n", .{message});
         // core.LLVMDisposeMessage(message);
-        const target_machine = target_m.LLVMCreateTargetMachine(
+        const target_machine = llvm.LLVMCreateTargetMachine(
             target_ref,
             triple,
             "",
             "",
-            types.LLVMCodeGenLevelDefault,
-            types.LLVMRelocDefault,
-            types.LLVMCodeModelDefault,
+            llvm.LLVMCodeGenLevelDefault,
+            llvm.LLVMRelocDefault,
+            llvm.LLVMCodeModelDefault,
         );
 
         // Generate the object file
         const filename = "output.o";
-        _ = target_m.LLVMTargetMachineEmitToFile(
+        _ = llvm.LLVMTargetMachineEmitToFile(
             target_machine,
             self.llvm_module,
             filename,
-            types.LLVMObjectFile,
+            llvm.LLVMObjectFile,
             null,
         );
         std.debug.print("Object file generated: {s}\n", .{filename});
 
-        _ = analysis.LLVMVerifyModule(self.llvm_module, types.LLVMAbortProcessAction, &message.?);
+        _ = llvm.LLVMVerifyModule(self.llvm_module, llvm.LLVMAbortProcessAction, &message.?);
         // std.debug.print("Verification output: {any}.\n", .{message});
         // core.LLVMDisposeMessage(message);
 
         // Clean up LLVM resources
-        defer core.LLVMDisposeBuilder(self.builder);
-        core.LLVMDisposeModule(self.llvm_module);
-        core.LLVMShutdown();
+        defer llvm.LLVMDisposeBuilder(self.builder);
+        llvm.LLVMDisposeModule(self.llvm_module);
+        llvm.LLVMShutdown();
     }
 
     pub fn generate(self: *CodeGen, ast: *parser.Node) CodeGenError!void {
@@ -144,10 +137,10 @@ pub const CodeGen = struct {
 
         if (assignment_statement.is_declaration and self.environment.scope_stack.items.len > 1) {
             // TODO: vv Int64Type is a problem
-            const alloca = core.LLVMBuildAlloca(self.builder, core.LLVMInt64Type(), try std.fmt.allocPrintZ(self.arena, "{s}", .{assignment_statement.name})); //TODO: Correct type
+            const alloca = llvm.LLVMBuildAlloca(self.builder, llvm.LLVMInt64Type(), try std.fmt.allocPrintZ(self.arena, "{s}", .{assignment_statement.name})); //TODO: Correct type
             try self.environment.add_variable(assignment_statement.name, try self.create_variable(.{
                 .value = alloca,
-                .type = core.LLVMVoidType(), // This gets set to the correct type during the expression type resolution. ALTERNATIVE: Pass the alloca
+                .type = llvm.LLVMVoidType(), // This gets set to the correct type during the expression type resolution. ALTERNATIVE: Pass the alloca
                 .stack_level = null,
             }));
         }
@@ -156,7 +149,7 @@ pub const CodeGen = struct {
         try self.environment.add_variable(assignment_statement.name, variable);
     }
 
-    fn generate_function_call_statement(self: *CodeGen, statement: *parser.Node) CodeGenError!types.LLVMValueRef {
+    fn generate_function_call_statement(self: *CodeGen, statement: *parser.Node) CodeGenError!llvm.LLVMValueRef {
         errdefer std.debug.print("Error generating function call statement\n", .{});
         std.debug.assert(statement.* == parser.Node.FUNCTION_CALL_STATEMENT);
         const function_call_statement = statement.FUNCTION_CALL_STATEMENT;
@@ -166,8 +159,8 @@ pub const CodeGen = struct {
             .PRIMARY_EXPRESSION => |primary_expression| {
                 std.debug.assert(primary_expression == .IDENTIFIER);
                 function = self.environment.get_variable(primary_expression.IDENTIFIER.name) orelse return CodeGenError.CompilationError;
-                if (core.LLVMGetValueKind(function.value) != types.LLVMFunctionValueKind) {
-                    function.value = core.LLVMBuildLoad2(self.builder, core.LLVMPointerType(function.type, 0), function.value, "");
+                if (llvm.LLVMGetValueKind(function.value) != llvm.LLVMFunctionValueKind) {
+                    function.value = llvm.LLVMBuildLoad2(self.builder, llvm.LLVMPointerType(function.type, 0), function.value, "");
                 }
             },
             .FUNCTION_DEFINITION => |*function_definition| {
@@ -176,14 +169,14 @@ pub const CodeGen = struct {
             else => unreachable,
         }
 
-        var arguments = std.ArrayList(types.LLVMValueRef).init(self.arena);
+        var arguments = std.ArrayList(llvm.LLVMValueRef).init(self.arena);
 
         for (function_call_statement.arguments) |argument| {
             const arg = try self.generate_expression_value(argument, null);
             try arguments.append(arg.value);
         }
 
-        return core.LLVMBuildCall2(self.builder, function.type, function.value, @ptrCast(arguments.items), @intCast(arguments.items.len), "") orelse return CodeGenError.CompilationError;
+        return llvm.LLVMBuildCall2(self.builder, function.type, function.value, @ptrCast(arguments.items), @intCast(arguments.items.len), "") orelse return CodeGenError.CompilationError;
     }
 
     fn generate_return_statement(self: *CodeGen, statement: *parser.Node) !void {
@@ -193,7 +186,7 @@ pub const CodeGen = struct {
         const expression = statement.RETURN_STATEMENT.expression;
 
         const val = try self.generate_expression_value(expression, null);
-        _ = core.LLVMBuildRet(self.builder, val.value);
+        _ = llvm.LLVMBuildRet(self.builder, val.value);
     }
 
     fn generate_if_statement(self: *CodeGen, statement: *parser.Node) !void {
@@ -204,22 +197,22 @@ pub const CodeGen = struct {
 
         const condition_value = try self.generate_expression_value(if_statement.condition, null);
 
-        const current_block = core.LLVMGetInsertBlock(self.builder);
+        const current_block = llvm.LLVMGetInsertBlock(self.builder);
 
-        const then_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "then_block");
-        _ = core.LLVMPositionBuilderAtEnd(self.builder, then_block);
+        const then_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "then_block");
+        _ = llvm.LLVMPositionBuilderAtEnd(self.builder, then_block);
         for (if_statement.statements) |stmt| {
             try self.generate_statement(stmt);
         }
-        const merge_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "merge_block");
-        const last_instr = core.LLVMGetLastInstruction(then_block);
-        if (core.LLVMIsATerminatorInst(last_instr) == null) {
-            _ = core.LLVMBuildBr(self.builder, merge_block);
+        const merge_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "merge_block");
+        const last_instr = llvm.LLVMGetLastInstruction(then_block);
+        if (llvm.LLVMIsATerminatorInst(last_instr) == null) {
+            _ = llvm.LLVMBuildBr(self.builder, merge_block);
         }
-        core.LLVMPositionBuilderAtEnd(self.builder, current_block);
+        llvm.LLVMPositionBuilderAtEnd(self.builder, current_block);
 
-        _ = core.LLVMBuildCondBr(self.builder, condition_value.value, then_block, merge_block);
-        core.LLVMPositionBuilderAtEnd(self.builder, merge_block);
+        _ = llvm.LLVMBuildCondBr(self.builder, condition_value.value, then_block, merge_block);
+        llvm.LLVMPositionBuilderAtEnd(self.builder, merge_block);
     }
 
     fn generate_while_statement(self: *CodeGen, statement: *parser.Node) !void {
@@ -228,23 +221,23 @@ pub const CodeGen = struct {
 
         const while_statement = statement.WHILE_STATEMENT;
 
-        const while_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "while_block");
-        _ = core.LLVMBuildBr(self.builder, while_block);
-        _ = core.LLVMPositionBuilderAtEnd(self.builder, while_block);
+        const while_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "while_block");
+        _ = llvm.LLVMBuildBr(self.builder, while_block);
+        _ = llvm.LLVMPositionBuilderAtEnd(self.builder, while_block);
         const condition_value = try self.generate_expression_value(while_statement.condition, null);
 
-        const inner_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "inner_block");
-        const outer_block = core.LLVMAppendBasicBlock(core.LLVMGetLastFunction(self.llvm_module), "outer_block");
-        _ = core.LLVMBuildCondBr(self.builder, condition_value.value, inner_block, outer_block);
+        const inner_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "inner_block");
+        const outer_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "outer_block");
+        _ = llvm.LLVMBuildCondBr(self.builder, condition_value.value, inner_block, outer_block);
 
-        _ = core.LLVMPositionBuilderAtEnd(self.builder, inner_block);
+        _ = llvm.LLVMPositionBuilderAtEnd(self.builder, inner_block);
         for (while_statement.statements) |stmt| {
             try self.generate_statement(stmt);
         }
 
-        _ = core.LLVMBuildBr(self.builder, while_block);
+        _ = llvm.LLVMBuildBr(self.builder, while_block);
 
-        core.LLVMPositionBuilderAtEnd(self.builder, outer_block);
+        llvm.LLVMPositionBuilderAtEnd(self.builder, outer_block);
     }
 
     fn generate_expression_value(self: *CodeGen, expression: *parser.Node, name: ?[]const u8) !*Variable {
@@ -253,22 +246,22 @@ pub const CodeGen = struct {
             .FUNCTION_DEFINITION => |function_definition| {
 
                 // Functions should be declared "globally"
-                const builder_pos = core.LLVMGetInsertBlock(self.builder);
+                const builder_pos = llvm.LLVMGetInsertBlock(self.builder);
 
-                var paramtypes = std.ArrayList(types.LLVMTypeRef).init(self.arena);
+                var paramtypes = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
                 for (function_definition.parameters) |param| {
                     std.debug.assert(param.PRIMARY_EXPRESSION == .IDENTIFIER);
                     var param_type = try self.get_llvm_type(param.PRIMARY_EXPRESSION.IDENTIFIER.type.?);
                     if (param.PRIMARY_EXPRESSION.IDENTIFIER.type.?.TYPE == .FUNCTION_TYPE) {
-                        param_type = core.LLVMPointerType(param_type.?, 0);
+                        param_type = llvm.LLVMPointerType(param_type.?, 0);
                     }
                     try paramtypes.append(param_type);
                 }
                 const return_type = try self.get_llvm_type(function_definition.return_type);
-                const function_type = core.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse return CodeGenError.CompilationError;
-                const function = core.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name orelse "unnamed_func"}), function_type) orelse return CodeGenError.CompilationError;
-                const function_entry = core.LLVMAppendBasicBlock(function, "entrypoint") orelse return CodeGenError.CompilationError;
-                core.LLVMPositionBuilderAtEnd(self.builder, function_entry);
+                const function_type = llvm.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse return CodeGenError.CompilationError;
+                const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name orelse "unnamed_func"}), function_type) orelse return CodeGenError.CompilationError;
+                const function_entry = llvm.LLVMAppendBasicBlock(function, "entrypoint") orelse return CodeGenError.CompilationError;
+                llvm.LLVMPositionBuilderAtEnd(self.builder, function_entry);
 
                 try self.environment.create_scope();
                 defer self.environment.drop_scope();
@@ -285,8 +278,8 @@ pub const CodeGen = struct {
                     }));
                 }
 
-                const params = try self.arena.alloc(types.LLVMValueRef, function_definition.parameters.len);
-                core.LLVMGetParams(function, params.ptr);
+                const params = try self.arena.alloc(llvm.LLVMValueRef, function_definition.parameters.len);
+                llvm.LLVMGetParams(function, params.ptr);
 
                 var parameters_index: usize = 0;
                 for (params) |p| {
@@ -297,11 +290,11 @@ pub const CodeGen = struct {
                     const param_type = try self.get_llvm_type(param_node.PRIMARY_EXPRESSION.IDENTIFIER.type.?);
                     var alloca_param_type = param_type;
                     if (param_node.PRIMARY_EXPRESSION.IDENTIFIER.type.?.TYPE == .FUNCTION_TYPE) {
-                        alloca_param_type = core.LLVMPointerType(alloca_param_type.?, 0);
+                        alloca_param_type = llvm.LLVMPointerType(alloca_param_type.?, 0);
                     }
                     // We need to alloca params because we assume all identifiers are alloca TODO:: Is this correct
-                    const alloca = core.LLVMBuildAlloca(self.builder, alloca_param_type, try std.fmt.allocPrintZ(self.arena, "{s}", .{param_node.PRIMARY_EXPRESSION.IDENTIFIER.name}));
-                    _ = core.LLVMBuildStore(self.builder, p, alloca);
+                    const alloca = llvm.LLVMBuildAlloca(self.builder, alloca_param_type, try std.fmt.allocPrintZ(self.arena, "{s}", .{param_node.PRIMARY_EXPRESSION.IDENTIFIER.name}));
+                    _ = llvm.LLVMBuildStore(self.builder, p, alloca);
 
                     try self.environment.add_variable(param_node.PRIMARY_EXPRESSION.IDENTIFIER.name, try self.create_variable(.{
                         .value = alloca,
@@ -315,7 +308,7 @@ pub const CodeGen = struct {
                 }
 
                 // TODO: This should be done with a defer when `builder_pos` is declared, but for some reason it doesn't work
-                core.LLVMPositionBuilderAtEnd(self.builder, builder_pos);
+                llvm.LLVMPositionBuilderAtEnd(self.builder, builder_pos);
 
                 // Global functions
                 if (name == null or self.environment.scope_stack.items.len == 2) {
@@ -326,7 +319,7 @@ pub const CodeGen = struct {
                     });
                 }
 
-                _ = core.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
+                _ = llvm.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
                 ptr.?.type = function_type;
                 return ptr.?;
             },
@@ -334,21 +327,21 @@ pub const CodeGen = struct {
                 if (name != null) {
                     const ptr = self.environment.get_variable(name.?) orelse unreachable;
                     const result = try self.generate_function_call_statement(@ptrCast(fn_call));
-                    _ = core.LLVMBuildStore(self.builder, result, ptr.value) orelse return CodeGenError.CompilationError;
-                    ptr.type = core.LLVMInt64Type();
+                    _ = llvm.LLVMBuildStore(self.builder, result, ptr.value) orelse return CodeGenError.CompilationError;
+                    ptr.type = llvm.LLVMInt64Type();
                     return ptr;
                 } else {
                     const r = try self.generate_function_call_statement(@ptrCast(fn_call));
                     return try self.create_variable(.{
                         .value = r,
-                        .type = core.LLVMInt64Type(),
+                        .type = llvm.LLVMInt64Type(),
                         .stack_level = null,
                     });
                 }
             },
             .PRIMARY_EXPRESSION => |primary_expression| switch (primary_expression) {
                 .NUMBER => |n| {
-                    return try self.generate_literal(core.LLVMConstInt(core.LLVMInt64Type(), @intCast(n.value), 0), core.LLVMInt64Type(), name);
+                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt64Type(), @intCast(n.value), 0), llvm.LLVMInt64Type(), name);
                 },
                 .BOOLEAN => |b| {
                     const int_value: i64 = switch (b.value) {
@@ -356,15 +349,15 @@ pub const CodeGen = struct {
                         true => 1,
                     };
 
-                    return try self.generate_literal(core.LLVMConstInt(core.LLVMInt1Type(), @intCast(int_value), 0), core.LLVMInt1Type(), name);
+                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt1Type(), @intCast(int_value), 0), llvm.LLVMInt1Type(), name);
                 },
                 .IDENTIFIER => |i| {
                     const variable = self.environment.get_variable(i.name).?;
                     var param_type = variable.type;
-                    if (core.LLVMGetTypeKind(param_type.?) == types.LLVMFunctionTypeKind) {
-                        param_type = core.LLVMPointerType(param_type.?, 0);
+                    if (llvm.LLVMGetTypeKind(param_type.?) == llvm.LLVMFunctionTypeKind) {
+                        param_type = llvm.LLVMPointerType(param_type.?, 0);
                     }
-                    const loaded = core.LLVMBuildLoad2(self.builder, param_type, variable.value, "");
+                    const loaded = llvm.LLVMBuildLoad2(self.builder, param_type, variable.value, "");
 
                     return self.generate_literal(loaded, variable.type, name);
                 },
@@ -373,48 +366,48 @@ pub const CodeGen = struct {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
-                var result: types.LLVMValueRef = undefined;
+                var result: llvm.LLVMValueRef = undefined;
                 if (exp.addition) {
-                    result = core.LLVMBuildAdd(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    result = llvm.LLVMBuildAdd(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                 } else {
-                    result = core.LLVMBuildSub(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    result = llvm.LLVMBuildSub(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                 }
 
-                return self.generate_literal(result, core.LLVMInt64Type(), name);
+                return self.generate_literal(result, llvm.LLVMInt64Type(), name);
             },
             .MULTIPLICATIVE_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
-                var result: types.LLVMValueRef = undefined;
+                var result: llvm.LLVMValueRef = undefined;
                 switch (exp.typ) {
                     .MUL => {
-                        result = core.LLVMBuildMul(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                        result = llvm.LLVMBuildMul(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                     },
                     .DIV => {
-                        result = core.LLVMBuildSDiv(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                        result = llvm.LLVMBuildSDiv(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                     },
                     .MOD => {
-                        result = core.LLVMBuildSRem(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                        result = llvm.LLVMBuildSRem(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                     },
                 }
 
-                return self.generate_literal(result, core.LLVMInt64Type(), name);
+                return self.generate_literal(result, llvm.LLVMInt64Type(), name);
             },
             .UNARY_EXPRESSION => |exp| {
                 const k = try self.generate_expression_value(exp.expression, null);
 
-                var r: types.LLVMValueRef = undefined;
-                var t: types.LLVMTypeRef = undefined;
+                var r: llvm.LLVMValueRef = undefined;
+                var t: llvm.LLVMTypeRef = undefined;
                 switch (exp.negation) {
                     true => {
-                        std.debug.assert(k.type == core.LLVMInt1Type());
-                        r = core.LLVMBuildICmp(self.builder, types.LLVMIntEQ, k.value, core.LLVMConstInt(core.LLVMInt1Type(), 0, 0), "");
-                        t = core.LLVMInt1Type();
+                        std.debug.assert(k.type == llvm.LLVMInt1Type());
+                        r = llvm.LLVMBuildICmp(self.builder, llvm.LLVMIntEQ, k.value, llvm.LLVMConstInt(llvm.LLVMInt1Type(), 0, 0), "");
+                        t = llvm.LLVMInt1Type();
                     },
                     false => {
-                        r = core.LLVMBuildNeg(self.builder, k.value, "");
-                        t = core.LLVMInt64Type();
+                        r = llvm.LLVMBuildNeg(self.builder, k.value, "");
+                        t = llvm.LLVMInt64Type();
                     },
                 }
 
@@ -425,31 +418,31 @@ pub const CodeGen = struct {
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
                 const op: c_uint = switch (exp.typ) {
-                    .EQ => types.LLVMIntEQ,
-                    .LT => types.LLVMIntSLT,
-                    .GT => types.LLVMIntSGT,
+                    .EQ => llvm.LLVMIntEQ,
+                    .LT => llvm.LLVMIntSLT,
+                    .GT => llvm.LLVMIntSGT,
                 };
-                const cmp = core.LLVMBuildICmp(self.builder, op, lhs_value.value, rhs_value.value, "");
+                const cmp = llvm.LLVMBuildICmp(self.builder, op, lhs_value.value, rhs_value.value, "");
 
-                return self.generate_literal(cmp, core.LLVMInt1Type(), name);
+                return self.generate_literal(cmp, llvm.LLVMInt1Type(), name);
             },
             else => unreachable,
         };
     }
 
-    fn generate_literal(self: *CodeGen, literal_val: types.LLVMValueRef, literal_type: types.LLVMTypeRef, name: ?[]const u8) !*Variable {
+    fn generate_literal(self: *CodeGen, literal_val: llvm.LLVMValueRef, literal_type: llvm.LLVMTypeRef, name: ?[]const u8) !*Variable {
         if (name != null) {
             if (self.environment.scope_stack.items.len == 1) {
                 const ptr = try self.create_variable(.{
-                    .value = core.LLVMAddGlobal(self.llvm_module, literal_type, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?})),
+                    .value = llvm.LLVMAddGlobal(self.llvm_module, literal_type, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?})),
                     .type = literal_type,
                     .stack_level = null,
                 });
-                core.LLVMSetInitializer(ptr.value, literal_val);
+                llvm.LLVMSetInitializer(ptr.value, literal_val);
                 return ptr;
             }
             const ptr = self.environment.get_variable(name.?) orelse unreachable;
-            _ = core.LLVMBuildStore(self.builder, literal_val, ptr.value) orelse return CodeGenError.CompilationError;
+            _ = llvm.LLVMBuildStore(self.builder, literal_val, ptr.value) orelse return CodeGenError.CompilationError;
             ptr.type = literal_type;
             return ptr;
         }
@@ -461,47 +454,47 @@ pub const CodeGen = struct {
         });
     }
 
-    fn get_llvm_type(self: *CodeGen, node: *parser.Node) !types.LLVMTypeRef {
+    fn get_llvm_type(self: *CodeGen, node: *parser.Node) !llvm.LLVMTypeRef {
         std.debug.assert(node.* == parser.Node.TYPE);
         const type_node = node.TYPE;
 
         switch (type_node) {
             .SIMPLE_TYPE => |t| {
-                if (std.mem.eql(u8, t.name, "i64")) return core.LLVMInt64Type();
-                if (std.mem.eql(u8, t.name, "bool")) return core.LLVMInt1Type();
+                if (std.mem.eql(u8, t.name, "i64")) return llvm.LLVMInt64Type();
+                if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
                 unreachable;
             },
             // TODO: Properly handle this vv
             .FUNCTION_TYPE => |t| {
                 const return_type = try self.get_llvm_type(t.return_type);
-                var paramtypes = std.ArrayList(types.LLVMTypeRef).init(self.arena);
+                var paramtypes = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
                 for (t.parameters) |param| {
                     try paramtypes.append(try self.get_llvm_type(param));
                 }
-                const function_type = core.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse unreachable;
+                const function_type = llvm.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse unreachable;
                 return function_type;
             },
         }
     }
 
     fn create_print_function(self: *CodeGen) !void {
-        const print_function_type = core.LLVMFunctionType(core.LLVMVoidType(), @constCast(&[_]types.LLVMTypeRef{core.LLVMInt64Type()}), 1, 0);
-        const print_function = core.LLVMAddFunction(self.llvm_module, "print", print_function_type);
-        const print_function_entry = core.LLVMAppendBasicBlock(print_function, "entrypoint") orelse return CodeGenError.CompilationError;
-        core.LLVMPositionBuilderAtEnd(self.builder, print_function_entry);
+        const print_function_type = llvm.LLVMFunctionType(llvm.LLVMVoidType(), @constCast(&[_]llvm.LLVMTypeRef{llvm.LLVMInt64Type()}), 1, 0);
+        const print_function = llvm.LLVMAddFunction(self.llvm_module, "print", print_function_type);
+        const print_function_entry = llvm.LLVMAppendBasicBlock(print_function, "entrypoint") orelse return CodeGenError.CompilationError;
+        llvm.LLVMPositionBuilderAtEnd(self.builder, print_function_entry);
 
         const format_str = "%d\n";
-        const format_str_ptr = core.LLVMBuildGlobalStringPtr(self.builder, format_str, "format_str_ptr");
+        const format_str_ptr = llvm.LLVMBuildGlobalStringPtr(self.builder, format_str, "format_str_ptr");
 
-        const arguments = @constCast(&[_]types.LLVMValueRef{
+        const arguments = @constCast(&[_]llvm.LLVMValueRef{
             format_str_ptr,
-            core.LLVMGetParam(print_function, 0),
+            llvm.LLVMGetParam(print_function, 0),
         });
 
         const printf_function_var = self.environment.get_variable("printf") orelse return CodeGenError.CompilationError;
 
-        _ = core.LLVMBuildCall2(self.builder, printf_function_var.type, printf_function_var.value, arguments, 2, "") orelse return CodeGenError.CompilationError;
-        _ = core.LLVMBuildRetVoid(self.builder);
+        _ = llvm.LLVMBuildCall2(self.builder, printf_function_var.type, printf_function_var.value, arguments, 2, "") orelse return CodeGenError.CompilationError;
+        _ = llvm.LLVMBuildRetVoid(self.builder);
 
         try self.environment.add_variable("print", try self.create_variable(.{
             .value = print_function,
@@ -511,26 +504,26 @@ pub const CodeGen = struct {
     }
 
     fn create_printb_function(self: *CodeGen) !void {
-        const print_function_type = core.LLVMFunctionType(core.LLVMVoidType(), @constCast(&[_]types.LLVMTypeRef{core.LLVMInt1Type()}), 1, 0);
-        const print_function = core.LLVMAddFunction(self.llvm_module, "printb", print_function_type);
-        const print_function_entry = core.LLVMAppendBasicBlock(print_function, "entrypoint") orelse return CodeGenError.CompilationError;
-        core.LLVMPositionBuilderAtEnd(self.builder, print_function_entry);
+        const print_function_type = llvm.LLVMFunctionType(llvm.LLVMVoidType(), @constCast(&[_]llvm.LLVMTypeRef{llvm.LLVMInt1Type()}), 1, 0);
+        const print_function = llvm.LLVMAddFunction(self.llvm_module, "printb", print_function_type);
+        const print_function_entry = llvm.LLVMAppendBasicBlock(print_function, "entrypoint") orelse return CodeGenError.CompilationError;
+        llvm.LLVMPositionBuilderAtEnd(self.builder, print_function_entry);
 
         const format_str = "%d\n";
-        const format_str_ptr = core.LLVMBuildGlobalStringPtr(self.builder, format_str, "format_str_ptr");
+        const format_str_ptr = llvm.LLVMBuildGlobalStringPtr(self.builder, format_str, "format_str_ptr");
 
-        const p = core.LLVMGetParam(print_function, 0);
-        const x = core.LLVMBuildZExt(self.builder, p, core.LLVMInt64Type(), "");
+        const p = llvm.LLVMGetParam(print_function, 0);
+        const x = llvm.LLVMBuildZExt(self.builder, p, llvm.LLVMInt64Type(), "");
 
-        const arguments = @constCast(&[_]types.LLVMValueRef{
+        const arguments = @constCast(&[_]llvm.LLVMValueRef{
             format_str_ptr,
             x,
         });
 
         const printf_function_var = self.environment.get_variable("printf") orelse return CodeGenError.CompilationError;
 
-        _ = core.LLVMBuildCall2(self.builder, printf_function_var.type, printf_function_var.value, arguments, 2, "") orelse return CodeGenError.CompilationError;
-        _ = core.LLVMBuildRetVoid(self.builder);
+        _ = llvm.LLVMBuildCall2(self.builder, printf_function_var.type, printf_function_var.value, arguments, 2, "") orelse return CodeGenError.CompilationError;
+        _ = llvm.LLVMBuildRetVoid(self.builder);
 
         try self.environment.add_variable("printb", try self.create_variable(.{
             .value = print_function,
@@ -547,8 +540,8 @@ pub const CodeGen = struct {
 };
 
 const Variable = struct {
-    type: types.LLVMTypeRef,
-    value: types.LLVMValueRef,
+    type: llvm.LLVMTypeRef,
+    value: llvm.LLVMValueRef,
     stack_level: ?usize,
 };
 
