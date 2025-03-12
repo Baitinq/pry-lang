@@ -26,7 +26,7 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    exe_mod.linkSystemLibrary("LLVM-18", .{});
+    exe_mod.linkSystemLibrary("LLVM-20-rc3", .{});
     exe_mod.link_libc = true;
 
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
