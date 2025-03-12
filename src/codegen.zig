@@ -65,11 +65,12 @@ pub const CodeGen = struct {
         // Generate code
         const triple = llvm.LLVMGetDefaultTargetTriple();
         var target_ref: llvm.LLVMTargetRef = undefined;
-        var message: ?[*c]u8 = undefined;
-        const xd = llvm.LLVMGetTargetFromTriple(triple, &target_ref, &message.?);
-        std.debug.print("XD: {any}.\n", .{xd});
-        // std.debug.print("Target output: {any}.\n", .{message});
-        // core.LLVMDisposeMessage(message);
+        var message: [*c]u8 = undefined;
+        var result = llvm.LLVMGetTargetFromTriple(triple, &target_ref, &message);
+        if (result != 0) {
+            std.debug.print("Target output: {s}.\n", .{message});
+            llvm.LLVMDisposeMessage(message.?);
+        }
         const target_machine = llvm.LLVMCreateTargetMachine(
             target_ref,
             triple,
@@ -91,9 +92,11 @@ pub const CodeGen = struct {
         );
         std.debug.print("Object file generated: {s}\n", .{filename});
 
-        _ = llvm.LLVMVerifyModule(self.llvm_module, llvm.LLVMAbortProcessAction, &message.?);
-        // std.debug.print("Verification output: {any}.\n", .{message});
-        // core.LLVMDisposeMessage(message);
+        result = llvm.LLVMVerifyModule(self.llvm_module, llvm.LLVMAbortProcessAction, &message);
+        if (result != 0) {
+            std.debug.print("Verification output: {any}.\n", .{message});
+            llvm.LLVMDisposeMessage(message);
+        }
 
         // Clean up LLVM resources
         defer llvm.LLVMDisposeBuilder(self.builder);
