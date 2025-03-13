@@ -1,0 +1,11 @@
+let main = () => i64 {
+	let fn = () => () => i64 {
+		return () => i64 {
+			return 4;
+		};
+	};
+
+	let x = fn();
+
+	return x();
+};
