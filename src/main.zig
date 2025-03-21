@@ -49,9 +49,7 @@ pub fn main() !void {
             );
         } else {
             const source_codegen = try codegen.CodeGen.init(arena.allocator());
-            defer source_codegen.deinit() catch |err| {
-                std.debug.print("ERROR GENERATING CODE {any}\n", .{err});
-            };
+            defer source_codegen.deinit();
             try process_buf(
                 buf,
                 allocator,
@@ -59,6 +57,7 @@ pub fn main() !void {
                 source_evaluator,
                 source_codegen,
             );
+            source_codegen.compile();
         }
     }
 }

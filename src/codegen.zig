@@ -65,7 +65,7 @@ pub const CodeGen = struct {
         return self;
     }
 
-    pub fn deinit(self: *CodeGen) !void {
+    pub fn compile(self: *CodeGen) void {
         // Dump module
         llvm.LLVMDumpModule(self.llvm_module);
 
@@ -104,8 +104,9 @@ pub const CodeGen = struct {
             std.debug.print("Verification output: {any}.\n", .{message});
             llvm.LLVMDisposeMessage(message);
         }
+    }
 
-        // Clean up LLVM resources
+    pub fn deinit(self: *CodeGen) void {
         defer llvm.LLVMDisposeBuilder(self.builder);
         llvm.LLVMDisposeModule(self.llvm_module);
         llvm.LLVMShutdown();
