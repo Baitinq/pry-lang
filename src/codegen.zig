@@ -196,6 +196,7 @@ pub const CodeGen = struct {
         const function_return_type = switch (function.node.?.*) {
             .FUNCTION_DEFINITION => |x| x.return_type,
             .PRIMARY_EXPRESSION => |x| x.IDENTIFIER.type.?,
+            .TYPE => |x| x.FUNCTION_TYPE.return_type,
             else => unreachable,
         };
 
@@ -458,6 +459,28 @@ pub const CodeGen = struct {
 
                 return self.generate_literal(cmp, llvm.LLVMInt1Type(), name);
             },
+            .TYPE => |typ| {
+                std.debug.assert(typ == .FUNCTION_TYPE);
+                const function_type = try self.get_llvm_type(expression);
+                const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}), function_type);
+
+                // Global functions
+                if (self.environment.scope_stack.items.len == 1) {
+                    return try self.create_variable(.{
+                        .value = function,
+                        .type = function_type,
+                        .stack_level = null,
+                        .node = expression,
+                    });
+                }
+
+                const ptr = self.environment.get_variable(name.?);
+                _ = llvm.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
+                ptr.?.type = function_type;
+                ptr.?.node = expression;
+
+                return ptr.?;
+            },
             else => unreachable,
         };
     }
@@ -496,6 +519,7 @@ pub const CodeGen = struct {
             .SIMPLE_TYPE => |t| {
                 if (std.mem.eql(u8, t.name, "i64")) return llvm.LLVMInt64Type();
                 if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
+                if (std.mem.eql(u8, t.name, "void")) return llvm.LLVMInt1Type(); //TODO:
                 unreachable;
             },
             // TODO: Properly handle this vv

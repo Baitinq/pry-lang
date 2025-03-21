@@ -1,7 +1,11 @@
-let putc = (i64) => i64;
+let putchar = (i64) => i64;
 
-let main = () => i64 {
-	putc(52);
-
+let main = (_: void) => i64 {
+	putchar(72);
+	putchar(101);
+	putchar(108);
+	putchar(108);
+	putchar(111);
+	putchar(10);
 	return 0;
 };
