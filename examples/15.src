@@ -1,0 +1,7 @@
+let putc = (i64) => i64;
+
+let main = () => i64 {
+	putc(52);
+
+	return 0;
+};
