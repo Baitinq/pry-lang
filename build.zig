@@ -26,7 +26,22 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    exe_mod.linkSystemLibrary("LLVM-20-rc3", .{});
+    switch (target.result.os.tag) {
+        .linux => exe_mod.linkSystemLibrary("LLVM-19", .{}),
+        .macos => {
+            exe_mod.addLibraryPath(.{
+                .cwd_relative = "/opt/homebrew/opt/llvm/lib",
+            });
+            exe_mod.addIncludePath(.{ .cwd_relative = "/opt/homebrew/opt/llvm/include" });
+            exe_mod.linkSystemLibrary("LLVM", .{
+                .use_pkg_config = .no,
+            });
+        },
+        else => exe_mod.linkSystemLibrary("LLVM", .{
+            .use_pkg_config = .no,
+        }),
+    }
+
     exe_mod.link_libc = true;
 
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
