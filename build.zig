@@ -27,7 +27,6 @@ pub fn build(b: *std.Build) !void {
     });
 
     switch (target.result.os.tag) {
-        .linux => exe_mod.linkSystemLibrary("LLVM-19", .{}),
         .macos => {
             exe_mod.addLibraryPath(.{
                 .cwd_relative = "/opt/homebrew/opt/llvm/lib",
