@@ -7,6 +7,7 @@ const TokenizerError = error{
 pub const TokenType = union(enum) {
     // Keywords
     LET: void,
+    EXTERN: void,
     IF: void,
     WHILE: void,
     RETURN: void,
@@ -67,6 +68,7 @@ pub const Tokenizer = struct {
         if (self.offset >= self.buf.len) return null;
 
         if (self.accept_string("let")) return self.create_token(.{ .LET = void{} });
+        if (self.accept_string("extern")) return self.create_token(.{ .EXTERN = void{} });
         if (self.accept_string("if")) return self.create_token(.{ .IF = void{} });
         if (self.accept_string("while")) return self.create_token(.{ .WHILE = void{} });
         if (self.accept_string("return")) return self.create_token(.{ .RETURN = void{} });

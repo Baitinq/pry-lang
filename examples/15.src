@@ -1,6 +1,6 @@
-let putchar = (i64) => i64;
+extern putchar = (i64) => i64;
 
-let main = (_: void) => i64 {
+let main = () => i64 {
 	putchar(72);
 	putchar(101);
 	putchar(108);

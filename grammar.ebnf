@@ -1,8 +1,10 @@
 Program      ::= Statement+
 
-Statement    ::= (AssignmentStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
+Statement    ::= (AssignmentStatement | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
 
-AssignmentStatement ::= "let" IDENTIFIER EQUALS (Type | Expression)
+AssignmentStatement ::= "let"? IDENTIFIER EQUALS Expression
+
+ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type
 
 FunctionCallStatement ::= (IDENTIFIER | FunctionDefinition) LPAREN FunctionArguments? RPAREN
 

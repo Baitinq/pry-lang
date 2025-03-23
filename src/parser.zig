@@ -123,7 +123,7 @@ pub const Parser = struct {
         } });
     }
 
-    // Statement    ::= (AssignmentStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
+    // Statement    ::= (AssignmentStatement | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
     fn parse_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing statement {any}\n", .{self.peek_token()});
 
@@ -131,7 +131,8 @@ pub const Parser = struct {
             self.accept_parse(parse_if_statement) orelse
             self.accept_parse(parse_while_statement) orelse
             self.accept_parse(parse_return_statement) orelse
-            try self.parse_assignment_statement();
+            self.accept_parse(parse_assignment_statement) orelse
+            try self.parse_extern_declaration();
 
         _ = try self.parse_token(tokenizer.TokenType.SEMICOLON);
 
@@ -142,7 +143,7 @@ pub const Parser = struct {
         });
     }
 
-    // AssignmentStatement ::= "let" IDENTIFIER EQUALS (Type | Expression)
+    // AssignmentStatement ::= "let"? IDENTIFIER EQUALS Expression
     fn parse_assignment_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing assignment statement {any}\n", .{self.peek_token()});
 
@@ -155,16 +156,6 @@ pub const Parser = struct {
 
         _ = try self.parse_token(tokenizer.TokenType.EQUALS);
 
-        if (self.accept_parse(parse_type)) |typ| {
-            return self.create_node(.{
-                .ASSIGNMENT_STATEMENT = .{
-                    .is_declaration = is_declaration,
-                    .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
-                    .expression = @constCast(typ),
-                },
-            });
-        }
-
         const expression = try self.parse_expression();
 
         return self.create_node(.{
@@ -172,6 +163,27 @@ pub const Parser = struct {
                 .is_declaration = is_declaration,
                 .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
                 .expression = @constCast(expression),
+            },
+        });
+    }
+
+    // ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type
+    fn parse_extern_declaration(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing extern declaration {any}\n", .{self.peek_token()});
+
+        _ = try self.parse_token(.EXTERN);
+
+        const identifier = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
+
+        _ = try self.parse_token(tokenizer.TokenType.EQUALS);
+
+        const typ = try self.parse_type();
+
+        return self.create_node(.{
+            .ASSIGNMENT_STATEMENT = .{
+                .is_declaration = true,
+                .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
+                .expression = @constCast(typ),
             },
         });
     }
