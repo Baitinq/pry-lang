@@ -1,11 +1,13 @@
+extern printf = (ptr, i64) => i64;
+
 let main = () => i64 {
 	let y = (f: (i64) => i64, x: i64) => i64 {
 		return f(x);
 	};
 
 	let id = (a: i64) => i64 {
-		print(a);
-		print(12);
+		printf("%d", a);
+		printf("%d", 12);
 		return a;
 	};
 

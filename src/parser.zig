@@ -556,13 +556,15 @@ pub const Parser = struct {
 
         var parameters = std.ArrayList(*Node).init(self.arena);
         var first = true;
-        while (self.accept_parse(parse_type)) |type_annotation| {
+        while (true) {
             if (!first) {
-                _ = try self.parse_token(tokenizer.TokenType.COMMA);
+                _ = self.accept_token(tokenizer.TokenType.COMMA);
             }
-            try parameters.append(type_annotation);
             first = false;
+            const type_annotation = self.accept_parse(parse_type) orelse break;
+            try parameters.append(type_annotation);
         }
+
         _ = try self.parse_token(tokenizer.TokenType.RPAREN);
 
         _ = try self.parse_token(tokenizer.TokenType.ARROW);

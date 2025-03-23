@@ -1,3 +1,5 @@
+extern printf = (ptr, i64) => i64;
+
 let print_boolean = (b: bool) => i64 {
 	printf("%d", b);
 	return 0;

@@ -1,3 +1,5 @@
+extern printf = (ptr, i64) => i64;
+
 let main = () => i64 {
 	let print_one = () => i64 {
 		printf("%d", 1);

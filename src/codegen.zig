@@ -42,23 +42,6 @@ pub const CodeGen = struct {
             .arena = arena,
         };
 
-        const printf_function_type = llvm.LLVMFunctionType(llvm.LLVMVoidType(), @constCast(&[_]llvm.LLVMTypeRef{
-            llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0),
-        }), 1, 1);
-        const printf_function = llvm.LLVMAddFunction(self.llvm_module, "printf", printf_function_type) orelse return CodeGenError.CompilationError;
-        try self.environment.add_variable("printf", try self.create_variable(.{
-            .value = printf_function,
-            .type = printf_function_type,
-            .stack_level = null,
-            .node = try self.create_node(.{ .FUNCTION_DEFINITION = .{
-                .statements = &[_]*parser.Node{},
-                .parameters = &[_]*parser.Node{},
-                .return_type = try self.create_node(.{ .TYPE = .{ .SIMPLE_TYPE = .{
-                    .name = "i64",
-                } } }),
-            } }),
-        }));
-
         return self;
     }
 
@@ -535,7 +518,7 @@ pub const CodeGen = struct {
             .SIMPLE_TYPE => |t| {
                 if (std.mem.eql(u8, t.name, "i64")) return llvm.LLVMInt64Type();
                 if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
-                if (std.mem.eql(u8, t.name, "void")) return llvm.LLVMInt1Type(); //TODO:
+                if (std.mem.eql(u8, t.name, "ptr")) return llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0); //TODO: id like *i64
                 unreachable;
             },
             // TODO: Properly handle this vv
