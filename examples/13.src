@@ -22,10 +22,10 @@ let main = () => i64 {
     };
 
     let fib_val = fibonacci_iter(10);
-    print(fib_val);
+    printf("%d", fib_val);
 
     let gcd_val = gcd(48, 18);
-    print(gcd_val);
+    printf("%d", gcd_val);
 
     return 0;
 };

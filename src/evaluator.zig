@@ -6,11 +6,12 @@ const EvaluatorError = error{
     OutOfMemory,
 };
 
-const VariableType = enum { NUMBER, BOOLEAN, FUNCTION_DEFINITION };
+const VariableType = enum { NUMBER, BOOLEAN, STRING, FUNCTION_DEFINITION };
 
 const Variable = union(VariableType) {
     NUMBER: i64,
     BOOLEAN: bool,
+    STRING: []const u8,
     FUNCTION_DEFINITION: *parser.Node,
 };
 
@@ -206,6 +207,7 @@ pub const Evaluator = struct {
                 switch (x) {
                     .NUMBER => |number| return self.create_variable(.{ .NUMBER = number.value }),
                     .BOOLEAN => |b| return self.create_variable(.{ .BOOLEAN = b.value }),
+                    .STRING => |s| return self.create_variable(.{ .STRING = s.value }),
                     .IDENTIFIER => |identifier| {
                         const val = self.environment.get_variable(identifier.name) orelse {
                             std.debug.print("Identifier {any} not found\n", .{identifier.name});

@@ -10,6 +10,6 @@ let main = () => i64 {
 	};
 
 	let result = fib(30);
-	print(result);
+	printf("%d", result);
 	return result;
 };

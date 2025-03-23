@@ -1,7 +1,7 @@
 /* HELLO! Welcome to the unnamed language */
 
 let main = (argc: i64) => i64 {
-	print(argc);
+	printf("%d", argc);
 	
 	return 2;
 };

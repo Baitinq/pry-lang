@@ -3,7 +3,7 @@ let main = () => i64 {
 
 	seventeen = seventeen + 1;
 
-	print(seventeen);
+	printf("%d", seventeen);
 
 	return seventeen;
 };

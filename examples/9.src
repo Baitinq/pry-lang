@@ -1,5 +1,5 @@
 let print_boolean = (b: bool) => i64 {
-	printb(b);
+	printf("%d", b);
 	return 0;
 };
 

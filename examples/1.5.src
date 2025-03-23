@@ -1,12 +1,12 @@
 let x = () => i64 {
-	print(22);
+	printf("%d", 22);
 	return 11;
 };
 
 let main = () => i64 {
 	let i = 4;
 
-	print(i);
+	print("%d", i);
 
 	return x();
 };

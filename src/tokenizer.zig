@@ -19,6 +19,7 @@ pub const TokenType = union(enum) {
     // Literals
     NUMBER: i64,
     BOOLEAN: bool,
+    STRING: []u8,
 
     // Operators
     EQUALS: void,
@@ -93,10 +94,15 @@ pub const Tokenizer = struct {
         if (self.accept_string("<")) return self.create_token(.{ .LESS = void{} });
         if (self.accept_string(">")) return self.create_token(.{ .GREATER = void{} });
 
-        const string = self.consume_string();
-        if (string.len == 0) return TokenizerError.TokenizingError;
+        if (self.accept_int_type()) |i| return self.create_token(.{ .NUMBER = i });
+        if (self.accept_string_type()) |s| return self.create_token(.{ .STRING = s });
 
-        if (std.fmt.parseInt(i32, string, 10) catch null) |i| return self.create_token(.{ .NUMBER = i });
+        const string = self.consume_until_condition(struct {
+            fn condition(c: u8) bool {
+                return !std.ascii.isAlphanumeric(c) and c != '_';
+            }
+        }.condition);
+        if (string.len == 0) return TokenizerError.TokenizingError;
 
         return self.create_token(.{ .IDENTIFIER = string });
     }
@@ -118,7 +124,7 @@ pub const Tokenizer = struct {
         }
     }
 
-    fn consume_string(self: *Tokenizer) []u8 {
+    fn consume_until_condition(self: *Tokenizer, condition: fn (c: u8) bool) []u8 {
         defer self.offset = if (self.offset > 0) self.offset - 1 else self.offset;
         const start = self.offset;
         while (true) {
@@ -127,7 +133,7 @@ pub const Tokenizer = struct {
 
             const c = self.buf[self.offset];
 
-            if (!std.ascii.isAlphanumeric(c) and c != '_') return self.buf[start..self.offset];
+            if (condition(c)) return self.buf[start..self.offset];
         }
     }
 
@@ -138,6 +144,37 @@ pub const Tokenizer = struct {
             return true;
         }
         return false;
+    }
+
+    fn accept_int_type(self: *Tokenizer) ?i64 {
+        const res = self.consume_until_condition(struct {
+            fn condition(c: u8) bool {
+                return !std.ascii.isDigit(c);
+            }
+        }.condition);
+
+        return std.fmt.parseInt(i64, res, 10) catch null;
+    }
+
+    fn accept_string_type(self: *Tokenizer) ?[]u8 {
+        const prev_offset = self.offset;
+        if (!self.accept_string("\"")) {
+            self.offset = prev_offset;
+            return null;
+        }
+
+        const res = self.consume_until_condition(struct {
+            fn condition(c: u8) bool {
+                return c == '"';
+            }
+        }.condition);
+
+        if (!self.accept_string("\"")) {
+            self.offset = prev_offset;
+            return null;
+        }
+
+        return res;
     }
 
     fn create_token(self: *Tokenizer, token_type: TokenType) Token {

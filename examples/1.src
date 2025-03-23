@@ -1,7 +1,7 @@
 let main = () => i64 {
-	let i = 4;
+	let s = "hello";
 
-	print(i);
+	printf("%s", s);
 
 	return 0;
 };

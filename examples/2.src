@@ -3,7 +3,7 @@ let main = () => i64 {
 
 	let uwu = test;
 
-	print(uwu);
+	printf("%d", uwu);
 
 	return 0;
 };
