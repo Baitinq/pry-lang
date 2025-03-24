@@ -1,0 +1,14 @@
+extern printf = (ptr, i64) => i64;
+extern SDL_CreateWindow = (ptr, i64, i64, i64, i64, i64) => i64;
+extern SDL_Init = (i64) => i64;
+
+let main = () => i64 {
+	SDL_Init(1);
+	SDL_CreateWindow("hello world!", 0, 0, 400, 400, 0);
+
+	while true {
+
+	};
+	
+	return 0;
+};
