@@ -1,4 +1,5 @@
 /* HELLO! Welcome to the unnamed language */
+extern printf = (*i64, i64) => i64;
 
 let main = (argc: i64) => i64 {
 	printf("%d", argc);

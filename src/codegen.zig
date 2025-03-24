@@ -518,7 +518,6 @@ pub const CodeGen = struct {
             .SIMPLE_TYPE => |t| {
                 if (std.mem.eql(u8, t.name, "i64")) return llvm.LLVMInt64Type();
                 if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
-                if (std.mem.eql(u8, t.name, "ptr")) return llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0); //TODO: id like *i64
                 unreachable;
             },
             // TODO: Properly handle this vv
@@ -530,6 +529,10 @@ pub const CodeGen = struct {
                 }
                 const function_type = llvm.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse unreachable;
                 return function_type;
+            },
+            .POINTER_TYPE => |t| {
+                const inner_type = try self.get_llvm_type(t.type);
+                return llvm.LLVMPointerType(inner_type, 0);
             },
         }
     }

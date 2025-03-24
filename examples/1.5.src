@@ -1,3 +1,5 @@
+extern printf = (*i64, i64) => i64;
+
 let x = () => i64 {
 	printf("%d", 22);
 	return 11;
@@ -6,7 +8,7 @@ let x = () => i64 {
 let main = () => i64 {
 	let i = 4;
 
-	print("%d", i);
+	printf("%d", i);
 
 	return x();
 };

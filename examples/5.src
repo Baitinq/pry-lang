@@ -1,5 +1,5 @@
 /* As you see, the language supports variable scopes */
-extern printf = (ptr, i64) => i64;
+extern printf = (*i64, i64) => i64;
 
 let x = 18;
 

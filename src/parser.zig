@@ -73,6 +73,9 @@ pub const Node = union(enum) {
             parameters: []*Node,
             return_type: *Node,
         },
+        POINTER_TYPE: struct {
+            type: *Node,
+        },
     },
     RETURN_STATEMENT: struct {
         expression: *Node,
@@ -534,6 +537,15 @@ pub const Parser = struct {
         errdefer if (!self.try_context) std.debug.print("Error parsing type annotation {any}\n", .{self.peek_token()});
 
         return self.accept_parse(parse_function_type) orelse switch (self.consume_token().?.type) {
+            .MUL => {
+                return self.create_node(.{
+                    .TYPE = .{
+                        .POINTER_TYPE = .{
+                            .type = try self.parse_type(),
+                        },
+                    },
+                });
+            },
             .IDENTIFIER => |ident| {
                 //TODO: we should only accept specific type identifiers
                 return try self.create_node(.{

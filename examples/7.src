@@ -1,4 +1,4 @@
-extern printf = (ptr, i64) => i64;
+extern printf = (*i64, i64) => i64;
 
 let ten = () => i64 {
 	return () => i64 {
