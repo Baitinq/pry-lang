@@ -1,7 +1,7 @@
 /* HELLO! Welcome to the unnamed language */
-extern printf = (*i64, i64) => i64;
+extern printf = (*i64, varargs) => i64;
 
-let main = (argc: i64) => i64 {
+let main = (argc: i64, argv: *i64) => i64 {
 	printf("%d", argc);
 	
 	return 2;

@@ -1,4 +1,4 @@
-extern printf = (*i64, i64) => i64;
+extern printf = (*i64, varargs) => i64;
 
 let print_input = (input_a: i64, input_b: i64) => i64 {
 	printf("%d", input_a);

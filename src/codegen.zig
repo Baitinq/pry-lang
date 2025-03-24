@@ -524,10 +524,15 @@ pub const CodeGen = struct {
             .FUNCTION_TYPE => |t| {
                 const return_type = try self.get_llvm_type(t.return_type);
                 var paramtypes = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
+                var is_varargs: i8 = 0;
                 for (t.parameters) |param| {
+                    if (param.TYPE == .SIMPLE_TYPE and std.mem.eql(u8, param.TYPE.SIMPLE_TYPE.name, "varargs")) {
+                        is_varargs = 1;
+                        continue;
+                    }
                     try paramtypes.append(try self.get_llvm_type(param));
                 }
-                const function_type = llvm.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), 0) orelse unreachable;
+                const function_type = llvm.LLVMFunctionType(return_type, paramtypes.items.ptr, @intCast(paramtypes.items.len), is_varargs) orelse unreachable;
                 return function_type;
             },
             .POINTER_TYPE => |t| {
