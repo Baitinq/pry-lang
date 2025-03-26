@@ -518,6 +518,7 @@ pub const CodeGen = struct {
             .SIMPLE_TYPE => |t| {
                 if (std.mem.eql(u8, t.name, "i64")) return llvm.LLVMInt64Type();
                 if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
+                if (std.mem.eql(u8, t.name, "void")) return llvm.LLVMVoidType();
                 unreachable;
             },
             // TODO: Properly handle this vv
