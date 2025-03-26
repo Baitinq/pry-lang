@@ -57,8 +57,10 @@ pub const Tokenizer = struct {
     buf: []u8,
     offset: u64,
 
-    pub fn init(buf: []u8) !Tokenizer {
-        return Tokenizer{ .buf = buf, .offset = 0 };
+    arena: std.mem.Allocator,
+
+    pub fn init(buf: []u8, arena: std.mem.Allocator) !Tokenizer {
+        return Tokenizer{ .buf = buf, .offset = 0, .arena = arena };
     }
 
     pub fn next(self: *Tokenizer) TokenizerError!?Token {
@@ -163,18 +165,34 @@ pub const Tokenizer = struct {
             return null;
         }
 
-        const res = self.consume_until_condition(struct {
+        const string = self.consume_until_condition(struct {
             fn condition(c: u8) bool {
                 return c == '"';
             }
         }.condition);
+
+        var res = std.ArrayList(u8).init(self.arena);
+
+        var i: usize = 0;
+        while (i < string.len) : (i += 1) {
+            if (string[i] == '\\') {
+                i += 1;
+                switch (string[i]) {
+                    'n' => res.append('\n') catch unreachable,
+                    't' => res.append('\t') catch unreachable,
+                    else => unreachable,
+                }
+                continue;
+            }
+            res.append(string[i]) catch unreachable;
+        }
 
         if (!self.accept_string("\"")) {
             self.offset = prev_offset;
             return null;
         }
 
-        return res;
+        return res.items;
     }
 
     fn create_token(self: *Tokenizer, token_type: TokenType) Token {

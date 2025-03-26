@@ -31,10 +31,10 @@ let main = () => i64 {
     };
 
     let fact_val = factorial(6);
-    printf("%d", fact_val);
+    printf("%d\n", fact_val);
 
     let even_sum = sum_if(is_even, 20);
-    printf("%d", even_sum);
+    printf("%d\n", even_sum);
 
     return 0;
 };

@@ -1,14 +1,14 @@
 extern printf = (*i64, i64) => i64;
 
 let x = () => i64 {
-	printf("%d", 22);
+	printf("%d\n", 22);
 	return 11;
 };
 
 let main = () => i64 {
 	let i = 4;
 
-	printf("%d", i);
+	printf("%d\n", i);
 
 	return x();
 };

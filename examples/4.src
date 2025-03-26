@@ -2,13 +2,13 @@ extern printf = (*i64, varargs) => i64;
 
 let main = () => i64 {
 	let print_one = () => i64 {
-		printf("%d", 1);
+		printf("%d\n", 1);
 		return 4;
 	};
 
 	let y = print_one() + 2;
 
-	printf("%d", y);
+	printf("%d\n", y);
 
 	return y;
 };

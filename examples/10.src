@@ -4,7 +4,7 @@ let main = () => i64 {
 	let counter = 0;
 
 	while counter < 10 {
-		printf("%d", counter);
+		printf("%d\n", counter);
 		counter = counter + 1;
 	};
 

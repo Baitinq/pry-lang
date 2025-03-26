@@ -6,8 +6,8 @@ let main = () => i64 {
 	};
 
 	let id = (a: i64) => i64 {
-		printf("%d", a);
-		printf("%d", 12);
+		printf("%d\n", a);
+		printf("%d\n", 12);
 		return a;
 	};
 

@@ -1,8 +1,8 @@
 extern printf = (*i64, varargs) => i64;
 
 let print_input = (input_a: i64, input_b: i64) => i64 {
-	printf("%d", input_a);
-	printf("%d", input_b);
+	printf("%d\n", input_a);
+	printf("%d\n", input_b);
 	return input_a + input_b;
 };
 

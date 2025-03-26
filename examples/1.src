@@ -3,7 +3,7 @@ extern printf = (*i64, varargs) => i64;
 let main = () => i64 {
 	let s = "hello";
 
-	printf("%s", s);
+	printf("%s\n", s);
 
 	return 0;
 };

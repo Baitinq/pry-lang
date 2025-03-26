@@ -5,14 +5,14 @@ let x = 18;
 
 let foo = () => i64 {
 	let x = 1;
-	printf("%d", x);
+	printf("%d\n", x);
 	return x;
 };
 
 let main = () => i64 {
-	printf("%d", x);
+	printf("%d\n", x);
 	let x = 2;
 	let y = foo();
-	printf("%d", x);
+	printf("%d\n", x);
 	return x + y;
 };

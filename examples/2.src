@@ -5,7 +5,7 @@ let main = () => i64 {
 
 	let uwu = test;
 
-	printf("%d", uwu);
+	printf("%d\n", uwu);
 
 	return 0;
 };

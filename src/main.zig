@@ -68,7 +68,7 @@ fn process_buf(buf: []u8, allocator: std.mem.Allocator, arena: std.mem.Allocator
     var token_list = std.ArrayList(tokenizer.Token).init(allocator);
     defer token_list.deinit();
 
-    var source_tokenizer = try tokenizer.Tokenizer.init(buf);
+    var source_tokenizer = try tokenizer.Tokenizer.init(buf, arena);
     while (try source_tokenizer.next()) |token| {
         std.debug.print("{any}\n", .{token});
         try token_list.append(token);

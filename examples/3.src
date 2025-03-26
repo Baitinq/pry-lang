@@ -5,7 +5,7 @@ let main = () => i64 {
 
 	seventeen = seventeen + 1;
 
-	printf("%d", seventeen);
+	printf("%d\n", seventeen);
 
 	return seventeen;
 };
