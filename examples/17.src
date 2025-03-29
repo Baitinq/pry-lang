@@ -1,0 +1,12 @@
+extern printf = (*i64, varargs) => void;
+extern malloc = (i64) => *i64;
+extern free = (*i64) => void;
+
+let main = () => i64 {
+	let x = malloc(8);
+	*x = 10;
+	printf("%p\n", x);
+	printf("%d\n", *x);
+	free(x);
+	return 0;
+};

@@ -15,6 +15,7 @@ pub const Node = union(enum) {
     },
     ASSIGNMENT_STATEMENT: struct {
         is_declaration: bool,
+        is_dereference: bool,
         name: []const u8,
         expression: *Node,
     },
@@ -42,7 +43,11 @@ pub const Node = union(enum) {
         typ: MultiplicativeExpressionType,
     },
     UNARY_EXPRESSION: struct {
-        negation: bool,
+        typ: enum {
+            NOT,
+            MINUS,
+            STAR,
+        },
         expression: *Node,
     },
     PRIMARY_EXPRESSION: union(enum) {
@@ -149,13 +154,18 @@ pub const Parser = struct {
         });
     }
 
-    // AssignmentStatement ::= "let"? IDENTIFIER EQUALS Expression
+    // AssignmentStatement ::= ("let")? ("*")? IDENTIFIER EQUALS Expression
     fn parse_assignment_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing assignment statement {any}\n", .{self.peek_token()});
 
-        var is_declaration: bool = false;
+        var is_declaration = false;
         if (self.accept_token(.LET) != null) {
             is_declaration = true;
+        }
+
+        var is_dereference = false;
+        if (self.accept_token(.MUL) != null) {
+            is_dereference = true;
         }
 
         const identifier = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
@@ -167,6 +177,7 @@ pub const Parser = struct {
         return self.create_node(.{
             .ASSIGNMENT_STATEMENT = .{
                 .is_declaration = is_declaration,
+                .is_dereference = is_dereference,
                 .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
                 .expression = @constCast(expression),
             },
@@ -188,6 +199,7 @@ pub const Parser = struct {
         return self.create_node(.{
             .ASSIGNMENT_STATEMENT = .{
                 .is_declaration = true,
+                .is_dereference = false,
                 .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
                 .expression = @constCast(typ),
             },
@@ -392,19 +404,20 @@ pub const Parser = struct {
         return lhs;
     }
 
-    // UnaryExpression ::= ("!" | "-") UnaryExpression | PrimaryExpression
+    // UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PrimaryExpression
     fn parse_unary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing unary expression {any}\n", .{self.peek_token()});
 
         const not = self.accept_token(tokenizer.TokenType.BANG) != null;
         const minus = self.accept_token(tokenizer.TokenType.MINUS) != null;
+        const star = self.accept_token(tokenizer.TokenType.MUL) != null;
 
-        if (!not and !minus) {
+        if (!not and !minus and !star) {
             return try self.parse_primary_expression();
         }
 
         return self.create_node(.{ .UNARY_EXPRESSION = .{
-            .negation = not,
+            .typ = if (not) .NOT else if (minus) .MINUS else .STAR,
             .expression = try self.parse_unary_expression(),
         } });
     }

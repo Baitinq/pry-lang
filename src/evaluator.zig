@@ -186,12 +186,17 @@ pub const Evaluator = struct {
             },
             .UNARY_EXPRESSION => |x| {
                 const val = try self.get_expression_value(x.expression) orelse return EvaluatorError.EvaluationError;
-                if (!x.negation) {
-                    std.debug.assert(val.* == .NUMBER);
-                    return try self.create_variable(.{ .NUMBER = -val.NUMBER });
+                switch (x.typ) {
+                    .NOT => {
+                        std.debug.assert(val.* == .BOOLEAN);
+                        return try self.create_variable(.{ .BOOLEAN = !val.BOOLEAN });
+                    },
+                    .MINUS => {
+                        std.debug.assert(val.* == .NUMBER);
+                        return try self.create_variable(.{ .NUMBER = -val.NUMBER });
+                    },
+                    else => unreachable,
                 }
-                std.debug.assert(val.* == .BOOLEAN);
-                return try self.create_variable(.{ .BOOLEAN = !val.BOOLEAN });
             },
             .EQUALITY_EXPRESSION => |x| {
                 const lhs = try self.get_expression_value(x.lhs) orelse return EvaluatorError.EvaluationError;

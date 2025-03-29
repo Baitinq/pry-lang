@@ -127,6 +127,7 @@ pub const CodeGen = struct {
         const assignment_statement = statement.ASSIGNMENT_STATEMENT;
 
         if (assignment_statement.is_declaration and self.environment.scope_stack.items.len > 1) {
+            std.debug.assert(assignment_statement.is_dereference == false);
             // TODO: vv Int64Type is a problem
             const alloca = llvm.LLVMBuildAlloca(self.builder, llvm.LLVMInt64Type(), try std.fmt.allocPrintZ(self.arena, "{s}", .{assignment_statement.name})); //TODO: Correct type
             try self.environment.add_variable(assignment_statement.name, try self.create_variable(.{
@@ -137,8 +138,26 @@ pub const CodeGen = struct {
             }));
         }
 
+        var undereferenced_variable: ?*Variable = null;
+        if (assignment_statement.is_dereference) {
+            const ptr = self.environment.get_variable(assignment_statement.name) orelse unreachable;
+            undereferenced_variable = ptr;
+            const x = llvm.LLVMBuildLoad2(self.builder, ptr.type, ptr.value, "") orelse return CodeGenError.CompilationError;
+            try self.environment.add_variable(assignment_statement.name, try self.create_variable(.{
+                .value = x,
+                .type = ptr.type,
+                .stack_level = null,
+                .node = statement,
+            }));
+        }
+
         const variable = try self.generate_expression_value(assignment_statement.expression, assignment_statement.name);
-        try self.environment.add_variable(assignment_statement.name, variable);
+
+        if (!assignment_statement.is_dereference) {
+            try self.environment.add_variable(assignment_statement.name, variable);
+        } else {
+            try self.environment.add_variable(assignment_statement.name, undereferenced_variable.?);
+        }
     }
 
     fn generate_function_call_statement(self: *CodeGen, statement: *parser.Node) CodeGenError!*Variable {
@@ -430,14 +449,18 @@ pub const CodeGen = struct {
 
                 var r: llvm.LLVMValueRef = undefined;
                 var t: llvm.LLVMTypeRef = undefined;
-                switch (exp.negation) {
-                    true => {
+                switch (exp.typ) {
+                    .NOT => {
                         std.debug.assert(k.type == llvm.LLVMInt1Type());
                         r = llvm.LLVMBuildICmp(self.builder, llvm.LLVMIntEQ, k.value, llvm.LLVMConstInt(llvm.LLVMInt1Type(), 0, 0), "");
                         t = llvm.LLVMInt1Type();
                     },
-                    false => {
+                    .MINUS => {
                         r = llvm.LLVMBuildNeg(self.builder, k.value, "");
+                        t = llvm.LLVMInt64Type();
+                    },
+                    .STAR => {
+                        r = llvm.LLVMBuildLoad2(self.builder, k.type, k.value, "");
                         t = llvm.LLVMInt64Type();
                     },
                 }

@@ -2,7 +2,7 @@ Program      ::= Statement+
 
 Statement    ::= (AssignmentStatement | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
 
-AssignmentStatement ::= "let"? IDENTIFIER EQUALS Expression
+AssignmentStatement ::= ("let")? ("*")? IDENTIFIER EQUALS Expression
 
 ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type
 
@@ -24,7 +24,7 @@ AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpre
 
 MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)*
 
-UnaryExpression ::= ("!" | "-") UnaryExpression | PrimaryExpression
+UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PrimaryExpression
 
 PrimaryExpression ::= NUMBER | BOOLEAN | STRING | IDENTIFIER | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
 
