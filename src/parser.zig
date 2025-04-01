@@ -16,8 +16,8 @@ pub const Node = union(enum) {
     ASSIGNMENT_STATEMENT: struct {
         is_declaration: bool,
         is_dereference: bool,
-        name: []const u8,
-        expression: *Node,
+        lhs: *Node,
+        rhs: *Node,
     },
     FUNCTION_CALL_STATEMENT: struct {
         expression: *Node,
@@ -154,7 +154,7 @@ pub const Parser = struct {
         });
     }
 
-    // AssignmentStatement ::= ("let")? ("*")? IDENTIFIER EQUALS Expression
+    // AssignmentStatement ::= ("let")? ("*")? Expression EQUALS Expression
     fn parse_assignment_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing assignment statement {any}\n", .{self.peek_token()});
 
@@ -168,18 +168,18 @@ pub const Parser = struct {
             is_dereference = true;
         }
 
-        const identifier = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
+        const lhs = try self.parse_expression();
 
         _ = try self.parse_token(tokenizer.TokenType.EQUALS);
 
-        const expression = try self.parse_expression();
+        const rhs = try self.parse_expression();
 
         return self.create_node(.{
             .ASSIGNMENT_STATEMENT = .{
                 .is_declaration = is_declaration,
                 .is_dereference = is_dereference,
-                .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
-                .expression = @constCast(expression),
+                .lhs = lhs,
+                .rhs = rhs,
             },
         });
     }
@@ -200,8 +200,15 @@ pub const Parser = struct {
             .ASSIGNMENT_STATEMENT = .{
                 .is_declaration = true,
                 .is_dereference = false,
-                .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
-                .expression = @constCast(typ),
+                .lhs = try self.create_node(.{
+                    .PRIMARY_EXPRESSION = .{
+                        .IDENTIFIER = .{
+                            .name = try self.arena.dupe(u8, identifier.type.IDENTIFIER),
+                            .type = null,
+                        },
+                    },
+                }),
+                .rhs = @constCast(typ),
             },
         });
     }

@@ -2,7 +2,7 @@ Program      ::= Statement+
 
 Statement    ::= (AssignmentStatement | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
 
-AssignmentStatement ::= ("let")? ("*")? IDENTIFIER EQUALS Expression
+AssignmentStatement ::= ("let")? ("*")? Expression EQUALS Expression
 
 ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type
 

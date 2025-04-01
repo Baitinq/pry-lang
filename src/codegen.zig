@@ -123,40 +123,48 @@ pub const CodeGen = struct {
     fn generate_assignment_statement(self: *CodeGen, statement: *parser.Node) CodeGenError!void {
         errdefer std.debug.print("Error generating assignment statement\n", .{});
         std.debug.assert(statement.* == parser.Node.ASSIGNMENT_STATEMENT);
-
         const assignment_statement = statement.ASSIGNMENT_STATEMENT;
 
-        if (assignment_statement.is_declaration and self.environment.scope_stack.items.len > 1) {
-            std.debug.assert(assignment_statement.is_dereference == false);
-            // TODO: vv Int64Type is a problem
-            const alloca = llvm.LLVMBuildAlloca(self.builder, llvm.LLVMInt64Type(), try std.fmt.allocPrintZ(self.arena, "{s}", .{assignment_statement.name})); //TODO: Correct type
-            try self.environment.add_variable(assignment_statement.name, try self.create_variable(.{
-                .value = alloca,
-                .type = llvm.LLVMVoidType(), // This gets set to the correct type during the expression type resolution. ALTERNATIVE: Pass the alloca
-                .stack_level = null,
-                .node = statement,
-            }));
-        }
+        if (assignment_statement.lhs.* == .PRIMARY_EXPRESSION) {
+            const identifier = assignment_statement.lhs.PRIMARY_EXPRESSION.IDENTIFIER;
 
-        var undereferenced_variable: ?*Variable = null;
-        if (assignment_statement.is_dereference) {
-            const ptr = self.environment.get_variable(assignment_statement.name) orelse unreachable;
-            undereferenced_variable = ptr;
-            const x = llvm.LLVMBuildLoad2(self.builder, ptr.type, ptr.value, "") orelse return CodeGenError.CompilationError;
-            try self.environment.add_variable(assignment_statement.name, try self.create_variable(.{
-                .value = x,
-                .type = ptr.type,
-                .stack_level = null,
-                .node = statement,
-            }));
-        }
+            if (assignment_statement.is_declaration and self.environment.scope_stack.items.len > 1) {
+                std.debug.assert(assignment_statement.is_dereference == false);
+                // TODO: vv Int64Type is a problem
+                const alloca = llvm.LLVMBuildAlloca(self.builder, llvm.LLVMInt64Type(), try std.fmt.allocPrintZ(self.arena, "{s}", .{identifier.name})); //TODO: Correct type
+                try self.environment.add_variable(identifier.name, try self.create_variable(.{
+                    .value = alloca,
+                    .type = llvm.LLVMVoidType(), // This gets set to the correct type during the expression type resolution. ALTERNATIVE: Pass the alloca
+                    .stack_level = null,
+                    .node = statement,
+                }));
+            }
 
-        const variable = try self.generate_expression_value(assignment_statement.expression, assignment_statement.name);
+            var undereferenced_variable: ?*Variable = null;
+            if (assignment_statement.is_dereference) {
+                const ptr = self.environment.get_variable(identifier.name) orelse unreachable;
+                undereferenced_variable = ptr;
+                const x = llvm.LLVMBuildLoad2(self.builder, ptr.type, ptr.value, "") orelse return CodeGenError.CompilationError;
+                try self.environment.add_variable(identifier.name, try self.create_variable(.{
+                    .value = x,
+                    .type = ptr.type,
+                    .stack_level = null,
+                    .node = statement,
+                }));
+            }
 
-        if (!assignment_statement.is_dereference) {
-            try self.environment.add_variable(assignment_statement.name, variable);
+            const variable = try self.generate_expression_value(assignment_statement.rhs, identifier.name);
+
+            if (!assignment_statement.is_dereference) {
+                try self.environment.add_variable(identifier.name, variable);
+            } else {
+                try self.environment.add_variable(identifier.name, undereferenced_variable.?);
+            }
         } else {
-            try self.environment.add_variable(assignment_statement.name, undereferenced_variable.?);
+            const xd = assignment_statement.lhs.UNARY_EXPRESSION.expression;
+            const a = try self.generate_expression_value(xd, null);
+            const variable = try self.generate_expression_value(assignment_statement.rhs, null);
+            _ = llvm.LLVMBuildStore(self.builder, variable.value, a.value);
         }
     }
 

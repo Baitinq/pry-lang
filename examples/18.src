@@ -4,13 +4,13 @@ extern free = (*i64) => void;
 
 let main = () => i64 {
 	let x = malloc(128);
-	/*
-	*(x+0) = 10;
-	*(x+8) = 20;
-	*/
+	(*(x+0)) = 10;
+	(*(x+1)) = 20;
+	(*(x+2)) = 40;
 	printf("%p\n", x);
-	printf("%d\n", *x);
+	printf("%d\n", *(x+0));
 	printf("%d\n", *(x+1));
+	printf("%d\n", *(x+2));
 	free(x);
 	return 0;
 };
