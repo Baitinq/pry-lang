@@ -416,9 +416,17 @@ pub const CodeGen = struct {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
+                std.debug.assert(lhs_value.node.?.* == .PRIMARY_EXPRESSION);
+                std.debug.assert(rhs_value.node.?.* == .PRIMARY_EXPRESSION);
+
                 var result: llvm.LLVMValueRef = undefined;
                 if (exp.addition) {
-                    result = llvm.LLVMBuildAdd(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    if (llvm.LLVMGetTypeKind(lhs_value.type.?) == llvm.LLVMPointerTypeKind) {
+                        const indices = [_]llvm.LLVMValueRef{rhs_value.value};
+                        result = llvm.LLVMBuildGEP2(self.builder, llvm.LLVMInt8Type(), lhs_value.value, @constCast(&indices), indices.len, "");
+                    } else {
+                        result = llvm.LLVMBuildAdd(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
+                    }
                 } else {
                     result = llvm.LLVMBuildSub(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                 }
@@ -529,7 +537,7 @@ pub const CodeGen = struct {
             .value = literal_val,
             .type = literal_type,
             .stack_level = null,
-            .node = null, //TODO
+            .node = node,
         });
     }
 
