@@ -430,8 +430,7 @@ pub const CodeGen = struct {
                 var result: llvm.LLVMValueRef = undefined;
                 if (exp.addition) {
                     if (llvm.LLVMGetTypeKind(lhs_value.type.?) == llvm.LLVMPointerTypeKind) {
-                        const indices = [_]llvm.LLVMValueRef{rhs_value.value};
-                        result = llvm.LLVMBuildGEP2(self.builder, llvm.LLVMInt8Type(), lhs_value.value, @constCast(&indices), indices.len, "");
+                        result = llvm.LLVMBuildGEP2(self.builder, rhs_value.type, lhs_value.value, @constCast(&[_]llvm.LLVMValueRef{rhs_value.value}), 1, "");
                     } else {
                         result = llvm.LLVMBuildAdd(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                     }
