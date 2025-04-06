@@ -26,7 +26,7 @@ MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)
 
 UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PrimaryExpression
 
-PrimaryExpression ::= NUMBER | BOOLEAN | STRING | IDENTIFIER | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
+PrimaryExpression ::= NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
 
 FunctionDefinition ::= LPAREN FunctionParameters? RPAREN ARROW IDENTIFIER LBRACE Statement* ReturnStatement SEMICOLON RBRACE
 

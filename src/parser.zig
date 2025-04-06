@@ -57,6 +57,9 @@ pub const Node = union(enum) {
         BOOLEAN: struct {
             value: bool,
         },
+        CHAR: struct {
+            value: u8,
+        },
         STRING: struct {
             value: []const u8,
         },
@@ -429,7 +432,7 @@ pub const Parser = struct {
         } });
     }
 
-    // PrimaryExpression ::= NUMBER | BOOLEAN | STRING | IDENTIFIER | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
+    // PrimaryExpression ::= NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
     fn parse_primary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing primary expression {any}\n", .{self.peek_token()});
 
@@ -456,6 +459,11 @@ pub const Parser = struct {
             .BOOLEAN => |boolean_token| try self.create_node(.{
                 .PRIMARY_EXPRESSION = .{ .BOOLEAN = .{
                     .value = boolean_token,
+                } },
+            }),
+            .CHAR => |char_token| try self.create_node(.{
+                .PRIMARY_EXPRESSION = .{ .CHAR = .{
+                    .value = char_token,
                 } },
             }),
             .STRING => |string_token| try self.create_node(.{

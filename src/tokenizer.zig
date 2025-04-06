@@ -19,6 +19,7 @@ pub const TokenType = union(enum) {
     // Literals
     NUMBER: i64,
     BOOLEAN: bool,
+    CHAR: u8,
     STRING: []u8,
 
     // Operators
@@ -97,6 +98,7 @@ pub const Tokenizer = struct {
         if (self.accept_string(">")) return self.create_token(.{ .GREATER = void{} });
 
         if (self.accept_int_type()) |i| return self.create_token(.{ .NUMBER = i });
+        if (self.accept_char_type()) |c| return self.create_token(.{ .CHAR = c });
         if (self.accept_string_type()) |s| return self.create_token(.{ .STRING = s });
 
         const string = self.consume_until_condition(struct {
@@ -156,6 +158,42 @@ pub const Tokenizer = struct {
         }.condition);
 
         return std.fmt.parseInt(i64, res, 10) catch null;
+    }
+
+    fn accept_char_type(self: *Tokenizer) ?u8 {
+        const prev_offset = self.offset;
+        if (!self.accept_string("'")) {
+            self.offset = prev_offset;
+            return null;
+        }
+
+        const string = self.consume_until_condition(struct {
+            fn condition(c: u8) bool {
+                return c == '\'';
+            }
+        }.condition);
+
+        var res: u8 = string[0];
+        var i: usize = 0;
+        while (i < string.len) : (i += 1) {
+            if (string[i] == '\\') {
+                i += 1;
+                res = switch (string[i]) {
+                    'n' => '\n',
+                    't' => '\t',
+                    '0' => 0,
+                    else => unreachable,
+                };
+                break;
+            }
+        }
+
+        if (!self.accept_string("'")) {
+            self.offset = prev_offset;
+            return null;
+        }
+
+        return res;
     }
 
     fn accept_string_type(self: *Tokenizer) ?[]u8 {
