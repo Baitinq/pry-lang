@@ -1,0 +1,34 @@
+extern printf = (*i8, varargs) => void;
+extern fopen = (*i8, *i8) => *i8;
+extern fgets = (*i8, i64, *i8) => void;
+extern feof = (*i8) => bool;
+extern fseek = (*i8, i64, i64) => i64;
+extern ftell = (*i8) => i64;
+extern fread = (*i8, i64, i64, *i8) => i64;
+extern fclose = (*i8) => *i8;
+extern malloc = (i64) => *i8;
+extern free = (*i8) => void;
+
+let main = (argc: i64, argv: **i8) => i64 {
+	let filename = *(argv + 1);
+
+	printf("%s\n", filename);
+
+	let file = fopen("./src/bootstrap/main.src", "r");
+	
+	fseek(file, 0, 2);
+	let file_size = ftell(file);
+	fseek(file, 0, 0);
+
+	let buf = malloc(file_size + 1);
+
+	let bytes_read = fread(buf, 1, file_size, file);
+	(*(buf + bytes_read)) = '\0';
+
+	printf("%s",  buf);
+
+	free(buf);
+	fclose(file);
+
+	return 0;
+};
