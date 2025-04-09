@@ -14,7 +14,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	printf("%s\n", filename);
 
-	let file = fopen("./src/bootstrap/main.src", "r");
+	let file = fopen(filename, "r");
 	
 	fseek(file, 0, 2);
 	let file_size = ftell(file);

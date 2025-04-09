@@ -146,12 +146,13 @@ pub const CodeGen = struct {
                 const ptr = self.environment.get_variable(identifier.name) orelse unreachable;
                 undereferenced_variable = ptr;
                 const x = llvm.LLVMBuildLoad2(self.builder, ptr.type, ptr.value, "") orelse return CodeGenError.CompilationError;
+                std.debug.assert(ptr.node_type.?.TYPE == .POINTER_TYPE);
                 try self.environment.add_variable(identifier.name, try self.create_variable(.{
                     .value = x,
                     .type = ptr.type,
                     .stack_level = null,
                     .node = statement,
-                    .node_type = null,
+                    .node_type = ptr.node_type.?.TYPE.POINTER_TYPE.type,
                 }));
             }
 
@@ -347,7 +348,7 @@ pub const CodeGen = struct {
                         .type = param_type,
                         .stack_level = null,
                         .node = param_node,
-                        .node_type = null,
+                        .node_type = param_node.PRIMARY_EXPRESSION.IDENTIFIER.type,
                     }));
                 }
 
@@ -390,7 +391,13 @@ pub const CodeGen = struct {
             },
             .PRIMARY_EXPRESSION => |primary_expression| switch (primary_expression) {
                 .NUMBER => |n| {
-                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt64Type(), @intCast(n.value), 0), llvm.LLVMInt64Type(), name, expression);
+                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt64Type(), @intCast(n.value), 0), llvm.LLVMInt64Type(), name, expression, try self.create_node(.{
+                        .TYPE = .{
+                            .SIMPLE_TYPE = .{
+                                .name = "i64",
+                            },
+                        },
+                    }));
                 },
                 .BOOLEAN => |b| {
                     const int_value: i64 = switch (b.value) {
@@ -398,10 +405,22 @@ pub const CodeGen = struct {
                         true => 1,
                     };
 
-                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt1Type(), @intCast(int_value), 0), llvm.LLVMInt1Type(), name, expression);
+                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt1Type(), @intCast(int_value), 0), llvm.LLVMInt1Type(), name, expression, try self.create_node(.{
+                        .TYPE = .{
+                            .SIMPLE_TYPE = .{
+                                .name = "i1",
+                            },
+                        },
+                    }));
                 },
                 .CHAR => |c| {
-                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt8Type(), @intCast(c.value), 0), llvm.LLVMInt8Type(), name, expression);
+                    return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt8Type(), @intCast(c.value), 0), llvm.LLVMInt8Type(), name, expression, try self.create_node(.{
+                        .TYPE = .{
+                            .SIMPLE_TYPE = .{
+                                .name = "i8",
+                            },
+                        },
+                    }));
                 },
                 .STRING => |s| {
                     const x = llvm.LLVMBuildGlobalStringPtr(self.builder, try std.fmt.allocPrintZ(self.arena, "{s}", .{s.value}), "");
@@ -411,7 +430,17 @@ pub const CodeGen = struct {
                             .type = llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0),
                             .stack_level = null,
                             .node = expression,
-                            .node_type = null,
+                            .node_type = try self.create_node(.{
+                                .TYPE = .{
+                                    .POINTER_TYPE = .{
+                                        .type = try self.create_node(.{
+                                            .TYPE = .{ .SIMPLE_TYPE = .{
+                                                .name = "i8",
+                                            } },
+                                        }),
+                                    },
+                                },
+                            }),
                         },
                     );
                 },
@@ -430,7 +459,7 @@ pub const CodeGen = struct {
                         loaded = llvm.LLVMBuildLoad2(self.builder, param_type, variable.value, "");
                     }
 
-                    return self.generate_literal(loaded, variable.type, name, expression);
+                    return self.generate_literal(loaded, variable.type, name, expression, variable.node_type);
                 },
             },
             .ADDITIVE_EXPRESSION => |exp| {
@@ -441,22 +470,15 @@ pub const CodeGen = struct {
                 std.debug.assert(rhs_value.node.?.* == .PRIMARY_EXPRESSION);
 
                 var result: llvm.LLVMValueRef = undefined;
+                var node_type: *parser.Node = try self.create_node(.{ .TYPE = .{ .SIMPLE_TYPE = .{
+                    .name = "i64",
+                } } });
+
                 if (exp.addition) {
                     if (llvm.LLVMGetTypeKind(lhs_value.type.?) == llvm.LLVMPointerTypeKind) {
-                        var x: llvm.LLVMTypeRef = lhs_value.type.?;
-                        const inner_type = lhs_value.node_type;
-                        if (inner_type != null) {
-                            x = try self.get_llvm_type(inner_type.?);
-                        }
-                        if (lhs_value.node.?.* == .PRIMARY_EXPRESSION and lhs_value.node.?.PRIMARY_EXPRESSION == .IDENTIFIER) {
-                            //TODO: We can probably clean this up a lot. We could store the node_type in the identifier too!
-                            const ptr = self.environment.get_variable(lhs_value.node.?.PRIMARY_EXPRESSION.IDENTIFIER.name) orelse unreachable;
-                            const u = ptr.node_type;
-                            if (u != null) {
-                                x = try self.get_underlying_llvm_ptr_type(u.?);
-                            }
-                        }
-                        result = llvm.LLVMBuildGEP2(self.builder, x, lhs_value.value, @constCast(&[_]llvm.LLVMValueRef{rhs_value.value}), 1, "");
+                        std.debug.print("DEBUG: {any}\n", .{expression});
+                        result = llvm.LLVMBuildGEP2(self.builder, try self.get_llvm_type(lhs_value.node_type.?.TYPE.POINTER_TYPE.type), lhs_value.value, @constCast(&[_]llvm.LLVMValueRef{rhs_value.value}), 1, "");
+                        node_type = lhs_value.node_type.?;
                     } else {
                         result = llvm.LLVMBuildAdd(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                     }
@@ -464,7 +486,7 @@ pub const CodeGen = struct {
                     result = llvm.LLVMBuildSub(self.builder, lhs_value.value, rhs_value.value, "") orelse return CodeGenError.CompilationError;
                 }
 
-                return self.generate_literal(result, llvm.LLVMInt64Type(), name, expression);
+                return self.generate_literal(result, llvm.LLVMInt64Type(), name, expression, node_type);
             },
             .MULTIPLICATIVE_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
@@ -483,13 +505,14 @@ pub const CodeGen = struct {
                     },
                 }
 
-                return self.generate_literal(result, llvm.LLVMInt64Type(), name, expression);
+                return self.generate_literal(result, llvm.LLVMInt64Type(), name, expression, lhs_value.node_type);
             },
             .UNARY_EXPRESSION => |exp| {
                 const k = try self.generate_expression_value(exp.expression, null);
 
                 var r: llvm.LLVMValueRef = undefined;
                 var t: llvm.LLVMTypeRef = undefined;
+                var uwu: *parser.Node = k.node_type.?;
                 switch (exp.typ) {
                     .NOT => {
                         std.debug.assert(k.type == llvm.LLVMInt1Type());
@@ -502,11 +525,14 @@ pub const CodeGen = struct {
                     },
                     .STAR => {
                         r = llvm.LLVMBuildLoad2(self.builder, k.type, k.value, "");
-                        t = llvm.LLVMInt64Type();
+                        std.debug.print("TEST: {any}\n", .{k.node_type});
+                        std.debug.assert(k.node_type.?.TYPE == .POINTER_TYPE);
+                        t = try self.get_llvm_type(k.node_type.?.TYPE.POINTER_TYPE.type);
+                        uwu = k.node_type.?.TYPE.POINTER_TYPE.type;
                     },
                 }
 
-                return self.generate_literal(r, t, name, expression);
+                return self.generate_literal(r, t, name, expression, uwu); //TODO: Why do we need the llvm type at all
             },
             .EQUALITY_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
@@ -519,7 +545,7 @@ pub const CodeGen = struct {
                 };
                 const cmp = llvm.LLVMBuildICmp(self.builder, op, lhs_value.value, rhs_value.value, "");
 
-                return self.generate_literal(cmp, llvm.LLVMInt1Type(), name, expression);
+                return self.generate_literal(cmp, llvm.LLVMInt1Type(), name, expression, lhs_value.node_type);
             },
             .TYPE => |typ| {
                 std.debug.assert(typ == .FUNCTION_TYPE);
@@ -533,7 +559,7 @@ pub const CodeGen = struct {
                         .type = function_type,
                         .stack_level = null,
                         .node = expression,
-                        .node_type = null,
+                        .node_type = expression,
                     });
                 }
 
@@ -541,6 +567,7 @@ pub const CodeGen = struct {
                 _ = llvm.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
                 ptr.?.type = function_type;
                 ptr.?.node = expression;
+                ptr.?.node_type = expression;
 
                 return ptr.?;
             },
@@ -548,7 +575,7 @@ pub const CodeGen = struct {
         };
     }
 
-    fn generate_literal(self: *CodeGen, literal_val: llvm.LLVMValueRef, literal_type: llvm.LLVMTypeRef, name: ?[]const u8, node: *parser.Node) !*Variable {
+    fn generate_literal(self: *CodeGen, literal_val: llvm.LLVMValueRef, literal_type: llvm.LLVMTypeRef, name: ?[]const u8, node: *parser.Node, node_type: ?*parser.Node) !*Variable {
         if (name != null) {
             if (self.environment.scope_stack.items.len == 1) {
                 const ptr = try self.create_variable(.{
@@ -556,7 +583,7 @@ pub const CodeGen = struct {
                     .type = literal_type,
                     .stack_level = null,
                     .node = node,
-                    .node_type = null,
+                    .node_type = node_type,
                 });
                 llvm.LLVMSetInitializer(ptr.value, literal_val);
                 return ptr;
@@ -565,6 +592,7 @@ pub const CodeGen = struct {
             _ = llvm.LLVMBuildStore(self.builder, literal_val, ptr.value) orelse return CodeGenError.CompilationError;
             ptr.type = literal_type;
             ptr.node = node;
+            ptr.node_type = node_type;
             return ptr;
         }
 
@@ -573,7 +601,7 @@ pub const CodeGen = struct {
             .type = literal_type,
             .stack_level = null,
             .node = node,
-            .node_type = null,
+            .node_type = node_type,
         });
     }
 
