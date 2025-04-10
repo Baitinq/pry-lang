@@ -9,23 +9,48 @@ extern fclose = (*i8) => *i8;
 extern malloc = (i64) => *i8;
 extern free = (*i8) => void;
 
+let file_size = 0;
+let file = 0;
+let buf = 0;
+
+let read_file = (filename: *i8) => *i8 {
+	file = fopen(filename, "r");
+
+	fseek(file, 0, 2);
+	file_size = ftell(file);
+	fseek(file, 0, 0);
+
+	buf = malloc(file_size + 1);
+
+	let bytes_read = fread(buf, 1, file_size, file);
+	(*(buf + bytes_read)) = '\0';
+
+	return buf;
+};
+
 let main = (argc: i64, argv: **i8) => i64 {
 	let filename = *(argv + 1);
 
 	printf("%s\n", filename);
 
-	let file = fopen(filename, "r");
-	
-	fseek(file, 0, 2);
-	let file_size = ftell(file);
-	fseek(file, 0, 0);
+	let buf = read_file(filename);
 
-	let buf = malloc(file_size + 1);
+	printf("File size: %d\n", file_size);
 
-	let bytes_read = fread(buf, 1, file_size, file);
-	(*(buf + bytes_read)) = '\0';
+	printf("%s", buf);
 
-	printf("%s",  buf);
+	let i = 0;
+	while i < file_size {
+		let c = (*(buf + i));
+
+		if c == '}' {
+			printf("BRACE!\n");
+		};
+
+		printf("C: %c\n", c);
+
+		i = i + 1;
+	};
 
 	free(buf);
 	fclose(file);
