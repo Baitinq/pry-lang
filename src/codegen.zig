@@ -466,9 +466,6 @@ pub const CodeGen = struct {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
-                std.debug.assert(lhs_value.node.?.* == .PRIMARY_EXPRESSION);
-                std.debug.assert(rhs_value.node.?.* == .PRIMARY_EXPRESSION);
-
                 var result: llvm.LLVMValueRef = undefined;
                 var node_type: *parser.Node = try self.create_node(.{ .TYPE = .{ .SIMPLE_TYPE = .{
                     .name = "i64",
