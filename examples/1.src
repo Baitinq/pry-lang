@@ -7,3 +7,13 @@ let main = () => i64 {
 
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+hello
+
+Expected return: 0
+
+*/

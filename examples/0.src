@@ -6,3 +6,13 @@ let main = (argc: i64, argv: *i64) => i64 {
 	
 	return 2;
 };
+
+/*
+
+Expected stdout:
+
+1
+
+Expected return: 2
+
+*/

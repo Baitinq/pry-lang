@@ -9,3 +9,13 @@ let main = () => i64 {
 
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+1922
+
+Expected return: 0
+
+*/

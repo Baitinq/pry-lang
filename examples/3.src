@@ -9,3 +9,13 @@ let main = () => i64 {
 
 	return seventeen;
 };
+
+/*
+
+Expected stdout:
+
+17
+
+Expected return: 17
+
+*/

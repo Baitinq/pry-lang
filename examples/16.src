@@ -12,3 +12,11 @@ let main = () => i64 {
 	
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+Expected return: 0
+
+*/

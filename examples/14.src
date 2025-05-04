@@ -9,3 +9,11 @@ let main = () => i64 {
 
 	return x();
 };
+
+/*
+
+Expected stdout:
+
+Expected return: 4
+
+*/

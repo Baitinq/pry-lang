@@ -9,3 +9,14 @@ let main = () => i64 {
 	putchar(10);
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+Hello
+
+Expected return: 0
+
+*/
+

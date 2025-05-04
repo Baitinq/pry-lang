@@ -16,3 +16,15 @@ let main = () => i64 {
 	printf("%d\n", x);
 	return x + y;
 };
+
+/*
+
+Expected stdout:
+
+18
+1
+2
+
+Expected return: 3
+
+*/

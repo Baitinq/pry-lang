@@ -21,3 +21,13 @@ let main = () => i64 {
 	free(buf);
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+hello world!
+
+Expected return: 0
+
+*/

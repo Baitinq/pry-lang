@@ -13,3 +13,14 @@ let main = () => i64 {
 
 	return y(id, 2);
 };
+
+/*
+
+Expected stdout:
+
+2
+12
+
+Expected return: 2
+
+*/

@@ -3,7 +3,17 @@ extern printf = (*i64, varargs) => i64;
 let main = () => i64 {
 	let x = !(1 == 1);
 	if !x {
-		printf("%d\n", x);
+		printf("Condition\n");
 	};
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+Condition
+
+Expected return: 0
+
+*/

@@ -14,3 +14,16 @@ let main = () => i64 {
 	free(x);
 	return 0;
 };
+
+/*
+
+Expected stdout:
+
+${SOMEPOINTER}
+10
+20
+40
+
+Expected return: 0
+
+*/

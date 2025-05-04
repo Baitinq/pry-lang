@@ -12,3 +12,14 @@ let main = () => i64 {
 
 	return y;
 };
+
+/*
+
+Expected stdout:
+
+1
+6
+
+Expected return: 6
+
+*/

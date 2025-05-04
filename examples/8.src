@@ -15,3 +15,13 @@ let main = () => i64 {
 	printf("%d\n", result);
 	return result;
 };
+
+/*
+
+Expected stdout:
+
+832040
+
+Expected return: 832040
+
+*/
