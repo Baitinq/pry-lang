@@ -30,6 +30,7 @@
             llvmPackages_20.libllvm
             gdb
             gf
+            valgrind
         ];
       };
   in {
