@@ -68,6 +68,12 @@ pub const CodeGen = struct {
             llvm.LLVMCodeModelDefault,
         );
 
+        result = llvm.LLVMVerifyModule(self.llvm_module, llvm.LLVMAbortProcessAction, &message);
+        if (result != 0) {
+            std.debug.print("Verification output: {any}.\n", .{message});
+            llvm.LLVMDisposeMessage(message);
+        }
+
         // Generate the object file
         const filename = "output.o";
         _ = llvm.LLVMTargetMachineEmitToFile(
@@ -78,12 +84,6 @@ pub const CodeGen = struct {
             null,
         );
         std.debug.print("Object file generated: {s}\n", .{filename});
-
-        result = llvm.LLVMVerifyModule(self.llvm_module, llvm.LLVMAbortProcessAction, &message);
-        if (result != 0) {
-            std.debug.print("Verification output: {any}.\n", .{message});
-            llvm.LLVMDisposeMessage(message);
-        }
     }
 
     pub fn deinit(self: *CodeGen) void {
