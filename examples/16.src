@@ -1,5 +1,5 @@
 extern printf = (*i64, varargs) => i64;
-extern SDL_CreateWindow = (ptr, i64, i64, i64, i64, i64) => i64;
+extern SDL_CreateWindow = (*i8, i64, i64, i64, i64, i64) => i64;
 extern SDL_Init = (i64) => i64;
 
 let main = () => i64 {
