@@ -3,25 +3,25 @@ extern rand = () => i64;
 extern malloc = (i64) => *i64;
 extern free = (*i64) => void;
 
-let init_array = (n: i64, arr: *i64) => i64 {
+let init_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	while i < n {
 		(*(arr + i)) = rand();
 		i = i + 1;
 	};
-	return 0;
+	return;
 };
 
-let print_array = (n: i64, arr: *i64) => i64 {
+let print_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	while i < n {
 		printf("%d\n", *(arr + i));
 		i = i + 1;
 	};
-	return 0;
+	return;
 };
 
-let sort_array = (n: i64, arr: *i64) => i64 {
+let sort_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	let j = 0;
 
@@ -42,7 +42,7 @@ let sort_array = (n: i64, arr: *i64) => i64 {
 		i = i + 1;
 	};
 
-	return 0;
+	return;
 };
 
 let main = () => i64 {

@@ -235,7 +235,12 @@ pub const CodeGen = struct {
 
         const expression = statement.RETURN_STATEMENT.expression;
 
-        const val = try self.generate_expression_value(expression, null);
+        if (expression == null) {
+            _ = llvm.LLVMBuildRetVoid(self.builder);
+            return;
+        }
+
+        const val = try self.generate_expression_value(expression.?, null);
         _ = llvm.LLVMBuildRet(self.builder, val.value);
     }
 

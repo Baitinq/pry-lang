@@ -90,7 +90,7 @@ pub const Node = union(enum) {
         },
     },
     RETURN_STATEMENT: struct {
-        expression: *Node,
+        expression: ?*Node,
     },
 };
 
@@ -601,17 +601,17 @@ pub const Parser = struct {
         return node_list.items;
     }
 
-    // ReturnStatement ::= RETURN Expression
+    // ReturnStatement ::= RETURN (Expression)?
     fn parse_return_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing return statement {any}\n", .{self.peek_token()});
 
         _ = try self.parse_token(tokenizer.TokenType.RETURN);
 
-        const expression = try self.parse_expression();
+        const maybe_expression = self.accept_parse(parse_expression);
 
         return self.create_node(.{
             .RETURN_STATEMENT = .{
-                .expression = @constCast(expression),
+                .expression = maybe_expression,
             },
         });
     }

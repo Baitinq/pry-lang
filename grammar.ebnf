@@ -14,7 +14,7 @@ IfStatement ::= "if" Expression LBRACE Statement* RBRACE -- TODO: Should functio
 
 WhileStatement ::= "while" Expression LBRACE Statement* RBRACE
 
-ReturnStatement ::= RETURN Expression
+ReturnStatement ::= RETURN (Expression)?
 
 FunctionArguments ::= Expression ("," Expression)*
 
