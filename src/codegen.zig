@@ -570,25 +570,22 @@ pub const CodeGen = struct {
             },
             .TYPE => |typ| {
                 std.debug.assert(typ == .FUNCTION_TYPE);
+                std.debug.assert(self.environment.scope_stack.items.len == 1);
+
+                const variable = self.environment.get_variable(name.?);
+                if (variable) |v| {
+                    return v;
+                }
+
                 const function_type = try self.get_llvm_type(expression);
                 const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}), function_type);
 
-                // Global functions
-                if (self.environment.scope_stack.items.len == 1) {
-                    return try self.create_variable(.{
-                        .value = function,
-                        .stack_level = null,
-                        .node = expression,
-                        .node_type = expression,
-                    });
-                }
-
-                const ptr = self.environment.get_variable(name.?);
-                _ = llvm.LLVMBuildStore(self.builder, function, ptr.?.value) orelse return CodeGenError.CompilationError;
-                ptr.?.node = expression;
-                ptr.?.node_type = expression;
-
-                return ptr.?;
+                return try self.create_variable(.{
+                    .value = function,
+                    .stack_level = null,
+                    .node = expression,
+                    .node_type = expression,
+                });
             },
             else => unreachable,
         };

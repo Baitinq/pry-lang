@@ -8,6 +8,8 @@ extern fclose = (*i8) => *i8;
 extern malloc = (i64) => *i8;
 extern free = (*i8) => void;
 
+import "!stdlib.src";
+
 import "tokenizer.src";
 
 let file_size = 0;
@@ -32,23 +34,23 @@ let read_file = (filename: *i8) => *i8 {
 let main = (argc: i64, argv: **i8) => i64 {
 	let filename = *(argv + 1);
 
-	printf("%s\n", filename);
+	println("%s", filename);
 
 	let buf = read_file(filename);
 
-	printf("File size: %d\n", file_size);
+	println("File size: %d", file_size);
 
-	printf("%s", buf);
+	println("%s", buf);
 
 	let i = 0;
 	while i < file_size {
 		let c = (*(buf + i));
 
 		if c == '}' {
-			printf("BRACE!\n");
+			println("BRACE!");
 		};
 
-		printf("C: %c\n", c);
+		println("C: %c", c);
 
 		i = i + 1;
 	};
@@ -56,7 +58,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 	free(buf);
 	fclose(file);
 
-	printf("TEST: %d\n", test());
+	println("TEST: %d", test());
 
 	return 0;
 };
