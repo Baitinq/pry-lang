@@ -19,6 +19,10 @@ pub const Node = union(enum) {
         lhs: *Node,
         rhs: *Node,
     },
+    IMPORT_DECLARATION: struct {
+        filename: []const u8,
+        program: *Node,
+    },
     FUNCTION_CALL_STATEMENT: struct {
         expression: *Node,
         arguments: []*Node,
@@ -103,6 +107,8 @@ pub const MultiplicativeExpressionType = enum {
 };
 
 pub const Parser = struct {
+    filename: []const u8,
+
     tokens: []tokenizer.Token,
     offset: u32,
 
@@ -110,9 +116,10 @@ pub const Parser = struct {
 
     try_context: bool, //TODO: I dont like this
 
-    pub fn init(tokens: []tokenizer.Token, arena_allocator: std.mem.Allocator) ParserError!*Parser {
+    pub fn init(tokens: []tokenizer.Token, arena_allocator: std.mem.Allocator, filename: []const u8) ParserError!*Parser {
         const parser = try arena_allocator.create(Parser);
         parser.* = .{
+            .filename = filename,
             .tokens = tokens,
             .offset = 0,
             .arena = arena_allocator,
@@ -146,6 +153,7 @@ pub const Parser = struct {
             self.accept_parse(parse_while_statement) orelse
             self.accept_parse(parse_return_statement) orelse
             self.accept_parse(parse_assignment_statement) orelse
+            self.accept_parse(parse_import_declaration) orelse
             try self.parse_extern_declaration();
 
         _ = try self.parse_token(tokenizer.TokenType.SEMICOLON);
@@ -183,6 +191,54 @@ pub const Parser = struct {
                 .is_dereference = is_dereference,
                 .lhs = lhs,
                 .rhs = rhs,
+            },
+        });
+    }
+
+    // ImportDeclaration ::= "import" STRING
+    fn parse_import_declaration(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing import declaration {any}\n", .{self.peek_token()});
+
+        _ = try self.parse_token(.IMPORT);
+
+        const expr = try self.parse_primary_expression();
+
+        std.debug.assert(expr.PRIMARY_EXPRESSION == .STRING);
+
+        const filename = expr.PRIMARY_EXPRESSION.STRING.value;
+
+        // Open the directory containing self.filename
+        const dir_path = std.fs.path.dirname(self.filename) orelse ".";
+        var x = std.fs.cwd().openDir(dir_path, .{}) catch {
+            std.debug.print("COULDNT OPEN DIR {s}\n", .{self.filename});
+            return ParserError.OutOfMemory;
+        };
+        defer x.close();
+
+        // Open the target file
+        const file = x.openFile(filename, .{}) catch {
+            std.debug.print("COULDNT OPEN FILENAME {s}\n", .{filename});
+            return ParserError.OutOfMemory;
+        };
+        defer file.close();
+
+        // Read file contents
+        const buf = file.readToEndAlloc(self.arena, 1 * 1024 * 1024) catch return ParserError.OutOfMemory;
+
+        // Initialize tokenizer and parse
+        var inner_tokenizer = try tokenizer.Tokenizer.init(buf, self.arena);
+        const tokens = inner_tokenizer.tokenize() catch return ParserError.OutOfMemory;
+
+        // Resolve the full path of the imported file
+        const full_path = try std.fs.path.resolve(self.arena, &.{ dir_path, filename });
+
+        const inner_parser = try Parser.init(tokens, self.arena, full_path);
+        const ast = try inner_parser.parse();
+
+        return self.create_node(.{
+            .IMPORT_DECLARATION = .{
+                .filename = filename,
+                .program = ast,
             },
         });
     }

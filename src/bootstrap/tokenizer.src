@@ -1,0 +1,6 @@
+extern printf = (*i8, varargs) => void;
+
+let test = () => i64 {
+	printf("HELLO\n");
+	return 2;
+};

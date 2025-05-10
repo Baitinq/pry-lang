@@ -116,6 +116,7 @@ pub const CodeGen = struct {
             .RETURN_STATEMENT => |*return_statement| return try self.generate_return_statement(@ptrCast(return_statement)),
             .IF_STATEMENT => |*if_statement| return try self.generate_if_statement(@ptrCast(if_statement)),
             .WHILE_STATEMENT => |*while_statement| return try self.generate_while_statement(@ptrCast(while_statement)),
+            .IMPORT_DECLARATION => |*import_declaration| return try self.generate_import_declaration(@ptrCast(import_declaration)),
             else => unreachable,
         }
     }
@@ -170,6 +171,7 @@ pub const CodeGen = struct {
             if (assignment_statement.is_declaration) {
                 try self.environment.add_variable(identifier.name, new_variable);
             } else {
+                // TODO: Dont allow changing types of variables if its not declaration
                 try self.environment.set_variable(identifier.name, new_variable);
             }
         } else {
@@ -288,6 +290,15 @@ pub const CodeGen = struct {
         llvm.LLVMPositionBuilderAtEnd(self.builder, outer_block);
     }
 
+    fn generate_import_declaration(self: *CodeGen, declaration: *parser.Node) !void {
+        errdefer std.debug.print("Error generating import declaration\n", .{});
+        std.debug.assert(declaration.* == parser.Node.IMPORT_DECLARATION);
+
+        const import_declaration = declaration.IMPORT_DECLARATION;
+
+        try self.generate(import_declaration.program);
+    }
+
     fn generate_expression_value(self: *CodeGen, expression: *parser.Node, name: ?[]const u8) !*Variable {
         errdefer std.debug.print("Error generating statement value\n", .{});
         return switch (expression.*) {
@@ -328,7 +339,7 @@ pub const CodeGen = struct {
                     },
                 });
 
-                // // Needed for recursive functions
+                // Needed for recursive functions
                 if (name != null) {
                     try self.environment.add_variable(name.?, try self.create_variable(.{
                         .value = function,

@@ -1,4 +1,3 @@
-extern printf = (*i8, varargs) => void;
 extern fopen = (*i8, *i8) => *i8;
 extern fgets = (*i8, i64, *i8) => void;
 extern feof = (*i8) => bool;
@@ -8,6 +7,8 @@ extern fread = (*i8, i64, i64, *i8) => i64;
 extern fclose = (*i8) => *i8;
 extern malloc = (i64) => *i8;
 extern free = (*i8) => void;
+
+import "tokenizer.src";
 
 let file_size = 0;
 let file = 0;
@@ -54,6 +55,8 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	free(buf);
 	fclose(file);
+
+	printf("TEST: %d\n", test());
 
 	return 0;
 };

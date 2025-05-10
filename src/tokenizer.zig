@@ -6,6 +6,7 @@ const TokenizerError = error{
 
 pub const TokenType = union(enum) {
     // Keywords
+    IMPORT: void,
     LET: void,
     EXTERN: void,
     IF: void,
@@ -64,12 +65,25 @@ pub const Tokenizer = struct {
         return Tokenizer{ .buf = buf, .offset = 0, .arena = arena };
     }
 
-    pub fn next(self: *Tokenizer) TokenizerError!?Token {
+    pub fn tokenize(self: *Tokenizer) ![]Token {
+        var token_list = std.ArrayList(Token).init(self.arena);
+
+        while (try self.next()) |token| {
+            std.debug.print("{any}\n", .{token});
+            try token_list.append(token);
+        }
+
+        return token_list.items;
+    }
+
+    fn next(self: *Tokenizer) TokenizerError!?Token {
         self.skip_whitespace();
         self.skip_comments();
         self.skip_whitespace();
 
         if (self.offset >= self.buf.len) return null;
+
+        if (self.accept_string("import")) return self.create_token(.{ .IMPORT = void{} });
 
         if (self.accept_string("let")) return self.create_token(.{ .LET = void{} });
         if (self.accept_string("extern")) return self.create_token(.{ .EXTERN = void{} });

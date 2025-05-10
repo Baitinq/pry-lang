@@ -25,26 +25,19 @@ pub fn main() !void {
     defer source_codegen.deinit();
     try process_buf(
         buf,
-        allocator,
         arena.allocator(),
         source_codegen,
+        path,
     );
     source_codegen.compile();
 }
 
-fn process_buf(buf: []u8, allocator: std.mem.Allocator, arena: std.mem.Allocator, source_codegen: ?*codegen.CodeGen) !void {
+fn process_buf(buf: []u8, arena: std.mem.Allocator, source_codegen: ?*codegen.CodeGen, filename: []const u8) !void {
     std.debug.print("Buf:\n{s}\n", .{buf});
 
-    var token_list = std.ArrayList(tokenizer.Token).init(allocator);
-    defer token_list.deinit();
-
     var source_tokenizer = try tokenizer.Tokenizer.init(buf, arena);
-    while (try source_tokenizer.next()) |token| {
-        std.debug.print("{any}\n", .{token});
-        try token_list.append(token);
-    }
-
-    const source_parser = try parser.Parser.init(token_list.items, arena);
+    const token_list = try source_tokenizer.tokenize();
+    const source_parser = try parser.Parser.init(token_list, arena, filename);
     const ast = try source_parser.parse();
     std.debug.print("AST: {any}\n", .{ast});
 
