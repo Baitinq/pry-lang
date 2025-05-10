@@ -151,8 +151,10 @@ pub const CodeGen = struct {
                 ptr = self.environment.get_variable(identifier.name).?.value;
             }
 
+            var typ = variable.node_type;
             if (assignment_statement.is_dereference) {
-                ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(variable.node_type), ptr, "");
+                typ = self.environment.get_variable(identifier.name).?.node_type;
+                ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
             }
 
             _ = llvm.LLVMBuildStore(self.builder, variable.value, ptr);
@@ -164,7 +166,7 @@ pub const CodeGen = struct {
             const new_variable = try self.create_variable(.{
                 .value = ptr,
                 .node = variable.node,
-                .node_type = variable.node_type,
+                .node_type = typ,
                 .stack_level = null,
             });
             // Adding variable doesnt actually replace the variable of previous scope
