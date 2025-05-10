@@ -11,7 +11,6 @@ let init_array = (n: i64, arr: *i64) => i64 {
 	return 0;
 };
 
-
 let main = () => i64 {
 	let n = 10;
 	let arr = malloc(n * 8);
