@@ -205,19 +205,26 @@ pub const Parser = struct {
 
         std.debug.assert(expr.PRIMARY_EXPRESSION == .STRING);
 
-        const filename = expr.PRIMARY_EXPRESSION.STRING.value;
+        var import_filename = expr.PRIMARY_EXPRESSION.STRING.value;
+        var current_file = self.filename;
 
-        // Open the directory containing self.filename
-        const dir_path = std.fs.path.dirname(self.filename) orelse ".";
-        var x = std.fs.cwd().openDir(dir_path, .{}) catch {
-            std.debug.print("COULDNT OPEN DIR {s}\n", .{self.filename});
+        // stdlib. TODO: this is very hacky and won't work if running the compiler binary by itself
+        if (import_filename.ptr[0] == '!') {
+            import_filename = std.fmt.allocPrint(self.arena, "./std/{s}", .{import_filename[1..]}) catch return ParserError.OutOfMemory;
+            current_file = ".";
+        }
+
+        // Open the directory containing current_file
+        const dir_path = std.fs.path.dirname(current_file) orelse ".";
+        var dir = std.fs.cwd().openDir(dir_path, .{}) catch {
+            std.debug.print("Couldn't open directory {s}\n", .{current_file});
             return ParserError.OutOfMemory;
         };
-        defer x.close();
+        defer dir.close();
 
         // Open the target file
-        const file = x.openFile(filename, .{}) catch {
-            std.debug.print("COULDNT OPEN FILENAME {s}\n", .{filename});
+        const file = dir.openFile(import_filename, .{}) catch {
+            std.debug.print("Couldn't open file {s}\n", .{import_filename});
             return ParserError.OutOfMemory;
         };
         defer file.close();
@@ -230,14 +237,14 @@ pub const Parser = struct {
         const tokens = inner_tokenizer.tokenize() catch return ParserError.OutOfMemory;
 
         // Resolve the full path of the imported file
-        const full_path = try std.fs.path.resolve(self.arena, &.{ dir_path, filename });
+        const full_path = try std.fs.path.resolve(self.arena, &.{ dir_path, import_filename });
 
         const inner_parser = try Parser.init(tokens, self.arena, full_path);
         const ast = try inner_parser.parse();
 
         return self.create_node(.{
             .IMPORT_DECLARATION = .{
-                .filename = filename,
+                .filename = import_filename,
                 .program = ast,
             },
         });

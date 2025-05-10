@@ -1,0 +1,7 @@
+extern printf = (*i8, varargs) => void;
+
+let println = (str: *i8, args: varargs) => void {
+	printf(str, args);
+	printf("\n");
+	return;
+};

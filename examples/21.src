@@ -1,7 +1,8 @@
-extern printf = (*i64, varargs) => void;
 extern rand = () => i64;
 extern malloc = (i64) => *i64;
 extern free = (*i64) => void;
+
+import "!stdlib.src";
 
 let init_array = (n: i64, arr: *i64) => void {
 	let i = 0;
@@ -15,7 +16,7 @@ let init_array = (n: i64, arr: *i64) => void {
 let print_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	while i < n {
-		printf("%d\n", *(arr + i));
+		println("%d", *(arr + i));
 		i = i + 1;
 	};
 	return;
@@ -50,12 +51,12 @@ let main = () => i64 {
 	let arr = malloc(n * 8);
 	init_array(n, arr);
 
-	printf("Pre-sorted:\n");
+	println("Pre-sorted:");
 	print_array(n, arr);
 
 	sort_array(n, arr);
 
-	printf("Sorted:\n");
+	println("Sorted:");
 	print_array(n, arr);
 	
 	free(arr);
