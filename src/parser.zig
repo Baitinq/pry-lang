@@ -96,6 +96,8 @@ pub const Node = union(enum) {
 
 pub const EqualityExpressionType = enum {
     EQ,
+    GE,
+    LE,
     LT,
     GT,
 };
@@ -388,7 +390,7 @@ pub const Parser = struct {
             return ParserError.ParsingError;
     }
 
-    // EqualityExpression ::= AdditiveExpression ("==" | "<" | ">") AdditiveExpression
+    // EqualityExpression ::= AdditiveExpression ("==" | "<=" | ">=" | "<" | ">") AdditiveExpression
     fn parse_equality_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing equality expression {any}\n", .{self.peek_token()});
 
@@ -406,6 +408,26 @@ pub const Parser = struct {
             }
         }.parse) != null) {
             typ = .EQ;
+        } else if (self.accept_parse(struct {
+            fn parse(iself: *Parser) ParserError!*Node {
+                _ = try iself.parse_token(tokenizer.TokenType.LESS);
+                _ = try iself.parse_token(tokenizer.TokenType.EQUALS);
+                return try iself.create_node(.{ .PROGRAM = .{
+                    .statements = &[_]*Node{},
+                } });
+            }
+        }.parse) != null) {
+            typ = .LE;
+        } else if (self.accept_parse(struct {
+            fn parse(iself: *Parser) ParserError!*Node {
+                _ = try iself.parse_token(tokenizer.TokenType.GREATER);
+                _ = try iself.parse_token(tokenizer.TokenType.EQUALS);
+                return try iself.create_node(.{ .PROGRAM = .{
+                    .statements = &[_]*Node{},
+                } });
+            }
+        }.parse) != null) {
+            typ = .GE;
         } else if (self.accept_token(tokenizer.TokenType.LESS) != null) {
             typ = .LT;
         } else if (self.accept_token(tokenizer.TokenType.GREATER) != null) {
