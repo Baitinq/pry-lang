@@ -92,6 +92,7 @@ pub const Node = union(enum) {
     RETURN_STATEMENT: struct {
         expression: ?*Node,
     },
+    BREAK_STATEMENT: void,
 };
 
 pub const EqualityExpressionType = enum {
@@ -146,23 +147,30 @@ pub const Parser = struct {
         } });
     }
 
-    // Statement    ::= (AssignmentStatement | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement) SEMICOLON
+    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break") SEMICOLON
     fn parse_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing statement {any}\n", .{self.peek_token()});
 
-        const statement = self.accept_parse(parse_function_call_statement) orelse
+        var statement = self.accept_parse(parse_function_call_statement) orelse
             self.accept_parse(parse_if_statement) orelse
             self.accept_parse(parse_while_statement) orelse
             self.accept_parse(parse_return_statement) orelse
             self.accept_parse(parse_assignment_statement) orelse
             self.accept_parse(parse_import_declaration) orelse
-            try self.parse_extern_declaration();
+            self.accept_parse(parse_extern_declaration);
+
+        if (statement == null) {
+            _ = try self.parse_token(tokenizer.TokenType.BREAK);
+            statement = try self.create_node(.{
+                .BREAK_STATEMENT = void{},
+            });
+        }
 
         _ = try self.parse_token(tokenizer.TokenType.SEMICOLON);
 
         return self.create_node(.{
             .STATEMENT = .{
-                .statement = statement,
+                .statement = statement.?,
             },
         });
     }

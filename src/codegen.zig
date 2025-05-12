@@ -22,6 +22,8 @@ pub const CodeGen = struct {
 
     arena: std.mem.Allocator,
 
+    while_loop_exit: ?llvm.LLVMBasicBlockRef,
+
     pub fn init(arena: std.mem.Allocator) !*CodeGen {
         // Initialize LLVM
         llvm.LLVMInitializeAllTargetInfos();
@@ -40,6 +42,8 @@ pub const CodeGen = struct {
             .environment = try Environment.init(arena),
 
             .arena = arena,
+
+            .while_loop_exit = null,
         };
 
         return self;
@@ -114,6 +118,7 @@ pub const CodeGen = struct {
                 _ = try self.generate_function_call_statement(@ptrCast(function_call_statement));
             },
             .RETURN_STATEMENT => |*return_statement| return try self.generate_return_statement(@ptrCast(return_statement)),
+            .BREAK_STATEMENT => |*break_statement| return try self.generate_break_statement(@ptrCast(@alignCast(break_statement))),
             .IF_STATEMENT => |*if_statement| return try self.generate_if_statement(@ptrCast(if_statement)),
             .WHILE_STATEMENT => |*while_statement| return try self.generate_while_statement(@ptrCast(while_statement)),
             .IMPORT_DECLARATION => |*import_declaration| return try self.generate_import_declaration(@ptrCast(import_declaration)),
@@ -246,6 +251,14 @@ pub const CodeGen = struct {
         _ = llvm.LLVMBuildRet(self.builder, val.value);
     }
 
+    fn generate_break_statement(self: *CodeGen, statement: *parser.Node) !void {
+        errdefer std.debug.print("Error generating break statement\n", .{});
+        std.debug.assert(statement.* == parser.Node.BREAK_STATEMENT);
+        std.debug.assert(self.while_loop_exit != null);
+
+        _ = llvm.LLVMBuildBr(self.builder, self.while_loop_exit.?);
+    }
+
     fn generate_if_statement(self: *CodeGen, statement: *parser.Node) !void {
         errdefer std.debug.print("Error generating if statement\n", .{});
         std.debug.assert(statement.* == parser.Node.IF_STATEMENT);
@@ -286,6 +299,9 @@ pub const CodeGen = struct {
         const inner_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "inner_block");
         const outer_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "outer_block");
         _ = llvm.LLVMBuildCondBr(self.builder, condition_value.value, inner_block, outer_block);
+
+        self.while_loop_exit = outer_block;
+        defer self.while_loop_exit = null;
 
         _ = llvm.LLVMPositionBuilderAtEnd(self.builder, inner_block);
         for (while_statement.statements) |stmt| {
