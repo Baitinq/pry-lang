@@ -4,6 +4,9 @@ let file_size = 0;
 let file = 0;
 let buf = 0;
 
+
+let offset = 0;
+
 let read_file = (filename: *i8) => *i8 {
 	file = fopen(filename, "r");
 
@@ -19,6 +22,22 @@ let read_file = (filename: *i8) => *i8 {
 	return buf;
 };
 
+let tokenizer_next = () => *i8 {
+	if offset >= file_size {
+		return "EOF";
+	};
+
+	let c = (*(buf + offset));
+
+	offset = offset + 1;
+
+	let t = malloc(2);
+	(*(t + 0)) = c;
+	(*(t + 1)) = '\0';
+
+	return t;
+};
+
 let tokenizer_init = (filename: *i8) => i64 {
 	let buf = read_file(filename);
 
@@ -26,17 +45,13 @@ let tokenizer_init = (filename: *i8) => i64 {
 
 	println("%s", buf);
 
-	let i = 0;
-	while i < file_size {
-		let c = (*(buf + i));
-
-		if c == '}' {
-			println("BRACE!");
+	while true {
+		let t = tokenizer_next();
+		if strcmp(t, "EOF") {
+			return 0;
 		};
-
-		println("C: %c", c);
-
-		i = i + 1;
+		println("%s", t);
+		free(t);
 	};
 
 	return 0;
