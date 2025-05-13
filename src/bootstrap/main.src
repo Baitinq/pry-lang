@@ -13,6 +13,11 @@ import "!stdlib.src";
 import "tokenizer.src";
 
 let main = (argc: i64, argv: **i8) => i64 {
+	if argc < 2 {
+		println("Need filename!");
+		return 1;
+	};
+
 	let filename = *(argv + 1);
 
 	println("%s", filename);
