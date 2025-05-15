@@ -426,6 +426,19 @@ pub const CodeGen = struct {
                 return try self.generate_function_call_statement(@ptrCast(fn_call));
             },
             .PRIMARY_EXPRESSION => |primary_expression| switch (primary_expression) {
+                .NULL => {
+                    return try self.generate_literal(llvm.LLVMConstNull(llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0)), name, expression, try self.create_node(.{
+                        .TYPE = .{
+                            .POINTER_TYPE = .{
+                                .type = try self.create_node(.{
+                                    .TYPE = .{ .SIMPLE_TYPE = .{
+                                        .name = "i8",
+                                    } },
+                                }),
+                            },
+                        },
+                    }));
+                },
                 .NUMBER => |n| {
                     return try self.generate_literal(llvm.LLVMConstInt(llvm.LLVMInt64Type(), @intCast(n.value), 0), name, expression, try self.create_node(.{
                         .TYPE = .{

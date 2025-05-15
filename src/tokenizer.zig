@@ -21,6 +21,7 @@ pub const TokenType = union(enum) {
     // Literals
     NUMBER: i64,
     BOOLEAN: bool,
+    NULL: void,
     CHAR: u8,
     STRING: []u8,
 
@@ -94,6 +95,7 @@ pub const Tokenizer = struct {
         if (self.accept_string("break")) return self.create_token(.{ .BREAK = void{} });
         if (self.accept_string("true")) return self.create_token(.{ .BOOLEAN = true });
         if (self.accept_string("false")) return self.create_token(.{ .BOOLEAN = false });
+        if (self.accept_string("null")) return self.create_token(.{ .NULL = void{} });
 
         if (self.accept_string("=>")) return self.create_token(.{ .ARROW = void{} });
         if (self.accept_string(";")) return self.create_token(.{ .SEMICOLON = void{} });
