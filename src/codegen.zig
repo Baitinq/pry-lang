@@ -655,6 +655,7 @@ pub const CodeGen = struct {
                 if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
                 if (std.mem.eql(u8, t.name, "void")) return llvm.LLVMVoidType();
                 if (std.mem.eql(u8, t.name, "varargs")) return llvm.LLVMPointerType(llvm.LLVMInt64Type(), 0); // Hack for varargs (only used for printf)
+                std.debug.print("Unknown type: {s}\n", .{t.name});
                 unreachable;
             },
             .FUNCTION_TYPE => |t| {

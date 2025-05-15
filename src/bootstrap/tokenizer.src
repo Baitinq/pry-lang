@@ -1,5 +1,7 @@
 extern strlen = (*i8) => i64;
 extern memcpy = (*i8, *i8, i64) => void;
+extern sprintf = (*i8, *i8, varargs) => void;
+extern atoi = (*i8) => i64;
 
 import "!stdlib.src";
 
@@ -67,7 +69,6 @@ let tokenizer_skip_whitespace = () => void {
 	while true {
 		if offset >= file_size { return; };
 		let c = (*(buf + offset));
-		printf("C: %c\n", c);
 		if !iswhitespace(c) {
 			return;
 		};
@@ -84,13 +85,53 @@ let tokenizer_accept_string = (str: *i8) => bool {
 	let s = malloc(1000);
 	memcpy(s, buf + offset, str_len);
 
-	printf("Accept string: %s\n", s);
+	printf("Accept string: %s vs %s\n", str, s);
 	if strcmp(s, str) {
 		offset = offset + str_len;
 		return true;
 	};
 
 	return false;
+};
+
+let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
+	let start = offset;
+	let res = malloc(1000);
+
+	while true {
+		memcpy(res, buf + start, offset);
+		(*(res + (offset - start))) = '\0';
+
+		if offset >= file_size {
+			return res;
+		};
+
+		let c = (*(buf + offset));
+		/* TODO: calling condition breaks */
+		if !isdigit(c) {
+			return res;
+		};
+		offset = offset + 1;
+	};
+
+	return null;
+};
+
+let isnt_digit = (c: i8) => bool {
+	return !isdigit(c);
+};
+
+let tokenizer_accept_int_type = () => *i64 {
+	let res = tokenizer_consume_until_condition(isnt_digit);
+	if res == null {
+		return null;
+	};
+	if strlen(res) == 0 {
+		return null;
+	};
+	let x = malloc(8);
+	*x = atoi(res);
+	return x;
 };
 
 let tokenizer_skip_comments = () => void {
@@ -190,6 +231,14 @@ let tokenizer_next = () => *i8 {
 	};
 	if tokenizer_accept_string(">") {
 	    return ">";
+	};
+	
+	let maybe_int = tokenizer_accept_int_type();
+	if !(maybe_int == null) {
+		let t = malloc(1000);
+		sprintf(t, "int:%d", *maybe_int);
+
+		return t;
 	};
 
 	let c = (*(buf + offset));

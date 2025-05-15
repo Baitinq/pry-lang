@@ -31,6 +31,15 @@ let strcmp = (stra: *i8, strb: *i8) => bool {
 	return true;
 };
 
+let isdigit = (c: i8) => bool {
+	if c > '0' {
+		if c < '9' {
+			return true;
+		};
+	};
+	return false;
+};
+
 let isalphanum = (c: i8) => bool {
 	if c > 'a' {
 		if c < 'z' {
@@ -42,10 +51,8 @@ let isalphanum = (c: i8) => bool {
 			return true;
 		};
 	};
-	if c > '0' {
-		if c < '9' {
-			return true;
-		};
+	if isdigit(c) {
+		return true;
 	};
 
 	return false;
