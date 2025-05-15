@@ -113,16 +113,93 @@ let tokenizer_next = () => *i8 {
 	};
 
 	if tokenizer_accept_string("import") {
-		return "import";
+	    return "import";
+	};
+	if tokenizer_accept_string("let") {
+	    return "let";
+	};
+	if tokenizer_accept_string("extern") {
+	    return "extern";
+	};
+	if tokenizer_accept_string("if") {
+	    return "if";
+	};
+	if tokenizer_accept_string("while") {
+	    return "while";
+	};
+	if tokenizer_accept_string("return") {
+	    return "return";
+	};
+	if tokenizer_accept_string("break") {
+	    return "break";
+	};
+	if tokenizer_accept_string("true") {
+	    return "bool:true";
+	};
+	if tokenizer_accept_string("false") {
+	    return "bool:false";
+	};
+
+	if tokenizer_accept_string("=>") {
+	    return "=>";
+	};
+	if tokenizer_accept_string(";") {
+	    return ";";
+	};
+	if tokenizer_accept_string(",") {
+	    return ",";
+	};
+	if tokenizer_accept_string(":") {
+	    return ":";
+	};
+	if tokenizer_accept_string("(") {
+	    return "(";
+	};
+	if tokenizer_accept_string(")") {
+	    return ")";
+	};
+	if tokenizer_accept_string("{") {
+	    return "{";
+	};
+	if tokenizer_accept_string("}") {
+	    return "}";
+	};
+	if tokenizer_accept_string("=") {
+	    return "=";
+	};
+	if tokenizer_accept_string("+") {
+	    return "+";
+	};
+	if tokenizer_accept_string("-") {
+	    return "-";
+	};
+	if tokenizer_accept_string("*") {
+	    return "*";
+	};
+	if tokenizer_accept_string("/") {
+	    return "/";
+	};
+	if tokenizer_accept_string("%") {
+	    return "%";
+	};
+	if tokenizer_accept_string("!") {
+	    return "!";
+	};
+	if tokenizer_accept_string("<") {
+	    return "<";
+	};
+	if tokenizer_accept_string(">") {
+	    return ">";
 	};
 
 	let c = (*(buf + offset));
 
 	offset = offset + 1;
 
-	let t = malloc(2);
-	(*(t + 0)) = c;
-	(*(t + 1)) = '\0';
+	let t = malloc(13);
+	memcpy(t, "identifier:", 11);
+	(*(t + 11)) = c;
+	(*(t + 12)) = '\0';
 
 	return t;
 };
