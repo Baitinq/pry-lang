@@ -275,8 +275,8 @@ pub const CodeGen = struct {
             try self.generate_statement(stmt);
         }
         const merge_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "merge_block");
-        const last_instr = llvm.LLVMGetLastInstruction(then_block);
-        if (llvm.LLVMIsATerminatorInst(last_instr) == null) {
+        const last_instr = llvm.LLVMGetLastInstruction(llvm.LLVMGetInsertBlock(self.builder));
+        if (last_instr == null or llvm.LLVMIsATerminatorInst(last_instr) == null) {
             _ = llvm.LLVMBuildBr(self.builder, merge_block);
         }
         llvm.LLVMPositionBuilderAtEnd(self.builder, current_block);
