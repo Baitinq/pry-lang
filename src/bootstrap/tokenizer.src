@@ -1,3 +1,6 @@
+extern strlen = (*i8) => i64;
+extern memcpy = (*i8, *i8, i64) => void;
+
 import "!stdlib.src";
 
 let file_size = 0;
@@ -26,6 +29,7 @@ let read_file = (filename: *i8) => *i8 {
 };
 
 let add_token = (tokens: *i8, token: *i8) => i64 {
+	printf("Add token: %s\n", token);
 	let i = 0;
 	while true {
 		let c = (*(token + i));
@@ -59,9 +63,57 @@ let print_tokens = (tokens: *i8) => i64 {
 	return 0;
 };
 
+let tokenizer_skip_whitespace = () => void {
+	while true {
+		if offset >= file_size { return; };
+		let c = (*(buf + offset));
+		printf("C: %c\n", c);
+		if !iswhitespace(c) {
+			return;
+		};
+		offset = offset + 1;
+	};
+
+	return;
+};
+
+let tokenizer_accept_string = (str: *i8) => bool {
+	let str_len = strlen(str);
+	if offset + str_len > file_size { return false; };
+
+	let s = malloc(1000);
+	memcpy(s, buf + offset, str_len);
+
+	printf("Accept string: %s\n", s);
+	if strcmp(s, str) {
+		offset = offset + str_len;
+		return true;
+	};
+
+	return false;
+};
+
+let tokenizer_skip_comments = () => void {
+	if !tokenizer_accept_string("/*") { return; };
+
+	while !tokenizer_accept_string("*/") {
+		offset = offset + 1;
+	};
+
+	return;
+};
+
 let tokenizer_next = () => *i8 {
+	tokenizer_skip_whitespace();
+	tokenizer_skip_comments();
+	tokenizer_skip_whitespace();
+
 	if offset >= file_size {
 		return "EOF";
+	};
+
+	if tokenizer_accept_string("import") {
+		return "import";
 	};
 
 	let c = (*(buf + offset));
@@ -78,9 +130,9 @@ let tokenizer_next = () => *i8 {
 let tokenizer_init = (filename: *i8) => i64 {
 	let buf = read_file(filename);
 
-	println("File size: %d", file_size);
+	printf("File size: %d\n", file_size);
 
-	println("%s", buf);
+	printf("%s\n", buf);
 
 	tokens = malloc(10000);
 
@@ -89,12 +141,10 @@ let tokenizer_init = (filename: *i8) => i64 {
 		if strcmp(t, "EOF") {
 			break;
 		};
-		println("%s", t);
 		add_token(tokens, t);
-		free(t);
 	};
 
-	println("PRINT TOKENS");
+	printf("PRINT TOKENS\n");
 
 	print_tokens(tokens);
 

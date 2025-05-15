@@ -197,6 +197,7 @@ pub const Tokenizer = struct {
                 res = switch (string[i]) {
                     'n' => '\n',
                     't' => '\t',
+                    'r' => '\r',
                     '0' => 0,
                     else => unreachable,
                 };

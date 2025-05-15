@@ -1,5 +1,6 @@
 extern printf = (*i8, varargs) => void;
 
+/* TODO: This has a bug (with varargs i think) */
 let println = (str: *i8, args: varargs) => void {
 	printf(str, args);
 	printf("\n");
@@ -28,4 +29,38 @@ let strcmp = (stra: *i8, strb: *i8) => bool {
 	};
 
 	return true;
+};
+
+let isalphanum = (c: i8) => bool {
+	if c > 'a' {
+		if c < 'z' {
+			return true;
+		};
+	};
+	if c > 'A' {
+		if c < 'Z' {
+			return true;
+		};
+	};
+	if c > '0' {
+		if c < '9' {
+			return true;
+		};
+	};
+
+	return false;
+};
+
+let iswhitespace = (c: i8) => bool {
+	if c == ' ' {
+		return true;
+	};
+
+	if c >= '\t' {
+		if c <= '\r' {
+			return true;
+		};
+	};
+
+	return false;
 };
