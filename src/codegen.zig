@@ -495,12 +495,14 @@ pub const CodeGen = struct {
                 .IDENTIFIER => |i| {
                     const variable = self.environment.get_variable(i.name).?;
                     var param_type = try self.get_llvm_type(variable.node_type);
+                    var param_value = variable.value;
                     if (variable.node_type.TYPE == .FUNCTION_TYPE) {
                         param_type = llvm.LLVMPointerType(param_type.?, 0);
+                    } else {
+                        param_value = llvm.LLVMBuildLoad2(self.builder, param_type, variable.value, "");
                     }
 
-                    const loaded = llvm.LLVMBuildLoad2(self.builder, param_type, variable.value, "");
-                    return self.generate_literal(loaded, name, expression, variable.node_type);
+                    return self.generate_literal(param_value, name, expression, variable.node_type);
                 },
             },
             .ADDITIVE_EXPRESSION => |exp| {

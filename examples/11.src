@@ -1,14 +1,14 @@
 extern printf = (*i64, varargs) => i64;
 
+let id = (a: i64) => i64 {
+	printf("%d\n", a);
+	printf("%d\n", 12);
+	return a;
+};
+
 let main = () => i64 {
 	let y = (f: (i64) => i64, x: i64) => i64 {
 		return f(x);
-	};
-
-	let id = (a: i64) => i64 {
-		printf("%d\n", a);
-		printf("%d\n", 12);
-		return a;
 	};
 
 	return y(id, 2);
