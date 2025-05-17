@@ -36,6 +36,13 @@ pub fn build(b: *std.Build) !void {
                 .use_pkg_config = .no,
             });
         },
+        .windows => {
+            exe_mod.addLibraryPath(.{ .cwd_relative = "C:\\Program Files\\LLVM\\lib" });
+            exe_mod.addIncludePath(.{ .cwd_relative = "C:\\Program Files\\LLVM\\include" });
+            exe_mod.linkSystemLibrary("LLVM-C", .{
+                .use_pkg_config = .no,
+            });
+        },
         else => exe_mod.linkSystemLibrary("LLVM", .{
             .use_pkg_config = .no,
         }),
