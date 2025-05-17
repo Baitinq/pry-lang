@@ -108,8 +108,8 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 			return res;
 		};
 		
-		memcpy(res, buf + start, offset);
-		(*(res + (offset - start))) = '\0';
+		(*(res + (offset - start))) = c;
+		(*(res + (offset - start + 1))) = '\0';
 
 		offset = offset + 1;
 	};
@@ -123,7 +123,6 @@ let isnt_digit = (c: i8) => bool {
 
 let tokenizer_accept_int_type = () => *i64 {
 	let string = tokenizer_consume_until_condition(isnt_digit);
-	printf("INT STRING: %s\n", string);
 	if string == null {
 		return null;
 	};
@@ -214,6 +213,16 @@ let tokenizer_skip_comments = () => void {
 	};
 
 	return;
+};
+
+let ident_cond = (c: i8) => bool {
+	if isalphanum(c) {
+		return false;
+	};
+	if c == '_' {
+		return false;
+	};
+	return true;
 };
 
 let tokenizer_next = () => *i8 {
@@ -329,15 +338,14 @@ let tokenizer_next = () => *i8 {
 		return t;
 	};
 
-	let c = (*(buf + offset));
+	let string = tokenizer_consume_until_condition(ident_cond);
+	if strlen(string) == 0 {
+		return null;
+	};
 
-	offset = offset + 1;
-
-	let t = malloc(13);
-	memcpy(t, "identifier:", 11);
-	(*(t + 11)) = c;
-	(*(t + 12)) = '\0';
-
+	let t = malloc(100);
+	sprintf(t, "identifier:%s", string);
+	
 	return t;
 };
 
@@ -352,6 +360,10 @@ let tokenizer_init = (filename: *i8) => i64 {
 
 	while true {
 		let t = tokenizer_next();
+		if t == null {
+			printf("NULL TOKEN!\n");
+			return 1;
+		};
 		if strcmp(t, "EOF") {
 			break;
 		};

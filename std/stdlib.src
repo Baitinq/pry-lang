@@ -40,16 +40,23 @@ let isdigit = (c: i8) => bool {
 	return false;
 };
 
-let isalphanum = (c: i8) => bool {
-	if c > 'a' {
-		if c < 'z' {
+let isalpha = (c: i8) => bool {
+	if c >= 'a' {
+		if c <= 'z' {
 			return true;
 		};
 	};
-	if c > 'A' {
-		if c < 'Z' {
+	if c >= 'A' {
+		if c <= 'Z' {
 			return true;
 		};
+	};
+	return false;
+};
+
+let isalphanum = (c: i8) => bool {
+	if isalpha(c) {
+		return true;
 	};
 	if isdigit(c) {
 		return true;
