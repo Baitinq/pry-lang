@@ -147,16 +147,27 @@ pub const Tokenizer = struct {
     }
 
     fn consume_until_condition(self: *Tokenizer, condition: fn (c: u8) bool) []u8 {
-        defer self.offset = if (self.offset > 0) self.offset - 1 else self.offset;
-        const start = self.offset;
-        while (true) {
-            defer self.offset += 1;
-            if (self.offset >= self.buf.len) return self.buf[start..self.offset];
+        var res = std.ArrayList(u8).init(self.arena);
+        var prev_c: ?u8 = null;
+        while (true) : (self.offset += 1) {
+            if (self.offset >= self.buf.len) {
+                return res.items;
+            }
 
             const c = self.buf[self.offset];
+            defer prev_c = c;
 
-            if (condition(c)) return self.buf[start..self.offset];
+            if (condition(c)) {
+                if (prev_c == null or prev_c.? != '\\') {
+                    return res.items;
+                } else {
+                    _ = res.pop();
+                }
+            }
+
+            res.append(c) catch unreachable;
         }
+        return res;
     }
 
     fn accept_string(self: *Tokenizer, substr: []const u8) bool {
