@@ -23,6 +23,7 @@ pub const CodeGen = struct {
     arena: std.mem.Allocator,
 
     while_loop_exit: ?llvm.LLVMBasicBlockRef,
+    current_function: ?llvm.LLVMValueRef,
 
     pub fn init(arena: std.mem.Allocator) !*CodeGen {
         // Initialize LLVM
@@ -44,6 +45,7 @@ pub const CodeGen = struct {
             .arena = arena,
 
             .while_loop_exit = null,
+            .current_function = null,
         };
 
         return self;
@@ -269,12 +271,12 @@ pub const CodeGen = struct {
 
         const current_block = llvm.LLVMGetInsertBlock(self.builder);
 
-        const then_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "then_block");
+        const then_block = llvm.LLVMAppendBasicBlock(self.current_function.?, "then_block");
         _ = llvm.LLVMPositionBuilderAtEnd(self.builder, then_block);
         for (if_statement.statements) |stmt| {
             try self.generate_statement(stmt);
         }
-        const merge_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "merge_block");
+        const merge_block = llvm.LLVMAppendBasicBlock(self.current_function.?, "merge_block");
         const last_instr = llvm.LLVMGetLastInstruction(llvm.LLVMGetInsertBlock(self.builder));
         if (last_instr == null or llvm.LLVMIsATerminatorInst(last_instr) == null) {
             _ = llvm.LLVMBuildBr(self.builder, merge_block);
@@ -291,13 +293,13 @@ pub const CodeGen = struct {
 
         const while_statement = statement.WHILE_STATEMENT;
 
-        const while_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "while_block");
+        const while_block = llvm.LLVMAppendBasicBlock(self.current_function.?, "while_block");
         _ = llvm.LLVMBuildBr(self.builder, while_block);
         _ = llvm.LLVMPositionBuilderAtEnd(self.builder, while_block);
         const condition_value = try self.generate_expression_value(while_statement.condition, null);
 
-        const inner_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "inner_block");
-        const outer_block = llvm.LLVMAppendBasicBlock(llvm.LLVMGetLastFunction(self.llvm_module), "outer_block");
+        const inner_block = llvm.LLVMAppendBasicBlock(self.current_function.?, "inner_block");
+        const outer_block = llvm.LLVMAppendBasicBlock(self.current_function.?, "outer_block");
         _ = llvm.LLVMBuildCondBr(self.builder, condition_value.value, inner_block, outer_block);
 
         self.while_loop_exit = outer_block;
@@ -351,7 +353,12 @@ pub const CodeGen = struct {
                 llvm.LLVMPositionBuilderAtEnd(self.builder, function_entry);
 
                 try self.environment.create_scope();
-                defer self.environment.drop_scope();
+                const last_function = self.current_function;
+                self.current_function = function;
+                defer {
+                    self.current_function = last_function;
+                    self.environment.drop_scope();
+                }
 
                 const node_type = try self.create_node(.{
                     .TYPE = .{

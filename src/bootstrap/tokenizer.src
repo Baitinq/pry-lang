@@ -117,12 +117,10 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 	return null;
 };
 
-let isnt_digit = (c: i8) => bool {
-	return !isdigit(c);
-};
-
 let tokenizer_accept_int_type = () => *i64 {
-	let string = tokenizer_consume_until_condition(isnt_digit);
+	let string = tokenizer_consume_until_condition((c: i8) => bool {
+		return !isdigit(c);
+	});
 	if string == null {
 		return null;
 	};
@@ -131,12 +129,7 @@ let tokenizer_accept_int_type = () => *i64 {
 	};
 	let x = malloc(8);
 	*x = atoi(string);
-	printf("Int: %d\n", *x);
 	return x;
-};
-
-let is_backtick = (c: i8) => bool {
-	return c == '\'';
 };
 
 let tokenizer_accept_char_type = () => *i8 {
@@ -146,7 +139,9 @@ let tokenizer_accept_char_type = () => *i8 {
 		return null;
 	};
 
-	let string = tokenizer_consume_until_condition(is_backtick);
+	let string = tokenizer_consume_until_condition((c: i8) => bool {
+		return c == '\'';
+	});
 
 	/*let string_len = strlen(string);
 	let i = 0;
@@ -184,10 +179,6 @@ let tokenizer_accept_char_type = () => *i8 {
 	return string;
 };
 
-let is_quote = (c: i8) => bool {
-	return c == '"';
-};
-
 let tokenizer_accept_string_type = () => *i8 {
 	let prev_offset = offset;
 	if !tokenizer_accept_string("\"") {
@@ -195,7 +186,9 @@ let tokenizer_accept_string_type = () => *i8 {
 		return null;
 	};
 
-	let string = tokenizer_consume_until_condition(is_quote);
+	let string = tokenizer_consume_until_condition((c: i8) => bool {
+		return c == '"';
+	});
 
 	if !tokenizer_accept_string("\"") {
 		offset = prev_offset;
@@ -213,16 +206,6 @@ let tokenizer_skip_comments = () => void {
 	};
 
 	return;
-};
-
-let ident_cond = (c: i8) => bool {
-	if isalphanum(c) {
-		return false;
-	};
-	if c == '_' {
-		return false;
-	};
-	return true;
 };
 
 let tokenizer_next = () => *i8 {
@@ -338,7 +321,15 @@ let tokenizer_next = () => *i8 {
 		return t;
 	};
 
-	let string = tokenizer_consume_until_condition(ident_cond);
+	let string = tokenizer_consume_until_condition((c: i8) => bool {
+		if isalphanum(c) {
+			return false;
+		};
+		if c == '_' {
+			return false;
+		};
+		return true;
+	});
 	if strlen(string) == 0 {
 		return null;
 	};
