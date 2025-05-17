@@ -104,14 +104,50 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 		};
 
 		let c = (*(buf + offset));
-		if condition(c) {
-			return res;
-		};
-		
-		(*(res + (offset - start))) = c;
-		(*(res + (offset - start + 1))) = '\0';
 
-		offset = offset + 1;
+		if c == '\\' {
+			let next_c = (*(buf + (offset + 1)));
+		
+			let any = false;
+			if next_c == 'n' {
+				(*(res + (offset - start))) = '\n';
+				any = true;
+			};
+			if next_c == 't' {
+				(*(res + (offset - start))) = '\t';
+				any = true;
+			};
+			if next_c == 'r' {
+				(*(res + (offset - start))) = '\r';
+				any = true;
+			};
+			if next_c == '0' {
+				(*(res + (offset - start))) = '\0';
+				any = true;
+			};
+			if next_c == '\\' {
+				(*(res + (offset - start))) = '\\';
+				any = true;
+			};
+			if !any {
+				(*(res + (offset - start))) = next_c;
+			};
+			
+			offset = offset + 1;
+			offset = offset + 1;
+		};
+
+		/* else / continue */
+		if !(c == '\\') {
+			if condition(c) {
+				return res;
+			};
+			
+			(*(res + (offset - start))) = c;
+			(*(res + (offset - start + 1))) = '\0';
+
+			offset = offset + 1;
+		};
 	};
 
 	return null;
@@ -142,34 +178,6 @@ let tokenizer_accept_char_type = () => *i8 {
 	let string = tokenizer_consume_until_condition((c: i8) => bool {
 		return c == '\'';
 	});
-
-	/*let string_len = strlen(string);
-	let i = 0;
-
-	while i < string_len {
-		let c = (*(string + i));
-		if c == '\' {
-			i = i + 1;
-			let nc = (*(string + i));
-			let res = malloc(1);
-			if nc == 'n' {
-				*res = '\n';
-			};
-			if nc == 't' {
-				*res = '\t';
-			};
-			if nc == 'r' {
-				*res = '\r';
-			};
-			if nc == '0' {
-				*res = '\0';
-			};
-			 unreachable 
-			return res;
-		};
-		i = i + 1;
-	};
-	*/
 
 	if !tokenizer_accept_string("'") {
 		offset = prev_offset;

@@ -148,21 +148,29 @@ pub const Tokenizer = struct {
 
     fn consume_until_condition(self: *Tokenizer, condition: fn (c: u8) bool) []u8 {
         var res = std.ArrayList(u8).init(self.arena);
-        var prev_c: ?u8 = null;
         while (true) : (self.offset += 1) {
             if (self.offset >= self.buf.len) {
                 return res.items;
             }
 
             const c = self.buf[self.offset];
-            defer prev_c = c;
+
+            if (c == '\\') {
+                const next_c = self.buf[self.offset + 1];
+                res.append(switch (next_c) {
+                    'n' => '\n',
+                    't' => '\t',
+                    'r' => '\r',
+                    '0' => 0,
+                    '\\' => '\\',
+                    else => |x| x,
+                }) catch unreachable;
+                self.offset += 1;
+                continue;
+            }
 
             if (condition(c)) {
-                if (prev_c == null or prev_c.? != '\\') {
-                    return res.items;
-                } else {
-                    _ = res.pop();
-                }
+                return res.items;
             }
 
             res.append(c) catch unreachable;
@@ -202,28 +210,14 @@ pub const Tokenizer = struct {
             }
         }.condition);
 
-        var res: u8 = string[0];
-        var i: usize = 0;
-        while (i < string.len) : (i += 1) {
-            if (string[i] == '\\') {
-                i += 1;
-                res = switch (string[i]) {
-                    'n' => '\n',
-                    't' => '\t',
-                    'r' => '\r',
-                    '0' => 0,
-                    else => unreachable,
-                };
-                break;
-            }
-        }
+        std.debug.assert(string.len == 1);
 
         if (!self.accept_string("'")) {
             self.offset = prev_offset;
             return null;
         }
 
-        return res;
+        return string[0];
     }
 
     fn accept_string_type(self: *Tokenizer) ?[]u8 {
@@ -239,28 +233,12 @@ pub const Tokenizer = struct {
             }
         }.condition);
 
-        var res = std.ArrayList(u8).init(self.arena);
-
-        var i: usize = 0;
-        while (i < string.len) : (i += 1) {
-            if (string[i] == '\\') {
-                i += 1;
-                switch (string[i]) {
-                    'n' => res.append('\n') catch unreachable,
-                    't' => res.append('\t') catch unreachable,
-                    else => unreachable,
-                }
-                continue;
-            }
-            res.append(string[i]) catch unreachable;
-        }
-
         if (!self.accept_string("\"")) {
             self.offset = prev_offset;
             return null;
         }
 
-        return res.items;
+        return string;
     }
 
     fn create_token(self: *Tokenizer, token_type: TokenType) Token {
