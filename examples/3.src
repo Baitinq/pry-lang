@@ -1,11 +1,11 @@
-extern printf = (*i64, i64) => i64;
+import "!stdlib.src";
 
 let main = () => i64 {
 	let seventeen = 10 + 2 + 4;
 
 	seventeen = seventeen + 1;
 
-	printf("%d\n", seventeen);
+	println("%d", seventeen);
 
 	return seventeen;
 };

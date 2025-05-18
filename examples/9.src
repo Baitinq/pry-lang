@@ -1,7 +1,7 @@
-extern printf = (*i64, varargs) => i64;
+import "!stdlib.src";
 
 let print_boolean = (b: bool) => i64 {
-	printf("%d\n", b);
+	println("%d\n", b);
 	return 0;
 };
 

@@ -1,4 +1,4 @@
-extern printf = (*i64, varargs) => i64;
+import "!stdlib.src";
 
 let main = () => i64 {
     let factorial = (n: i64) => i64 {
@@ -31,10 +31,10 @@ let main = () => i64 {
     };
 
     let fact_val = factorial(6);
-    printf("%d\n", fact_val);
+    println("%d", fact_val);
 
     let even_sum = sum_if(is_even, 20);
-    printf("%d\n", even_sum);
+    println("%d", even_sum);
 
     return 0;
 };

@@ -1,6 +1,7 @@
-extern printf = (*i64, varargs) => void;
 extern malloc = (i64) => *i64;
 extern free = (*i64) => void;
+
+import "!stdlib.src";
 
 let init_array = (n: i64, arr: *i64) => i64 {
 	let i = 0;
@@ -18,7 +19,7 @@ let main = () => i64 {
 
 	let i = 0;
 	while i < n {
-		printf("%d\n", *(arr + i));
+		println("%d", *(arr + i));
 		i = i + 1;
 	};
 	

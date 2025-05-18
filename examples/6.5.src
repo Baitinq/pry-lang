@@ -1,9 +1,9 @@
-extern printf = (*i64, varargs) => i64;
+import "!stdlib.src";
 
 let main = () => i64 {
 	let x = !(1 == 1);
 	if !x {
-		printf("Condition\n");
+		println("Condition");
 	};
 	return 0;
 };

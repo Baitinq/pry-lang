@@ -1,8 +1,8 @@
-extern printf = (*i64, varargs) => i64;
+import "!stdlib.src";
 
 let id = (a: i64) => i64 {
-	printf("%d\n", a);
-	printf("%d\n", 12);
+	println("%d", a);
+	println("%d", 12);
 	return a;
 };
 

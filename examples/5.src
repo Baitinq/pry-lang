@@ -1,19 +1,20 @@
 /* As you see, the language supports variable scopes */
-extern printf = (*i64, varargs) => i64;
+
+import "!stdlib.src";
 
 let x = 18;
 
 let foo = () => i64 {
 	let x = 1;
-	printf("%d\n", x);
+	println("%d", x);
 	return x;
 };
 
 let main = () => i64 {
-	printf("%d\n", x);
+	println("%d", x);
 	let x = 2;
 	let y = foo();
-	printf("%d\n", x);
+	println("%d", x);
 	return x + y;
 };
 

@@ -1,10 +1,10 @@
-extern printf = (*i64, varargs) => i64;
+import "!stdlib.src";
 
 let main = () => i64 {
 	let counter = 0;
 
 	while counter < 10 {
-		printf("%d\n", counter);
+		println("%d", counter);
 		counter = counter + 1;
 	};
 

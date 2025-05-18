@@ -1,16 +1,17 @@
-extern printf = (*i64, varargs) => void;
 extern malloc = (i64) => *i64;
 extern free = (*i64) => void;
+
+import "!stdlib.src";
 
 let main = () => i64 {
 	let x = malloc(24);
 	(*(x+0)) = 10;
 	(*(x+1)) = 20;
 	(*(x+2)) = 40;
-	printf("%p\n", x);
-	printf("%d\n", *(x+0));
-	printf("%d\n", *(x+1));
-	printf("%d\n", *(x+2));
+	println("%p", x);
+	println("%d", *(x+0));
+	println("%d", *(x+1));
+	println("%d", *(x+2));
 	free(x);
 	return 0;
 };

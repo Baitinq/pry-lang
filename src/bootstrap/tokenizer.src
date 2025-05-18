@@ -32,7 +32,7 @@ let read_file = (filename: *i8) => *i8 {
 };
 
 let add_token = (tokens: *i8, token: *i8) => i64 {
-	printf("Add token: %s\n", token);
+	println("Add token: %s", token);
 	let i = 0;
 	while true {
 		let c = (*(token + i));
@@ -86,7 +86,6 @@ let tokenizer_accept_string = (str: *i8) => bool {
 	let s = malloc(1000);
 	memcpy(s, buf + offset, str_len);
 
-	/* printf("Accept string: %s vs %s\n", str, s); */
 	if strcmp(s, str) {
 		offset = offset + str_len;
 		return true;
@@ -351,16 +350,16 @@ let tokenizer_next = () => *i8 {
 let tokenizer_init = (filename: *i8) => i64 {
 	let buf = read_file(filename);
 
-	printf("File size: %d\n", file_size);
+	println("File size: %d", file_size);
 
-	printf("%s\n", buf);
+	println("%s", buf);
 
 	tokens = malloc(10000);
 
 	while true {
 		let t = tokenizer_next();
 		if t == null {
-			printf("NULL TOKEN!\n");
+			println("NULL TOKEN!");
 			return 1;
 		};
 		if strcmp(t, "EOF") {
@@ -369,7 +368,7 @@ let tokenizer_init = (filename: *i8) => i64 {
 		add_token(tokens, t);
 	};
 
-	printf("PRINT TOKENS\n");
+	println("PRINT TOKENS");
 
 	print_tokens(tokens);
 

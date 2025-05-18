@@ -1,14 +1,14 @@
-extern printf = (*i64, i64) => i64;
+import "!stdlib.src";
 
 let x = () => i64 {
-	printf("%d\n", 22);
+	println("%d", 22);
 	return 11;
 };
 
 let main = () => i64 {
 	let i = 4;
 
-	printf("%d\n", i);
+	println("%d", i);
 
 	return x();
 };

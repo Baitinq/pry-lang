@@ -1,9 +1,9 @@
-extern printf = (*i64, varargs) => i64;
+import "!stdlib.src";
 
 let main = () => i64 {
 	let s = "hello";
 
-	printf("%s\n", s);
+	println("%s", s);
 
 	return 0;
 };
