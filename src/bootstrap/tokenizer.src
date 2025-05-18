@@ -354,7 +354,7 @@ let tokenizer_init = (filename: *i8) => i64 {
 
 	println("%s", buf);
 
-	tokens = malloc(10000);
+	tokens = malloc(100000);
 
 	while true {
 		let t = tokenizer_next();
