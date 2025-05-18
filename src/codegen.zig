@@ -165,6 +165,10 @@ pub const CodeGen = struct {
 
             if (assignment_statement.is_dereference) {
                 ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
+            } else {
+                // TODO: we should still do this with dereferences, but differently
+                std.debug.print("TYP {s}: {any} vs {any}\n", .{ identifier.name, typ.TYPE, variable.node_type.TYPE });
+                std.debug.assert(self.compare_types(typ, variable.node_type));
             }
 
             _ = llvm.LLVMBuildStore(self.builder, variable.value, ptr);
@@ -710,17 +714,10 @@ pub const CodeGen = struct {
         }
     }
 
-    fn get_underlying_llvm_ptr_type(self: *CodeGen, node: *parser.Node) !llvm.LLVMTypeRef {
-        std.debug.assert(node.* == .TYPE);
-
-        switch (node.TYPE) {
-            .POINTER_TYPE => |t| {
-                return try self.get_underlying_llvm_ptr_type(t.type);
-            },
-            else => {
-                return try self.get_llvm_type(node);
-            },
-        }
+    fn compare_types(self: *CodeGen, a: *parser.Node, b: *parser.Node) bool {
+        const at = self.get_llvm_type(a) catch unreachable;
+        const bt = self.get_llvm_type(b) catch unreachable;
+        return at == bt;
     }
 
     fn create_variable(self: *CodeGen, variable_value: Variable) !*Variable {
