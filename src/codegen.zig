@@ -353,20 +353,25 @@ pub const CodeGen = struct {
 
                 var llvm_param_types = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
                 var param_types = std.ArrayList(*parser.Node).init(self.arena);
+                var is_varargs: i8 = 0;
                 for (function_definition.parameters) |param| {
                     std.debug.assert(param.PRIMARY_EXPRESSION == .IDENTIFIER);
-                    var param_type = try self.get_llvm_type(param.PRIMARY_EXPRESSION.IDENTIFIER.type.?);
-                    if (param.PRIMARY_EXPRESSION.IDENTIFIER.type.?.TYPE == .FUNCTION_TYPE) {
-                        param_type = llvm.LLVMPointerType(param_type.?, 0);
+                    const param_type = param.PRIMARY_EXPRESSION.IDENTIFIER.type.?;
+                    if (param_type.TYPE == .SIMPLE_TYPE and std.mem.eql(u8, param_type.TYPE.SIMPLE_TYPE.name, "varargs")) {
+                        is_varargs = 1;
                     }
-                    try llvm_param_types.append(param_type);
-                    try param_types.append(param.PRIMARY_EXPRESSION.IDENTIFIER.type.?);
+                    var llvm_param_type = try self.get_llvm_type(param_type);
+                    if (param_type.TYPE == .FUNCTION_TYPE) {
+                        llvm_param_type = llvm.LLVMPointerType(llvm_param_type, 0);
+                    }
+                    try llvm_param_types.append(llvm_param_type);
+                    try param_types.append(param_type);
                 }
                 var return_type = try self.get_llvm_type(function_definition.return_type);
                 if (function_definition.return_type.TYPE == .FUNCTION_TYPE) {
                     return_type = llvm.LLVMPointerType(return_type, 0);
                 }
-                const function_type = llvm.LLVMFunctionType(return_type, llvm_param_types.items.ptr, @intCast(llvm_param_types.items.len), 0) orelse return CodeGenError.CompilationError;
+                const function_type = llvm.LLVMFunctionType(return_type, llvm_param_types.items.ptr, @intCast(llvm_param_types.items.len), is_varargs) orelse return CodeGenError.CompilationError;
                 const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name orelse "unnamed_func"}), function_type) orelse return CodeGenError.CompilationError;
                 const function_entry = llvm.LLVMAppendBasicBlock(function, "entrypoint") orelse return CodeGenError.CompilationError;
                 llvm.LLVMPositionBuilderAtEnd(self.builder, function_entry);
@@ -407,20 +412,20 @@ pub const CodeGen = struct {
                     const param_node = function_definition.parameters[parameters_index];
                     std.debug.assert(param_node.* == .PRIMARY_EXPRESSION);
 
-                    const param_type = try self.get_llvm_type(param_node.PRIMARY_EXPRESSION.IDENTIFIER.type.?);
-                    var alloca_param_type = param_type;
+                    const param_type = param_node.PRIMARY_EXPRESSION.IDENTIFIER.type.?;
+                    var llvm_param_type = try self.get_llvm_type(param_type);
                     if (param_node.PRIMARY_EXPRESSION.IDENTIFIER.type.?.TYPE == .FUNCTION_TYPE) {
-                        alloca_param_type = llvm.LLVMPointerType(alloca_param_type.?, 0);
+                        llvm_param_type = llvm.LLVMPointerType(llvm_param_type.?, 0);
                     }
                     // We need to alloca params because we assume all identifiers are alloca
-                    const alloca = llvm.LLVMBuildAlloca(self.builder, alloca_param_type, try std.fmt.allocPrintZ(self.arena, "{s}", .{param_node.PRIMARY_EXPRESSION.IDENTIFIER.name}));
+                    const alloca = llvm.LLVMBuildAlloca(self.builder, llvm_param_type, try std.fmt.allocPrintZ(self.arena, "{s}", .{param_node.PRIMARY_EXPRESSION.IDENTIFIER.name}));
                     _ = llvm.LLVMBuildStore(self.builder, p, alloca);
 
                     try self.environment.add_variable(param_node.PRIMARY_EXPRESSION.IDENTIFIER.name, try self.create_variable(.{
                         .value = alloca,
                         .stack_level = null,
                         .node = param_node,
-                        .node_type = param_node.PRIMARY_EXPRESSION.IDENTIFIER.type.?,
+                        .node_type = param_type,
                     }));
                 }
 
