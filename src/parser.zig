@@ -94,6 +94,7 @@ pub const Node = union(enum) {
         expression: ?*Node,
     },
     BREAK_STATEMENT: void,
+    CONTINUE_STATEMENT: void,
 };
 
 pub const EqualityExpressionType = enum {
@@ -148,24 +149,33 @@ pub const Parser = struct {
         } });
     }
 
-    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break") SEMICOLON
+    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
     fn parse_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing statement {any}\n", .{self.peek_token()});
 
-        var statement = self.accept_parse(parse_function_call_statement) orelse
+        const statement = self.accept_parse(parse_function_call_statement) orelse
             self.accept_parse(parse_if_statement) orelse
             self.accept_parse(parse_while_statement) orelse
             self.accept_parse(parse_return_statement) orelse
             self.accept_parse(parse_assignment_statement) orelse
             self.accept_parse(parse_import_declaration) orelse
-            self.accept_parse(parse_extern_declaration);
-
-        if (statement == null) {
-            _ = try self.parse_token(tokenizer.TokenType.BREAK);
-            statement = try self.create_node(.{
-                .BREAK_STATEMENT = void{},
-            });
-        }
+            self.accept_parse(parse_extern_declaration) orelse
+            self.accept_parse(struct {
+                fn parse_break_statement(iself: *Parser) ParserError!*Node {
+                    _ = try iself.parse_token(tokenizer.TokenType.BREAK);
+                    return try iself.create_node(.{
+                        .BREAK_STATEMENT = void{},
+                    });
+                }
+            }.parse_break_statement) orelse
+            self.accept_parse(struct {
+                fn parse_continue_statement(iself: *Parser) ParserError!*Node {
+                    _ = try iself.parse_token(tokenizer.TokenType.CONTINUE);
+                    return try iself.create_node(.{
+                        .CONTINUE_STATEMENT = void{},
+                    });
+                }
+            }.parse_continue_statement);
 
         _ = try self.parse_token(tokenizer.TokenType.SEMICOLON);
 

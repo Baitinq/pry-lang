@@ -6,7 +6,6 @@ extern atoi = (*i8) => i64;
 import "!stdlib.src";
 
 let file_size = 0;
-let file = 0;
 let buf = 0;
 
 
@@ -16,7 +15,7 @@ let tokens = 0;
 let tokens_len = 0;
 
 let read_file = (filename: *i8) => *i8 {
-	file = fopen(filename, "r");
+	let file = fopen(filename, "r");
 
 	fseek(file, 0, 2);
 	file_size = ftell(file);
@@ -26,6 +25,8 @@ let read_file = (filename: *i8) => *i8 {
 
 	let bytes_read = fread(buf, 1, file_size, file);
 	(*(buf + bytes_read)) = '\0';
+
+	fclose(file);
 
 	return buf;
 };
@@ -135,19 +136,18 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 			
 			offset = offset + 1;
 			offset = offset + 1;
+
+			continue;
 		};
 
-		/* else / continue */
-		if !(c == '\\') {
-			if condition(c) {
-				return res;
-			};
-			
-			(*(res + (offset - start))) = c;
-			(*(res + (offset - start + 1))) = '\0';
-
-			offset = offset + 1;
+		if condition(c) {
+			return res;
 		};
+		
+		(*(res + (offset - start))) = c;
+		(*(res + (offset - start + 1))) = '\0';
+
+		offset = offset + 1;
 	};
 
 	return null;
@@ -379,7 +379,6 @@ let tokenizer_init = (filename: *i8) => i64 {
 let tokenizer_deinit = () => i64 {
 	free(tokens);
 	free(buf);
-	fclose(file);
 
 	return 0;
 };

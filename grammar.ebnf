@@ -1,6 +1,6 @@
 Program      ::= Statement+
 
-Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break") SEMICOLON
+Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
 
 AssignmentStatement ::= ("let")? ("*")? Expression EQUALS Expression
 

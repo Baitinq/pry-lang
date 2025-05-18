@@ -13,6 +13,7 @@ pub const TokenType = union(enum) {
     WHILE: void,
     RETURN: void,
     BREAK: void,
+    CONTINUE: void,
     ARROW: void,
 
     // Identifiers
@@ -93,6 +94,7 @@ pub const Tokenizer = struct {
         if (self.accept_string("while")) return self.create_token(.{ .WHILE = void{} });
         if (self.accept_string("return")) return self.create_token(.{ .RETURN = void{} });
         if (self.accept_string("break")) return self.create_token(.{ .BREAK = void{} });
+        if (self.accept_string("continue")) return self.create_token(.{ .CONTINUE = void{} });
         if (self.accept_string("true")) return self.create_token(.{ .BOOLEAN = true });
         if (self.accept_string("false")) return self.create_token(.{ .BOOLEAN = false });
         if (self.accept_string("null")) return self.create_token(.{ .NULL = void{} });

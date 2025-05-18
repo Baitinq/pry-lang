@@ -23,6 +23,7 @@ pub const CodeGen = struct {
     arena: std.mem.Allocator,
 
     while_loop_exit: ?llvm.LLVMBasicBlockRef,
+    while_block: ?llvm.LLVMBasicBlockRef,
     current_function: ?llvm.LLVMValueRef,
 
     pub fn init(arena: std.mem.Allocator) !*CodeGen {
@@ -45,6 +46,7 @@ pub const CodeGen = struct {
             .arena = arena,
 
             .while_loop_exit = null,
+            .while_block = null,
             .current_function = null,
         };
 
@@ -121,6 +123,7 @@ pub const CodeGen = struct {
             },
             .RETURN_STATEMENT => |*return_statement| return try self.generate_return_statement(@ptrCast(return_statement)),
             .BREAK_STATEMENT => |*break_statement| return try self.generate_break_statement(@ptrCast(@alignCast(break_statement))),
+            .CONTINUE_STATEMENT => |*continue_statement| return try self.generate_continue_statement(@ptrCast(@alignCast(continue_statement))),
             .IF_STATEMENT => |*if_statement| return try self.generate_if_statement(@ptrCast(if_statement)),
             .WHILE_STATEMENT => |*while_statement| return try self.generate_while_statement(@ptrCast(while_statement)),
             .IMPORT_DECLARATION => |*import_declaration| return try self.generate_import_declaration(@ptrCast(import_declaration)),
@@ -261,6 +264,14 @@ pub const CodeGen = struct {
         _ = llvm.LLVMBuildBr(self.builder, self.while_loop_exit.?);
     }
 
+    fn generate_continue_statement(self: *CodeGen, statement: *parser.Node) !void {
+        errdefer std.debug.print("Error generating continue statement\n", .{});
+        std.debug.assert(statement.* == parser.Node.CONTINUE_STATEMENT);
+        std.debug.assert(self.while_block != null);
+
+        _ = llvm.LLVMBuildBr(self.builder, self.while_block.?);
+    }
+
     fn generate_if_statement(self: *CodeGen, statement: *parser.Node) !void {
         errdefer std.debug.print("Error generating if statement\n", .{});
         std.debug.assert(statement.* == parser.Node.IF_STATEMENT);
@@ -303,7 +314,11 @@ pub const CodeGen = struct {
         _ = llvm.LLVMBuildCondBr(self.builder, condition_value.value, inner_block, outer_block);
 
         self.while_loop_exit = outer_block;
-        defer self.while_loop_exit = null;
+        self.while_block = while_block;
+        defer {
+            self.while_block = null;
+            self.while_loop_exit = null;
+        }
 
         _ = llvm.LLVMPositionBuilderAtEnd(self.builder, inner_block);
         for (while_statement.statements) |stmt| {
