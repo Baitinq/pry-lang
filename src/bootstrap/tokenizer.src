@@ -5,13 +5,13 @@ extern atoi = (*i8) => i64;
 
 import "!stdlib.src";
 
-let file_size = 0;
-let buf = 0;
-
-
 let offset = 0;
 
-let tokens = 0;
+let buf = null;
+let file_size = 0;
+
+
+let tokens = null;
 let tokens_len = 0;
 
 let read_file = (filename: *i8) => *i8 {

@@ -151,6 +151,7 @@ pub const CodeGen = struct {
             }
 
             var ptr: llvm.LLVMValueRef = undefined;
+            var typ = variable.node_type;
             if (assignment_statement.is_declaration) {
                 var x = try self.get_llvm_type(variable.node_type);
                 if (variable.node_type.TYPE == .FUNCTION_TYPE) {
@@ -159,11 +160,10 @@ pub const CodeGen = struct {
                 ptr = llvm.LLVMBuildAlloca(self.builder, x, try std.fmt.allocPrintZ(self.arena, "{s}", .{identifier.name}));
             } else {
                 ptr = self.environment.get_variable(identifier.name).?.value;
+                typ = self.environment.get_variable(identifier.name).?.node_type;
             }
 
-            var typ = variable.node_type;
             if (assignment_statement.is_dereference) {
-                typ = self.environment.get_variable(identifier.name).?.node_type;
                 ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
             }
 
