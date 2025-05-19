@@ -167,7 +167,7 @@ pub const CodeGen = struct {
                 ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
             } else {
                 // TODO: we should still do this with dereferences, but differently
-                std.debug.print("TYP {s}: {any} vs {any}\n", .{ identifier.name, typ.TYPE, variable.node_type.TYPE });
+                // TODO: Do this in more places! (everywhere get_llvm_type?)
                 std.debug.assert(self.compare_types(typ, variable.node_type));
             }
 
@@ -721,9 +721,56 @@ pub const CodeGen = struct {
     }
 
     fn compare_types(self: *CodeGen, a: *parser.Node, b: *parser.Node) bool {
-        const at = self.get_llvm_type(a) catch unreachable;
-        const bt = self.get_llvm_type(b) catch unreachable;
-        return at == bt;
+        std.debug.assert(a.* == parser.Node.TYPE);
+        std.debug.assert(b.* == parser.Node.TYPE);
+
+        const a_type = a.TYPE;
+        const b_type = b.TYPE;
+
+        if (!std.mem.eql(u8, @tagName(a_type), @tagName(b_type))) {
+            std.debug.print("Tagname mismatch: {s} vs {s}\n", .{ @tagName(a_type), @tagName(b_type) });
+        }
+
+        switch (a_type) {
+            .SIMPLE_TYPE => |a_simple| {
+                const b_simple = b_type.SIMPLE_TYPE;
+                const res = std.mem.eql(u8, a_simple.name, b_simple.name);
+                if (!res) {
+                    std.debug.print("Simple type name mismatch: '{s}' vs '{s}'\n", .{ a_simple.name, b_simple.name });
+                }
+                return res;
+            },
+            .FUNCTION_TYPE => |a_func| {
+                const b_func = b_type.FUNCTION_TYPE;
+
+                if (!self.compare_types(a_func.return_type, b_func.return_type)) {
+                    std.debug.print("Function return type mismatch\n", .{});
+                    return false;
+                }
+
+                if (a_func.parameters.len != b_func.parameters.len) {
+                    std.debug.print("Parameter count mismatch: {} vs {}\n", .{ a_func.parameters.len, b_func.parameters.len });
+                    return false;
+                }
+
+                for (a_func.parameters, b_func.parameters) |a_param, b_param| {
+                    if (!self.compare_types(a_param, b_param)) {
+                        std.debug.print("Parameter  type mismatch\n", .{});
+                        return false;
+                    }
+                }
+
+                return true;
+            },
+            .POINTER_TYPE => |a_ptr| {
+                const b_ptr = b_type.POINTER_TYPE;
+                const res = self.compare_types(a_ptr.type, b_ptr.type);
+                if (!res) {
+                    std.debug.print("Pointer base type mismatch\n", .{});
+                }
+                return res;
+            },
+        }
     }
 
     fn create_variable(self: *CodeGen, variable_value: Variable) !*Variable {

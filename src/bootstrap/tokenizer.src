@@ -2,6 +2,13 @@ extern strlen = (*i8) => i64;
 extern memcpy = (*i8, *i8, i64) => void;
 extern sprintf = (*i8, *i8, varargs) => void;
 extern atoi = (*i8) => i64;
+extern fopen = (*i8, *i8) => *i8;
+extern fgets = (*i8, i64, *i8) => void;
+extern feof = (*i8) => bool;
+extern fseek = (*i8, i64, i64) => i64;
+extern ftell = (*i8) => i64;
+extern fread = (*i8, i64, i64, *i8) => i64;
+extern fclose = (*i8) => *i8;
 
 import "!stdlib.src";
 
@@ -9,7 +16,6 @@ let offset = 0;
 
 let buf = null;
 let file_size = 0;
-
 
 let tokens = null;
 let tokens_len = 0;
