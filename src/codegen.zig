@@ -619,6 +619,7 @@ pub const CodeGen = struct {
 
                 const op: c_uint = switch (exp.typ) {
                     .EQ => llvm.LLVMIntEQ,
+                    .NE => llvm.LLVMIntNE,
                     .GE => llvm.LLVMIntSGE,
                     .LE => llvm.LLVMIntSLE,
                     .LT => llvm.LLVMIntSLT,

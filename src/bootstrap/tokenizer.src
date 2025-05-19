@@ -305,7 +305,7 @@ let tokenizer_next = () => *i8 {
 	};
 	
 	let maybe_int = tokenizer_accept_int_type();
-	if !(maybe_int == null) {
+	if maybe_int != null {
 		let t = malloc(1000);
 		sprintf(t, "int:%d", *maybe_int);
 
@@ -313,7 +313,7 @@ let tokenizer_next = () => *i8 {
 	};
 
 	let maybe_char = tokenizer_accept_char_type();
-	if !(maybe_char == null) {
+	if maybe_char != null {
 		let t = malloc(1000);
 		sprintf(t, "char:%d", *maybe_char);
 
@@ -321,7 +321,7 @@ let tokenizer_next = () => *i8 {
 	};
 
 	let maybe_string = tokenizer_accept_string_type();
-	if !(maybe_string == null) {
+	if maybe_string != null {
 		let t = malloc(1000);
 		sprintf(t, "string:%s", maybe_string);
 
