@@ -93,6 +93,10 @@ pub const Node = union(enum) {
     RETURN_STATEMENT: struct {
         expression: ?*Node,
     },
+    CAST_STATEMENT: struct {
+        typ: *Node,
+        expression: *Node,
+    },
     BREAK_STATEMENT: void,
     CONTINUE_STATEMENT: void,
 };
@@ -154,7 +158,8 @@ pub const Parser = struct {
     fn parse_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing statement {any}\n", .{self.peek_token()});
 
-        const statement = self.accept_parse(parse_function_call_statement) orelse
+        const statement =
+            self.accept_parse(parse_function_call_statement) orelse
             self.accept_parse(parse_if_statement) orelse
             self.accept_parse(parse_while_statement) orelse
             self.accept_parse(parse_return_statement) orelse
@@ -401,11 +406,12 @@ pub const Parser = struct {
         } });
     }
 
-    // Expression ::= EqualityExpression | AdditiveExpression
+    // Expression ::= EqualityExpression | AdditiveExpression | CastExpression
     fn parse_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing expression {any}\n", .{self.peek_token()});
 
-        return self.accept_parse(parse_equality_expression) orelse
+        return self.accept_parse(parse_cast_expression) orelse
+            self.accept_parse(parse_equality_expression) orelse
             self.accept_parse(parse_additive_expression) orelse
             return ParserError.ParsingError;
     }
@@ -674,6 +680,34 @@ pub const Parser = struct {
         return self.create_node(.{
             .RETURN_STATEMENT = .{
                 .expression = maybe_expression,
+            },
+        });
+    }
+
+    // CastExpression ::= "cast" LPAREN TYPE "," Expression RPAREN
+    fn parse_cast_expression(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing cast statement {any}\n", .{self.peek_token()});
+
+        const ident = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
+
+        if (!std.mem.eql(u8, "cast", ident.type.IDENTIFIER)) {
+            return ParserError.ParsingError;
+        }
+
+        _ = try self.parse_token(tokenizer.TokenType.LPAREN);
+
+        const typ = try self.parse_type();
+
+        _ = try self.parse_token(tokenizer.TokenType.COMMA);
+
+        const expression = try self.parse_expression();
+
+        _ = try self.parse_token(tokenizer.TokenType.RPAREN);
+
+        return self.create_node(.{
+            .CAST_STATEMENT = .{
+                .typ = typ,
+                .expression = expression,
             },
         });
     }

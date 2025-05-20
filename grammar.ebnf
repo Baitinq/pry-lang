@@ -18,7 +18,9 @@ ReturnStatement ::= RETURN (Expression)?
 
 FunctionArguments ::= Expression ("," Expression)*
 
-Expression ::= EqualityExpression | AdditiveExpression
+Expression ::= EqualityExpression | AdditiveExpression | CastExpression
+
+CastExpression ::= "cast" LPAREN TYPE "," Expression RPAREN
 
 EqualityExpression ::= AdditiveExpression ("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression
 

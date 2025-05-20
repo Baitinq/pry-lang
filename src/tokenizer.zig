@@ -177,7 +177,7 @@ pub const Tokenizer = struct {
 
             res.append(c) catch unreachable;
         }
-        return res;
+        return res.items;
     }
 
     fn accept_string(self: *Tokenizer, substr: []const u8) bool {

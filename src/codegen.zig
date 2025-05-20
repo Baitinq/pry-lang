@@ -654,6 +654,15 @@ pub const CodeGen = struct {
                     .node_type = expression,
                 });
             },
+            .CAST_STATEMENT => |exp| {
+                const val = try self.generate_expression_value(exp.expression, "");
+                return try self.create_variable(.{
+                    .value = val.value, //TODO: do real casting
+                    .stack_level = null,
+                    .node = expression,
+                    .node_type = exp.typ,
+                });
+            },
             else => unreachable,
         };
     }
