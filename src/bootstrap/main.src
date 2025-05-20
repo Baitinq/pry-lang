@@ -1,13 +1,3 @@
-extern fopen = (*i8, *i8) => *i8;
-extern fgets = (*i8, i64, *i8) => void;
-extern feof = (*i8) => bool;
-extern fseek = (*i8, i64, i64) => i64;
-extern ftell = (*i8) => i64;
-extern fread = (*i8, i64, i64, *i8) => i64;
-extern fclose = (*i8) => *i8;
-extern malloc = (i64) => *i8;
-extern free = (*i8) => void;
-
 import "!stdlib.src";
 
 import "tokenizer.src";

@@ -1,5 +1,5 @@
 extern strlen = (*i8) => i64;
-extern memcpy = (*i8, *i8, i64) => void;
+extern memcpy = (*void, *void, i64) => void;
 extern sprintf = (*i8, *i8, varargs) => void;
 extern atoi = (*i8) => i64;
 extern fopen = (*i8, *i8) => *i8;
@@ -9,6 +9,8 @@ extern fseek = (*i8, i64, i64) => i64;
 extern ftell = (*i8) => i64;
 extern fread = (*i8, i64, i64, *i8) => i64;
 extern fclose = (*i8) => *i8;
+extern malloc = (i64) => *void;
+extern free = (*void) => void;
 
 import "!stdlib.src";
 
@@ -27,7 +29,7 @@ let read_file = (filename: *i8) => *i8 {
 	file_size = ftell(file);
 	fseek(file, 0, 0);
 
-	buf = malloc(file_size + 1);
+	buf = cast(*i8, malloc(file_size + 1));
 
 	let bytes_read = fread(buf, 1, file_size, file);
 	(*(buf + bytes_read)) = '\0';
@@ -89,8 +91,8 @@ let tokenizer_accept_string = (str: *i8) => bool {
 	let str_len = strlen(str);
 	if offset + str_len > file_size { return false; };
 
-	let s = malloc(1000);
-	memcpy(s, buf + offset, str_len);
+	let s = cast(*i8, malloc(1000));
+	memcpy(cast(*void, s), cast(*void, buf + offset), str_len);
 
 	if strcmp(s, str) {
 		offset = offset + str_len;
@@ -102,7 +104,7 @@ let tokenizer_accept_string = (str: *i8) => bool {
 
 let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 	let start = offset;
-	let res = malloc(1000);
+	let res = cast(*i8, malloc(1000));
 
 	while true {
 		if offset >= file_size {
@@ -168,7 +170,7 @@ let tokenizer_accept_int_type = () => *i64 {
 	if strlen(string) == 0 {
 		return null;
 	};
-	let x = malloc(8);
+	let x = cast(*i64, malloc(8));
 	*x = atoi(string);
 	return x;
 };
@@ -312,7 +314,7 @@ let tokenizer_next = () => *i8 {
 	
 	let maybe_int = tokenizer_accept_int_type();
 	if maybe_int != null {
-		let t = malloc(1000);
+		let t = cast(*i8, malloc(1000));
 		sprintf(t, "int:%d", *maybe_int);
 
 		return t;
@@ -320,7 +322,7 @@ let tokenizer_next = () => *i8 {
 
 	let maybe_char = tokenizer_accept_char_type();
 	if maybe_char != null {
-		let t = malloc(1000);
+		let t = cast(*i8, malloc(1000));
 		sprintf(t, "char:%d", *maybe_char);
 
 		return t;
@@ -328,7 +330,7 @@ let tokenizer_next = () => *i8 {
 
 	let maybe_string = tokenizer_accept_string_type();
 	if maybe_string != null {
-		let t = malloc(1000);
+		let t = cast(*i8, malloc(1000));
 		sprintf(t, "string:%s", maybe_string);
 
 		return t;
@@ -347,7 +349,7 @@ let tokenizer_next = () => *i8 {
 		return null;
 	};
 
-	let t = malloc(100);
+	let t = cast(*i8, malloc(100));
 	sprintf(t, "identifier:%s", string);
 	
 	return t;
@@ -360,7 +362,7 @@ let tokenizer_init = (filename: *i8) => i64 {
 
 	println("%s", buf);
 
-	tokens = malloc(100000);
+	tokens = cast(*i8, malloc(100000));
 
 	while true {
 		let t = tokenizer_next();
@@ -382,8 +384,8 @@ let tokenizer_init = (filename: *i8) => i64 {
 };
 
 let tokenizer_deinit = () => i64 {
-	free(tokens);
-	free(buf);
+	free(cast(*void, tokens));
+	free(cast(*void, buf));
 
 	return 0;
 };
