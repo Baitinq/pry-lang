@@ -154,11 +154,12 @@ pub const Parser = struct {
         } });
     }
 
-    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
+    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
     fn parse_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing statement {any}\n", .{self.peek_token()});
 
         const statement =
+            self.accept_parse(parse_cast_statement) orelse
             self.accept_parse(parse_function_call_statement) orelse
             self.accept_parse(parse_if_statement) orelse
             self.accept_parse(parse_while_statement) orelse
@@ -406,12 +407,11 @@ pub const Parser = struct {
         } });
     }
 
-    // Expression ::= EqualityExpression | AdditiveExpression | CastExpression
+    // Expression ::= EqualityExpression | AdditiveExpression
     fn parse_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing expression {any}\n", .{self.peek_token()});
 
-        return self.accept_parse(parse_cast_expression) orelse
-            self.accept_parse(parse_equality_expression) orelse
+        return self.accept_parse(parse_equality_expression) orelse
             self.accept_parse(parse_additive_expression) orelse
             return ParserError.ParsingError;
     }
@@ -553,10 +553,11 @@ pub const Parser = struct {
         } });
     }
 
-    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
+    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | CastStatement | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
     fn parse_primary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing primary expression {any}\n", .{self.peek_token()});
 
+        if (self.accept_parse(parse_cast_statement)) |stmt| return stmt;
         if (self.accept_parse(parse_function_call_statement)) |stmt| return stmt;
         if (self.accept_parse(parse_function_definition)) |stmt| return stmt;
 
@@ -684,8 +685,8 @@ pub const Parser = struct {
         });
     }
 
-    // CastExpression ::= "cast" LPAREN TYPE "," Expression RPAREN
-    fn parse_cast_expression(self: *Parser) ParserError!*Node {
+    // CastStatement ::= "cast" LPAREN TYPE "," Expression RPAREN
+    fn parse_cast_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing cast statement {any}\n", .{self.peek_token()});
 
         const ident = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
