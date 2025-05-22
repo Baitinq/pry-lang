@@ -10,8 +10,8 @@ let println = (str: *i8, args: varargs) => void {
 let strcmp = (stra: *i8, strb: *i8) => bool {
 	let i = 0;
 	while true {
-		let ca = (*(stra + i));
-		let cb = (*(strb + i));
+		let ca = (*(stra + cast(*i8, i)));
+		let cb = (*(strb + cast(*i8, i)));
 
 		if ca == '\0' {
 			return cb == '\0';

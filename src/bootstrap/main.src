@@ -8,7 +8,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 		return 1;
 	};
 
-	let filename = *(argv + 1);
+	let filename = *(argv + cast(**i8, 1));
 
 	println("%s", filename);
 

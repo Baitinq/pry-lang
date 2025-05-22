@@ -32,7 +32,7 @@ let read_file = (filename: *i8) => *i8 {
 	buf = cast(*i8, malloc(file_size + 1));
 
 	let bytes_read = fread(buf, 1, file_size, file);
-	(*(buf + bytes_read)) = '\0';
+	(*(buf + cast(*i8, bytes_read))) = '\0';
 
 	fclose(file);
 
@@ -43,9 +43,9 @@ let add_token = (tokens: *i8, token: *i8) => i64 {
 	println("Add token: %s", token);
 	let i = 0;
 	while true {
-		let c = (*(token + i));
+		let c = (*(token + cast(*i8, i)));
 
-		(*(tokens + tokens_len)) = c;
+		(*(tokens + cast(*i8, tokens_len))) = c;
 
 		tokens_len = tokens_len + 1;
 		i = i + 1;
@@ -61,7 +61,7 @@ let add_token = (tokens: *i8, token: *i8) => i64 {
 let print_tokens = (tokens: *i8) => i64 {
 	let i = 0;
 	while i < tokens_len {
-		let c = (*(tokens + i));
+		let c = (*(tokens + cast(*i8, i)));
 		if c == '\0' {
 			c = '\n';
 		};
@@ -77,7 +77,7 @@ let print_tokens = (tokens: *i8) => i64 {
 let tokenizer_skip_whitespace = () => void {
 	while true {
 		if offset >= file_size { return; };
-		let c = (*(buf + offset));
+		let c = (*(buf + cast(*i8, offset)));
 		if !iswhitespace(c) {
 			return;
 		};
@@ -92,7 +92,7 @@ let tokenizer_accept_string = (str: *i8) => bool {
 	if offset + str_len > file_size { return false; };
 
 	let s = cast(*i8, malloc(1000));
-	memcpy(cast(*void, s), cast(*void, buf + offset), str_len);
+	memcpy(cast(*void, s), cast(*void, buf + cast(*i8, offset)), str_len);
 
 	if strcmp(s, str) {
 		offset = offset + str_len;
@@ -111,34 +111,34 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 			return res;
 		};
 
-		let c = (*(buf + offset));
+		let c = (*(buf + cast(*i8, offset)));
 
 		if c == '\\' {
-			let next_c = (*(buf + (offset + 1)));
+			let next_c = (*(buf + cast(*i8, offset + 1)));
 		
 			let any = false;
 			if next_c == 'n' {
-				(*(res + (offset - start))) = '\n';
+				(*(res + cast(*i8, offset - start))) = '\n';
 				any = true;
 			};
 			if next_c == 't' {
-				(*(res + (offset - start))) = '\t';
+				(*(res + cast(*i8, offset - start))) = '\t';
 				any = true;
 			};
 			if next_c == 'r' {
-				(*(res + (offset - start))) = '\r';
+				(*(res + cast(*i8, offset - start))) = '\r';
 				any = true;
 			};
 			if next_c == '0' {
-				(*(res + (offset - start))) = '\0';
+				(*(res + cast(*i8, offset - start))) = '\0';
 				any = true;
 			};
 			if next_c == '\\' {
-				(*(res + (offset - start))) = '\\';
+				(*(res + cast(*i8, offset - start))) = '\\';
 				any = true;
 			};
 			if !any {
-				(*(res + (offset - start))) = next_c;
+				(*(res + cast(*i8, offset - start))) = next_c;
 			};
 			
 			offset = offset + 1;
@@ -151,8 +151,8 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 			return res;
 		};
 		
-		(*(res + (offset - start))) = c;
-		(*(res + (offset - start + 1))) = '\0';
+		(*(res + cast(*i8, offset - start))) = c;
+		(*(res + cast(*i8, offset - start + 1))) = '\0';
 
 		offset = offset + 1;
 	};
@@ -164,7 +164,7 @@ let tokenizer_accept_int_type = () => *i64 {
 	let string = tokenizer_consume_until_condition((c: i8) => bool {
 		return !isdigit(c);
 	});
-	if string == null {
+	if string == cast(*i8, null) {
 		return cast(*i64, null);
 	};
 	if strlen(string) == 0 {
@@ -313,7 +313,7 @@ let tokenizer_next = () => *i8 {
 	};
 	
 	let maybe_int = tokenizer_accept_int_type();
-	if maybe_int != null {
+	if maybe_int != cast(*i64, null) {
 		let t = cast(*i8, malloc(1000));
 		sprintf(t, "int:%d", *maybe_int);
 
@@ -321,7 +321,7 @@ let tokenizer_next = () => *i8 {
 	};
 
 	let maybe_char = tokenizer_accept_char_type();
-	if maybe_char != null {
+	if maybe_char != cast(*i8, null) {
 		let t = cast(*i8, malloc(1000));
 		sprintf(t, "char:%d", *maybe_char);
 
@@ -329,7 +329,7 @@ let tokenizer_next = () => *i8 {
 	};
 
 	let maybe_string = tokenizer_accept_string_type();
-	if maybe_string != null {
+	if maybe_string != cast(*i8, null) {
 		let t = cast(*i8, malloc(1000));
 		sprintf(t, "string:%s", maybe_string);
 
@@ -366,7 +366,7 @@ let tokenizer_init = (filename: *i8) => i64 {
 
 	while true {
 		let t = tokenizer_next();
-		if t == null {
+		if t == cast(*i8, null) {
 			println("NULL TOKEN!");
 			return 1;
 		};

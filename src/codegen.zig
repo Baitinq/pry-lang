@@ -549,6 +549,9 @@ pub const CodeGen = struct {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
 
+                std.debug.print("4 TYP {s}: {any} vs {any}\n", .{ name orelse "unknown", lhs_value.node_type.TYPE, rhs_value.node_type.TYPE });
+                std.debug.assert(self.compare_types(lhs_value.node_type, rhs_value.node_type, false));
+
                 var result: llvm.LLVMValueRef = undefined;
                 var node_type: *parser.Node = try self.create_node(.{ .TYPE = .{ .SIMPLE_TYPE = .{
                     .name = "i64",
@@ -570,6 +573,9 @@ pub const CodeGen = struct {
             .MULTIPLICATIVE_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
+
+                std.debug.print("5 TYP {s}: {any} vs {any}\n", .{ name orelse "unknown", lhs_value.node_type.TYPE, rhs_value.node_type.TYPE });
+                std.debug.assert(self.compare_types(lhs_value.node_type, rhs_value.node_type, false));
 
                 var result: llvm.LLVMValueRef = undefined;
                 switch (exp.typ) {
@@ -625,6 +631,9 @@ pub const CodeGen = struct {
             .EQUALITY_EXPRESSION => |exp| {
                 const lhs_value = try self.generate_expression_value(exp.lhs, null);
                 const rhs_value = try self.generate_expression_value(exp.rhs, null);
+
+                std.debug.print("6 TYP {s}: {any} vs {any}\n", .{ name orelse "unknown", lhs_value.node_type.TYPE, rhs_value.node_type.TYPE });
+                std.debug.assert(self.compare_types(lhs_value.node_type, rhs_value.node_type, false));
 
                 const op: c_uint = switch (exp.typ) {
                     .EQ => llvm.LLVMIntEQ,
