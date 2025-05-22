@@ -16,10 +16,10 @@ import "!stdlib.src";
 
 let offset = 0;
 
-let buf = null;
+let buf = cast(*i8, null);
 let file_size = 0;
 
-let tokens = null;
+let tokens = cast(*i8, null);
 let tokens_len = 0;
 
 let read_file = (filename: *i8) => *i8 {
@@ -157,7 +157,7 @@ let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 		offset = offset + 1;
 	};
 
-	return null;
+	return cast(*i8, null);
 };
 
 let tokenizer_accept_int_type = () => *i64 {
@@ -165,10 +165,10 @@ let tokenizer_accept_int_type = () => *i64 {
 		return !isdigit(c);
 	});
 	if string == null {
-		return null;
+		return cast(*i64, null);
 	};
 	if strlen(string) == 0 {
-		return null;
+		return cast(*i64, null);
 	};
 	let x = cast(*i64, malloc(8));
 	*x = atoi(string);
@@ -179,7 +179,7 @@ let tokenizer_accept_char_type = () => *i8 {
 	let prev_offset = offset;
 	if !tokenizer_accept_string("'") {
 		offset = prev_offset;
-		return null;
+		return cast(*i8, null);
 	};
 
 	let string = tokenizer_consume_until_condition((c: i8) => bool {
@@ -188,7 +188,7 @@ let tokenizer_accept_char_type = () => *i8 {
 
 	if !tokenizer_accept_string("'") {
 		offset = prev_offset;
-		return null;
+		return cast(*i8, null);
 	};
 
 	return string;
@@ -198,7 +198,7 @@ let tokenizer_accept_string_type = () => *i8 {
 	let prev_offset = offset;
 	if !tokenizer_accept_string("\"") {
 		offset = prev_offset;
-		return null;
+		return cast(*i8, null);
 	};
 
 	let string = tokenizer_consume_until_condition((c: i8) => bool {
@@ -207,7 +207,7 @@ let tokenizer_accept_string_type = () => *i8 {
 
 	if !tokenizer_accept_string("\"") {
 		offset = prev_offset;
-		return null;
+		return cast(*i8, null);
 	};
 
 	return string;
@@ -346,7 +346,7 @@ let tokenizer_next = () => *i8 {
 		return true;
 	});
 	if strlen(string) == 0 {
-		return null;
+		return cast(*i8, null);
 	};
 
 	let t = cast(*i8, malloc(100));

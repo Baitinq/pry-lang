@@ -25,6 +25,7 @@ pub const CodeGen = struct {
     while_loop_exit: ?llvm.LLVMBasicBlockRef,
     while_block: ?llvm.LLVMBasicBlockRef,
     current_function: ?llvm.LLVMValueRef,
+    current_function_return_type: ?*parser.Node,
 
     pub fn init(arena: std.mem.Allocator) !*CodeGen {
         // Initialize LLVM
@@ -48,6 +49,7 @@ pub const CodeGen = struct {
             .while_loop_exit = null,
             .while_block = null,
             .current_function = null,
+            .current_function_return_type = null,
         };
 
         return self;
@@ -161,10 +163,9 @@ pub const CodeGen = struct {
             } else {
                 ptr = self.environment.get_variable(identifier.name).?.value;
                 typ = self.environment.get_variable(identifier.name).?.node_type;
-                // TODO: Do this in more places! (everywhere get_llvm_type?)  Also check types in return and cmp
-                const expected_type = typ;
-                std.debug.print("TYP {s}: {any} vs {any} -- {any}\n", .{ identifier.name, expected_type.TYPE, variable.node_type.TYPE, variable.node });
-                std.debug.assert(self.compare_types(expected_type, variable.node_type, assignment_statement.is_dereference));
+                // TODO: Do this in more places! (everywhere get_llvm_type or get_variable?)  Also check types in return and cmp
+                std.debug.print("TYP {s}: {any} vs {any} -- {any}\n", .{ identifier.name, typ.TYPE, variable.node_type.TYPE, variable.node });
+                std.debug.assert(self.compare_types(typ, variable.node_type, assignment_statement.is_dereference));
             }
 
             if (assignment_statement.is_dereference) {
@@ -224,7 +225,7 @@ pub const CodeGen = struct {
         for (0.., function_call_statement.arguments) |i, argument| {
             const arg = try self.generate_expression_value(argument, null);
             const expected_type = function.node_type.TYPE.FUNCTION_TYPE.parameters[i];
-            std.debug.print("TYP {s}: {any} vs {any}\n", .{ function_call_statement.expression.PRIMARY_EXPRESSION.IDENTIFIER.name, expected_type.TYPE, arg.node_type.TYPE });
+            std.debug.print("2 TYP {s}: {any} vs {any}\n", .{ function_call_statement.expression.PRIMARY_EXPRESSION.IDENTIFIER.name, expected_type.TYPE, arg.node_type.TYPE });
             std.debug.assert(self.compare_types(expected_type, arg.node_type, false));
             try arguments.append(arg.value);
         }
@@ -258,6 +259,10 @@ pub const CodeGen = struct {
         }
 
         const val = try self.generate_expression_value(expression.?, null);
+
+        std.debug.print("3TYP {any}: {any} vs {any}\n", .{ expression.?, self.current_function_return_type.?, val.node_type });
+        std.debug.assert(self.compare_types(self.current_function_return_type.?, val.node_type, false));
+
         _ = llvm.LLVMBuildRet(self.builder, val.value);
     }
 
@@ -380,8 +385,11 @@ pub const CodeGen = struct {
                 try self.environment.create_scope();
                 const last_function = self.current_function;
                 self.current_function = function;
+                const last_return_type = self.current_function_return_type;
+                self.current_function_return_type = function_definition.return_type;
                 defer {
                     self.current_function = last_function;
+                    self.current_function_return_type = last_return_type;
                     self.environment.drop_scope();
                 }
 
@@ -459,13 +467,12 @@ pub const CodeGen = struct {
             },
             .PRIMARY_EXPRESSION => |primary_expression| switch (primary_expression) {
                 .NULL => {
-                    //TODO: This should likely be *void.
                     return try self.generate_literal(llvm.LLVMConstNull(llvm.LLVMPointerType(llvm.LLVMInt8Type(), 0)), name, expression, try self.create_node(.{
                         .TYPE = .{
                             .POINTER_TYPE = .{
                                 .type = try self.create_node(.{
                                     .TYPE = .{ .SIMPLE_TYPE = .{
-                                        .name = "i8",
+                                        .name = "void",
                                     } },
                                 }),
                             },
