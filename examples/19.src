@@ -1,24 +1,24 @@
-extern printf = (*i64, varargs) => void;
-extern malloc = (i64) => *i8;
-extern free = (*i64) => void;
+extern printf = (*i8, varargs) => void;
+extern malloc = (i64) => *void;
+extern free = (*void) => void;
 
 let main = () => i64 {
-	let buf = malloc(13);
-	(*(buf+0)) = 'h';
-	(*(buf+1)) = 'e';
-	(*(buf+2)) = 'l';
-	(*(buf+3)) = 'l';
-	(*(buf+4)) = 'o';
-	(*(buf+5)) = ' ';
-	(*(buf+6)) = 'w';
-	(*(buf+7)) = 'o';
-	(*(buf+8)) = 'r';
-	(*(buf+9)) = 'l';
-	(*(buf+10)) = 'd';
-	(*(buf+11)) = '\n';
-	(*(buf+12)) = '\0';
+	let buf = cast(*i8, malloc(13));
+	(*(buf+cast(*i8, 0))) = 'h';
+	(*(buf+cast(*i8, 1))) = 'e';
+	(*(buf+cast(*i8, 2))) = 'l';
+	(*(buf+cast(*i8, 3))) = 'l';
+	(*(buf+cast(*i8, 4))) = 'o';
+	(*(buf+cast(*i8, 5))) = ' ';
+	(*(buf+cast(*i8, 6))) = 'w';
+	(*(buf+cast(*i8, 7))) = 'o';
+	(*(buf+cast(*i8, 8))) = 'r';
+	(*(buf+cast(*i8, 9))) = 'l';
+	(*(buf+cast(*i8, 10))) = 'd';
+	(*(buf+cast(*i8, 11))) = '\n';
+	(*(buf+cast(*i8, 12))) = '\0';
 	printf("%s", buf);
-	free(buf);
+	free(cast(*void, buf));
 	return 0;
 };
 

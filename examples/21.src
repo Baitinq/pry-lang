@@ -1,13 +1,13 @@
 extern rand = () => i64;
-extern malloc = (i64) => *i64;
-extern free = (*i64) => void;
+extern malloc = (i64) => *void;
+extern free = (*void) => void;
 
 import "!stdlib.src";
 
 let init_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	while i < n {
-		(*(arr + i)) = rand();
+		(*(arr + cast(*i64, i))) = rand();
 		i = i + 1;
 	};
 	return;
@@ -16,7 +16,7 @@ let init_array = (n: i64, arr: *i64) => void {
 let print_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	while i < n {
-		println("%d", *(arr + i));
+		println("%d", *(arr + cast(*i64, i)));
 		i = i + 1;
 	};
 	return;
@@ -29,13 +29,13 @@ let sort_array = (n: i64, arr: *i64) => void {
 	while i < n {
 		j = i + 1;
 		while j < n {
-			let x = *((arr + i));
-			let y = *((arr + j));
+			let x = *(arr + cast(*i64, i));
+			let y = *(arr + cast(*i64, j));
 
 			if x > y {
-				let tmp = (*(arr + i));
-				(*(arr + i)) = (*(arr + j));
-				(*(arr + j)) = tmp;
+				let tmp = *(arr + cast(*i64, i));
+				*(arr + cast(*i64, i)) = *(arr + cast(*i64, j));
+				*(arr + cast(*i64, j)) = tmp;
 			};
 
 			j = j + 1;	
@@ -48,7 +48,7 @@ let sort_array = (n: i64, arr: *i64) => void {
 
 let main = () => i64 {
 	let n = 10;
-	let arr = malloc(n * 8);
+	let arr = cast(*i64, malloc(n * 8));
 	init_array(n, arr);
 
 	println("Pre-sorted:");
@@ -59,7 +59,7 @@ let main = () => i64 {
 	println("Sorted:");
 	print_array(n, arr);
 	
-	free(arr);
+	free(cast(*void, arr));
 
 	return 0;
 };

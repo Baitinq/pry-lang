@@ -1,18 +1,18 @@
-extern malloc = (i64) => *i64;
-extern free = (*i64) => void;
+extern malloc = (i64) => *void;
+extern free = (*void) => void;
 
 import "!stdlib.src";
 
 let main = () => i64 {
-	let x = malloc(24);
-	(*(x+0)) = 10;
-	(*(x+1)) = 20;
-	(*(x+2)) = 40;
+	let x = cast(*i8, malloc(24));
+	(*(x+cast(*i8, 0))) = 10;
+	(*(x+cast(*i8, 1))) = 20;
+	(*(x+cast(*i8, 2))) = 40;
 	println("%p", x);
-	println("%d", *(x+0));
-	println("%d", *(x+1));
-	println("%d", *(x+2));
-	free(x);
+	println("%d", *(x+cast(*i8, 0)));
+	println("%d", *(x+cast(*i8, 1)));
+	println("%d", *(x+cast(*i8, 2)));
+	free(cast(*void, x));
 	return 0;
 };
 
