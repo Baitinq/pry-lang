@@ -34,8 +34,8 @@ let sort_array = (n: i64, arr: *i64) => void {
 
 			if x > y {
 				let tmp = *(arr + cast(*i64, i));
-				*(arr + cast(*i64, i)) = *(arr + cast(*i64, j));
-				*(arr + cast(*i64, j)) = tmp;
+				(*(arr + cast(*i64, i))) = *(arr + cast(*i64, j));
+				(*(arr + cast(*i64, j))) = tmp;
 			};
 
 			j = j + 1;	
