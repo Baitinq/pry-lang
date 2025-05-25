@@ -15,6 +15,7 @@ pub const TokenType = union(enum) {
     BREAK: void,
     CONTINUE: void,
     ARROW: void,
+    STRUCT: void,
 
     // Identifiers
     IDENTIFIER: []u8,
@@ -36,6 +37,7 @@ pub const TokenType = union(enum) {
     BANG: void,
     LESS: void,
     GREATER: void,
+    DOT: void,
 
     // Punctuation
     SEMICOLON: void,
@@ -98,6 +100,7 @@ pub const Tokenizer = struct {
         if (self.accept_string("true")) return self.create_token(.{ .BOOLEAN = true });
         if (self.accept_string("false")) return self.create_token(.{ .BOOLEAN = false });
         if (self.accept_string("null")) return self.create_token(.{ .NULL = void{} });
+        if (self.accept_string("struct")) return self.create_token(.{ .STRUCT = void{} });
 
         if (self.accept_string("=>")) return self.create_token(.{ .ARROW = void{} });
         if (self.accept_string(";")) return self.create_token(.{ .SEMICOLON = void{} });
@@ -116,6 +119,7 @@ pub const Tokenizer = struct {
         if (self.accept_string("!")) return self.create_token(.{ .BANG = void{} });
         if (self.accept_string("<")) return self.create_token(.{ .LESS = void{} });
         if (self.accept_string(">")) return self.create_token(.{ .GREATER = void{} });
+        if (self.accept_string(".")) return self.create_token(.{ .DOT = void{} });
 
         if (self.accept_int_type()) |i| return self.create_token(.{ .NUMBER = i });
         if (self.accept_char_type()) |c| return self.create_token(.{ .CHAR = c });

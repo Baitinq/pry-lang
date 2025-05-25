@@ -78,6 +78,13 @@ pub const Node = union(enum) {
         parameters: []*Node,
         return_type: *Node,
     },
+    STRUCT_INSTANCIATION: struct {
+        typ: []const u8,
+    },
+    FIELD_ACCESS: struct {
+        expression: *Node,
+        name: []const u8,
+    },
     TYPE: union(enum) {
         SIMPLE_TYPE: struct {
             name: []const u8,
@@ -88,6 +95,9 @@ pub const Node = union(enum) {
         },
         POINTER_TYPE: struct {
             type: *Node,
+        },
+        STRUCT_TYPE: struct {
+            fields: []*Node,
         },
     },
     RETURN_STATEMENT: struct {
@@ -553,13 +563,15 @@ pub const Parser = struct {
         } });
     }
 
-    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | CastStatement | FunctionCallStatement | FunctionDefinition | LPAREN Expression RPAREN
+    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | CastStatement | FunctionCallStatement | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
     fn parse_primary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing primary expression {any}\n", .{self.peek_token()});
 
         if (self.accept_parse(parse_cast_statement)) |stmt| return stmt;
         if (self.accept_parse(parse_function_call_statement)) |stmt| return stmt;
         if (self.accept_parse(parse_function_definition)) |stmt| return stmt;
+        if (self.accept_parse(parse_struct_definition)) |stmt| return stmt;
+        if (self.accept_parse(parse_struct_instanciation)) |stmt| return stmt;
 
         // LPAREN (Expression) RPAREN
         if (self.accept_token(tokenizer.TokenType.LPAREN)) |_| {
@@ -571,6 +583,7 @@ pub const Parser = struct {
         const token = self.consume_token() orelse return ParserError.ParsingError;
 
         return switch (token.type) {
+            .DOT => try self.parse_field_access(),
             .NULL => try self.create_node(.{
                 .PRIMARY_EXPRESSION = .{ .NULL = void{} },
             }),
@@ -668,6 +681,80 @@ pub const Parser = struct {
         }
 
         return node_list.items;
+    }
+
+    // StructDefinition ::= "struct" LBRACE StructFields? RBRACE
+    fn parse_struct_definition(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing struct definition {any}\n", .{self.peek_token()});
+
+        // StructField ::= IDENTIFIER ":" Type
+        const parse_struct_field = struct {
+            fn call(iself: *Parser) ParserError!*Node {
+                const ident = try iself.parse_token(tokenizer.TokenType.IDENTIFIER);
+                _ = try iself.parse_token(tokenizer.TokenType.COLON);
+                const type_annotation = try iself.parse_type();
+
+                return iself.create_node(.{
+                    .PRIMARY_EXPRESSION = .{
+                        .IDENTIFIER = .{
+                            .name = try iself.arena.dupe(u8, ident.type.IDENTIFIER),
+                            .type = type_annotation,
+                        },
+                    },
+                });
+            }
+        };
+
+        _ = try self.parse_token(tokenizer.TokenType.STRUCT);
+        _ = try self.parse_token(tokenizer.TokenType.LBRACE);
+
+        var fields = std.ArrayList(*Node).init(self.arena);
+        while (self.accept_parse(parse_struct_field.call)) |field| {
+            _ = self.accept_token(tokenizer.TokenType.COMMA);
+            try fields.append(field);
+        }
+        _ = try self.parse_token(tokenizer.TokenType.RBRACE);
+
+        return self.create_node(.{
+            .TYPE = .{
+                .STRUCT_TYPE = .{
+                    .fields = fields.items,
+                },
+            },
+        });
+    }
+
+    // StructInstantiation ::= IDENTIFIER LBRACE RBRACE
+    fn parse_struct_instanciation(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing struct instanciation {any}\n", .{self.peek_token()});
+
+        const typ = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
+        _ = try self.parse_token(tokenizer.TokenType.LBRACE);
+        _ = try self.parse_token(tokenizer.TokenType.RBRACE);
+
+        return self.create_node(.{
+            .STRUCT_INSTANCIATION = .{
+                .typ = try self.arena.dupe(u8, typ.type.IDENTIFIER),
+            },
+        });
+    }
+
+    // FieldAccess ::= Expression DOT IDENTIFIER
+    fn parse_field_access(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing field access {any}\n", .{self.peek_token()});
+
+        const expression = try self.parse_expression();
+
+        _ = try self.parse_token(tokenizer.TokenType.DOT);
+
+        const ident = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
+
+        return self.create_node(.{
+            .FIELD_ACCESS = .{
+                .expression = expression,
+                .name = try self.arena.dupe(u8, ident.type.IDENTIFIER),
+            },
+        });
     }
 
     // ReturnStatement ::= RETURN (Expression)?

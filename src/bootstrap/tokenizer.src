@@ -311,6 +311,9 @@ let tokenizer_next = () => *i8 {
 	if tokenizer_accept_string(">") {
 	    return ">";
 	};
+	if tokenizer_accept_string(".") {
+	    return ".";
+	};
 	
 	let maybe_int = tokenizer_accept_int_type();
 	if maybe_int != cast(*i64, null) {

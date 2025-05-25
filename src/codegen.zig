@@ -17,6 +17,7 @@ pub const CodeGenError = error{
 
 pub const CodeGen = struct {
     llvm_module: llvm.LLVMModuleRef,
+    llvm_context: llvm.LLVMContextRef,
     builder: llvm.LLVMBuilderRef,
     environment: *Environment,
 
@@ -36,11 +37,13 @@ pub const CodeGen = struct {
         llvm.LLVMInitializeAllAsmParsers();
 
         const module: llvm.LLVMModuleRef = llvm.LLVMModuleCreateWithName("module");
+        const context = llvm.LLVMGetGlobalContext();
         const builder = llvm.LLVMCreateBuilder();
 
         const self = try arena.create(CodeGen);
         self.* = .{
             .llvm_module = module,
+            .llvm_context = context,
             .builder = builder,
             .environment = try Environment.init(arena),
 
@@ -145,6 +148,7 @@ pub const CodeGen = struct {
             if (self.environment.scope_stack.items.len == 1) {
                 try self.environment.add_variable(identifier.name, try self.create_variable(.{
                     .value = variable.value,
+                    .type = null,
                     .node = variable.node,
                     .node_type = variable.node_type,
                     .stack_level = null,
@@ -171,7 +175,11 @@ pub const CodeGen = struct {
             if (assignment_statement.is_dereference) {
                 ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
             }
-            _ = llvm.LLVMBuildStore(self.builder, variable.value, ptr);
+
+            // NOTE: structs have a null variable.value
+            if (variable.value != null) {
+                _ = llvm.LLVMBuildStore(self.builder, variable.value, ptr);
+            }
 
             if (assignment_statement.is_dereference) {
                 ptr = self.environment.get_variable(identifier.name).?.value;
@@ -179,6 +187,7 @@ pub const CodeGen = struct {
 
             const new_variable = try self.create_variable(.{
                 .value = ptr,
+                .type = null,
                 .node = variable.node,
                 .node_type = typ,
                 .stack_level = null,
@@ -257,6 +266,7 @@ pub const CodeGen = struct {
 
         return self.create_variable(.{
             .value = res,
+            .type = null,
             .stack_level = null,
             .node = node,
             .node_type = function_return_type,
@@ -422,6 +432,7 @@ pub const CodeGen = struct {
                 if (name != null) {
                     try self.environment.add_variable(name.?, try self.create_variable(.{
                         .value = function,
+                        .type = null,
                         .stack_level = null,
                         .node = expression,
                         .node_type = node_type,
@@ -448,6 +459,7 @@ pub const CodeGen = struct {
 
                     try self.environment.add_variable(param_node.PRIMARY_EXPRESSION.IDENTIFIER.name, try self.create_variable(.{
                         .value = alloca,
+                        .type = null,
                         .stack_level = null,
                         .node = param_node,
                         .node_type = param_type,
@@ -465,6 +477,7 @@ pub const CodeGen = struct {
                 if (name == null or self.environment.scope_stack.items.len == 2) {
                     return try self.create_variable(.{
                         .value = function,
+                        .type = null,
                         .stack_level = null,
                         .node = expression,
                         .node_type = node_type,
@@ -473,6 +486,7 @@ pub const CodeGen = struct {
 
                 return try self.create_variable(.{
                     .value = function,
+                    .type = null,
                     .stack_level = null,
                     .node = expression,
                     .node_type = node_type,
@@ -480,6 +494,9 @@ pub const CodeGen = struct {
             },
             .FUNCTION_CALL_STATEMENT => |*fn_call| {
                 return try self.generate_function_call_statement(@ptrCast(fn_call));
+            },
+            .STRUCT_INSTANCIATION => |struct_instanciation| {
+                return self.environment.get_variable(struct_instanciation.typ).?;
             },
             .PRIMARY_EXPRESSION => |primary_expression| switch (primary_expression) {
                 .NULL => {
@@ -532,6 +549,7 @@ pub const CodeGen = struct {
                     return self.create_variable(
                         .{
                             .value = x,
+                            .type = null,
                             .stack_level = null,
                             .node = expression,
                             .node_type = try self.create_node(.{
@@ -671,28 +689,51 @@ pub const CodeGen = struct {
                 }));
             },
             .TYPE => |typ| {
-                std.debug.assert(typ == .FUNCTION_TYPE);
-                std.debug.assert(self.environment.scope_stack.items.len == 1);
+                switch (typ) {
+                    .FUNCTION_TYPE => {
+                        std.debug.assert(self.environment.scope_stack.items.len == 1);
 
-                const variable = self.environment.get_variable(name.?);
-                if (variable) |v| {
-                    return v;
+                        const variable = self.environment.get_variable(name.?);
+                        if (variable) |v| {
+                            return v;
+                        }
+
+                        const function_type = try self.get_llvm_type(expression);
+                        const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}), function_type);
+
+                        return try self.create_variable(.{
+                            .value = function,
+                            .type = null,
+                            .stack_level = null,
+                            .node = expression,
+                            .node_type = expression,
+                        });
+                    },
+                    .STRUCT_TYPE => |t| {
+                        const struct_type = llvm.LLVMStructCreateNamed(self.llvm_context, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}));
+
+                        var llvm_types = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
+
+                        for (t.fields) |field| {
+                            try llvm_types.append(try self.get_llvm_type(field.PRIMARY_EXPRESSION.IDENTIFIER.type.?));
+                        }
+                        llvm.LLVMStructSetBody(struct_type, llvm_types.items.ptr, @intCast(llvm_types.items.len), 0);
+                        return try self.create_variable(.{
+                            .value = null,
+                            .type = struct_type,
+                            .stack_level = null,
+                            .node = expression,
+                            .node_type = expression,
+                        });
+                    },
+                    else => unreachable,
                 }
-
-                const function_type = try self.get_llvm_type(expression);
-                const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}), function_type);
-
-                return try self.create_variable(.{
-                    .value = function,
-                    .stack_level = null,
-                    .node = expression,
-                    .node_type = expression,
-                });
             },
             .CAST_STATEMENT => |exp| {
                 const val = try self.generate_expression_value(exp.expression, "");
                 return try self.create_variable(.{
                     .value = val.value, //TODO: do real casting
+                    .type = null,
                     .stack_level = null,
                     .node = expression,
                     .node_type = exp.typ,
@@ -706,6 +747,7 @@ pub const CodeGen = struct {
         if (name != null and self.environment.scope_stack.items.len == 1) {
             const ptr = try self.create_variable(.{
                 .value = llvm.LLVMAddGlobal(self.llvm_module, try self.get_llvm_type(node_type), try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?})),
+                .type = null,
                 .stack_level = null,
                 .node = node,
                 .node_type = node_type,
@@ -716,6 +758,7 @@ pub const CodeGen = struct {
 
         return try self.create_variable(.{
             .value = literal_val,
+            .type = null,
             .stack_level = null,
             .node = node,
             .node_type = node_type,
@@ -760,6 +803,15 @@ pub const CodeGen = struct {
             .POINTER_TYPE => |t| {
                 const inner_type = try self.get_llvm_type(t.type);
                 return llvm.LLVMPointerType(inner_type, 0);
+            },
+            .STRUCT_TYPE => |t| {
+                var llvm_types = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
+
+                for (t.fields) |field| {
+                    try llvm_types.append(try self.get_llvm_type(field.PRIMARY_EXPRESSION.IDENTIFIER.type.?));
+                }
+
+                return llvm.LLVMStructType(llvm_types.items.ptr, @intCast(llvm_types.items.len), 0);
             },
         }
     }
@@ -824,6 +876,18 @@ pub const CodeGen = struct {
                 }
                 return res;
             },
+            .STRUCT_TYPE => |a_struct| {
+                const b_struct = b_type.STRUCT_TYPE;
+
+                if (a_struct.fields.len != b_struct.fields.len) return false;
+
+                for (0.., a_struct.fields) |i, f| {
+                    if (!self.compare_types(f, b_struct.fields[i], false)) {
+                        return false;
+                    }
+                }
+                return true;
+            },
         }
     }
 
@@ -842,6 +906,7 @@ pub const CodeGen = struct {
 
 const Variable = struct {
     value: llvm.LLVMValueRef,
+    type: llvm.LLVMTypeRef,
     node: *parser.Node,
     node_type: *parser.Node,
     stack_level: ?usize,

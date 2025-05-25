@@ -1,0 +1,34 @@
+import "!stdlib.src";
+
+/* declare new struct type */
+let test = struct {
+	 x: i64,
+	 y: *i8,
+	 z: bool
+};
+
+let main = () => i64 {
+	/* instanciate new struct. instanciating fields isn't supported here */
+	let inst = test{};
+	inst.x = 2;
+	inst.y = "hello";
+	inst.z = true;
+
+	println("Inst x: %d", inst.x);
+	println("Inst y: %s", inst.y);
+	println("Inst z: %d", inst.z);
+
+	return 0;
+};
+
+/*
+
+Expected stdout:
+
+2
+hello
+1
+
+Expected return: 0
+
+*/
