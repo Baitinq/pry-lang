@@ -1,6 +1,6 @@
 Program      ::= Statement+
 
-Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement| FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
+Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
 
 AssignmentStatement ::= ("let")? ("*")? Expression EQUALS Expression
 
@@ -21,6 +21,8 @@ FunctionArguments ::= Expression ("," Expression)*
 Expression ::= EqualityExpression | AdditiveExpression
 
 CastStatement ::= "cast" LPAREN TYPE "," Expression RPAREN
+    
+SizeOfStatement ::= "sizeof" LPAREN TYPE RPAREN
 
 EqualityExpression ::= AdditiveExpression ("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression
 
@@ -30,7 +32,7 @@ MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)
 
 UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PostfixExpression
 
-PostfixExpression ::= PrimaryExpression (FieldAccess | FunctionCallStatement | CastStatement)*
+PostfixExpression ::= PrimaryExpression (FieldAccess | FunctionCallStatement | CastStatement | SizeOfStatement)*
 
 PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
 

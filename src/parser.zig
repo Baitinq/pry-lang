@@ -111,6 +111,9 @@ pub const Node = union(enum) {
         typ: *Node,
         expression: *Node,
     },
+    SIZEOF_STATEMENT: struct {
+        typ: *Node,
+    },
     BREAK_STATEMENT: void,
     CONTINUE_STATEMENT: void,
 };
@@ -168,12 +171,13 @@ pub const Parser = struct {
         } });
     }
 
-    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
+    // Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON
     fn parse_statement(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing statement {any}\n", .{self.peek_token()});
 
         const statement =
-            self.accept_parse(parse_cast_statement) orelse
+            self.accept_parse(parse_cast_statement) orelse //TODO: Can we not deal with cast / sizeof in parser?
+            self.accept_parse(parse_sizeof_statement) orelse
             self.accept_parse(parse_function_call_statement) orelse
             self.accept_parse(parse_if_statement) orelse
             self.accept_parse(parse_while_statement) orelse
@@ -567,11 +571,13 @@ pub const Parser = struct {
         } });
     }
 
-    // PostfixExpression ::= PrimaryExpression (FunctionCallStatement | FieldAccess )*
+    // PostfixExpression ::= PrimaryExpression (CastStatement | SizeOfStatement | FunctionCallStatement | FieldAccess )*
     fn parse_postfix_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing postfix expression {any}\n", .{self.peek_token()});
 
         if (self.accept_parse(parse_cast_statement)) |stmt| {
+            return stmt;
+        } else if (self.accept_parse(parse_sizeof_statement)) |stmt| {
             return stmt;
         } else if (self.accept_parse(parse_function_call_statement)) |stmt| {
             return stmt;
@@ -810,6 +816,29 @@ pub const Parser = struct {
             .CAST_STATEMENT = .{
                 .typ = typ,
                 .expression = expression,
+            },
+        });
+    }
+
+    // SizeOfStatement ::= "sizeof" LPAREN TYPE RPAREN
+    fn parse_sizeof_statement(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing sizeof statement {any}\n", .{self.peek_token()});
+
+        const ident = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
+
+        if (!std.mem.eql(u8, "sizeof", ident.type.IDENTIFIER)) {
+            return ParserError.ParsingError;
+        }
+
+        _ = try self.parse_token(tokenizer.TokenType.LPAREN);
+
+        const typ = try self.parse_type();
+
+        _ = try self.parse_token(tokenizer.TokenType.RPAREN);
+
+        return self.create_node(.{
+            .SIZEOF_STATEMENT = .{
+                .typ = typ,
             },
         });
     }

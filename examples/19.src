@@ -3,7 +3,7 @@ extern malloc = (i64) => *void;
 extern free = (*void) => void;
 
 let main = () => i64 {
-	let buf = cast(*i8, malloc(13));
+	let buf = cast(*i8, malloc(sizeof(i8) * 13));
 	(*(buf+cast(*i8, 0))) = 'h';
 	(*(buf+cast(*i8, 1))) = 'e';
 	(*(buf+cast(*i8, 2))) = 'l';

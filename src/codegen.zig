@@ -17,6 +17,7 @@ pub const CodeGenError = error{
 
 pub const CodeGen = struct {
     llvm_module: llvm.LLVMModuleRef,
+    llvm_target_data: llvm.LLVMTargetDataRef,
     llvm_context: llvm.LLVMContextRef,
     builder: llvm.LLVMBuilderRef,
     environment: *Environment,
@@ -43,6 +44,7 @@ pub const CodeGen = struct {
         const self = try arena.create(CodeGen);
         self.* = .{
             .llvm_module = module,
+            .llvm_target_data = llvm.LLVMGetModuleDataLayout(module),
             .llvm_context = context,
             .builder = builder,
             .environment = try Environment.init(arena),
@@ -751,6 +753,27 @@ pub const CodeGen = struct {
                     .stack_level = null,
                     .node = expression,
                     .node_type = exp.typ,
+                });
+            },
+            .SIZEOF_STATEMENT => |exp| {
+                const typ = try self.get_llvm_type(exp.typ);
+                const size_in_bits = llvm.LLVMSizeOfTypeInBits(self.llvm_target_data, typ);
+                const size_in_bytes = size_in_bits / 8;
+
+                const size_val = llvm.LLVMConstInt(llvm.LLVMInt64Type(), size_in_bytes, 0);
+
+                return try self.create_variable(.{
+                    .value = size_val,
+                    .type = null,
+                    .node_type = try self.create_node(.{
+                        .TYPE = .{
+                            .SIMPLE_TYPE = .{
+                                .name = "i64",
+                            },
+                        },
+                    }),
+                    .stack_level = null,
+                    .node = expression,
                 });
             },
             .FIELD_ACCESS => |exp| {
