@@ -28,9 +28,11 @@ AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpre
 
 MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)*
 
-UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PrimaryExpression
+UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PostfixExpression
 
-PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | CastStatement | FunctionCallStatement | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
+PostfixExpression ::= PrimaryExpression (FieldAccess | FunctionCallStatement | CastStatement)*
+
+PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
 
 FunctionDefinition ::= LPAREN FunctionParameters? RPAREN ARROW IDENTIFIER LBRACE Statement* ReturnStatement SEMICOLON RBRACE
 

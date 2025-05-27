@@ -1,3 +1,5 @@
+extern malloc = (i64) => *void;
+
 import "!stdlib.src";
 
 /* declare new struct type */
@@ -10,13 +12,22 @@ let test = struct {
 let main = () => i64 {
 	/* instanciate new struct. instanciating fields isn't supported here */
 	let inst = test{};
+
 	inst.x = 2;
-	inst.y = "hello";
 	inst.z = true;
+	inst.y = malloc(1);
+	(*(inst.y)) = 5;
+
+	let x = 0;
 
 	println("Inst x: %d", inst.x);
-	println("Inst y: %s", inst.y);
-	println("Inst z: %d", inst.z);
+	println("Inst y: %d", *(inst.y));
+
+	if inst.z {
+		x = 1;
+	};
+
+	println("Test: %d", x);
 
 	return 0;
 };
@@ -25,9 +36,9 @@ let main = () => i64 {
 
 Expected stdout:
 
-2
-hello
-1
+Inst x: 2
+Inst y: 5
+Test: 1
 
 Expected return: 0
 

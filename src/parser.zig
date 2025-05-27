@@ -54,6 +54,10 @@ pub const Node = union(enum) {
         },
         expression: *Node,
     },
+    POSTFIX_EXPRESSION: struct {
+        lhs: *Node,
+        rhs: ?*Node,
+    },
     PRIMARY_EXPRESSION: union(enum) {
         NUMBER: struct {
             value: i64,
@@ -545,7 +549,7 @@ pub const Parser = struct {
         return lhs;
     }
 
-    // UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PrimaryExpression
+    // UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PostfixExpression
     fn parse_unary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing unary expression {any}\n", .{self.peek_token()});
 
@@ -554,7 +558,7 @@ pub const Parser = struct {
         const star = self.accept_token(tokenizer.TokenType.MUL) != null;
 
         if (!not and !minus and !star) {
-            return try self.parse_primary_expression();
+            return try self.parse_postfix_expression();
         }
 
         return self.create_node(.{ .UNARY_EXPRESSION = .{
@@ -563,12 +567,25 @@ pub const Parser = struct {
         } });
     }
 
-    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | CastStatement | FunctionCallStatement | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
+    // PostfixExpression ::= PrimaryExpression (FunctionCallStatement | FieldAccess )*
+    fn parse_postfix_expression(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing postfix expression {any}\n", .{self.peek_token()});
+
+        if (self.accept_parse(parse_cast_statement)) |stmt| {
+            return stmt;
+        } else if (self.accept_parse(parse_function_call_statement)) |stmt| {
+            return stmt;
+        } else if (self.accept_parse(parse_field_access)) |stmt| {
+            return stmt;
+        } else {
+            return try self.parse_primary_expression();
+        }
+    }
+
+    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
     fn parse_primary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing primary expression {any}\n", .{self.peek_token()});
 
-        if (self.accept_parse(parse_cast_statement)) |stmt| return stmt;
-        if (self.accept_parse(parse_function_call_statement)) |stmt| return stmt;
         if (self.accept_parse(parse_function_definition)) |stmt| return stmt;
         if (self.accept_parse(parse_struct_definition)) |stmt| return stmt;
         if (self.accept_parse(parse_struct_instanciation)) |stmt| return stmt;
@@ -583,7 +600,6 @@ pub const Parser = struct {
         const token = self.consume_token() orelse return ParserError.ParsingError;
 
         return switch (token.type) {
-            .DOT => try self.parse_field_access(),
             .NULL => try self.create_node(.{
                 .PRIMARY_EXPRESSION = .{ .NULL = void{} },
             }),
@@ -739,14 +755,12 @@ pub const Parser = struct {
         });
     }
 
-    // FieldAccess ::= Expression DOT IDENTIFIER
+    // FieldAccess ::= PrimaryExpression DOT IDENTIFIER
     fn parse_field_access(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing field access {any}\n", .{self.peek_token()});
 
-        const expression = try self.parse_expression();
-
+        const expression = try self.parse_primary_expression();
         _ = try self.parse_token(tokenizer.TokenType.DOT);
-
         const ident = try self.parse_token(tokenizer.TokenType.IDENTIFIER);
 
         return self.create_node(.{

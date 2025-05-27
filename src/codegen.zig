@@ -141,68 +141,82 @@ pub const CodeGen = struct {
         std.debug.assert(statement.* == parser.Node.ASSIGNMENT_STATEMENT);
         const assignment_statement = statement.ASSIGNMENT_STATEMENT;
 
-        if (assignment_statement.lhs.* == .PRIMARY_EXPRESSION) {
-            const identifier = assignment_statement.lhs.PRIMARY_EXPRESSION.IDENTIFIER;
-            const variable = try self.generate_expression_value(assignment_statement.rhs, identifier.name);
+        switch (assignment_statement.lhs.*) {
+            .PRIMARY_EXPRESSION => {
+                const identifier = assignment_statement.lhs.PRIMARY_EXPRESSION.IDENTIFIER;
+                const variable = try self.generate_expression_value(assignment_statement.rhs, identifier.name);
 
-            if (self.environment.scope_stack.items.len == 1) {
-                try self.environment.add_variable(identifier.name, try self.create_variable(.{
-                    .value = variable.value,
+                if (self.environment.scope_stack.items.len == 1) {
+                    try self.environment.add_variable(identifier.name, try self.create_variable(.{
+                        .value = variable.value,
+                        .type = null,
+                        .node = variable.node,
+                        .node_type = variable.node_type,
+                        .stack_level = null,
+                    }));
+                    return;
+                }
+
+                var ptr: llvm.LLVMValueRef = undefined;
+                var typ = variable.node_type;
+                if (assignment_statement.is_declaration) {
+                    var x = try self.get_llvm_type(variable.node_type);
+                    if (variable.node_type.TYPE == .FUNCTION_TYPE) {
+                        x = llvm.LLVMPointerType(x, 0);
+                    }
+                    ptr = llvm.LLVMBuildAlloca(self.builder, x, try std.fmt.allocPrintZ(self.arena, "{s}", .{identifier.name}));
+                } else {
+                    ptr = self.environment.get_variable(identifier.name).?.value;
+                    typ = self.environment.get_variable(identifier.name).?.node_type;
+                    // TODO: Do this in more places! (everywhere get_llvm_type or get_variable?)  Also check types in return and cmp
+                    std.debug.print("TYP {s}: {any} vs {any} -- {any}\n", .{ identifier.name, typ.TYPE, variable.node_type.TYPE, variable.node });
+                    std.debug.assert(self.compare_types(typ, variable.node_type, assignment_statement.is_dereference));
+                }
+
+                if (assignment_statement.is_dereference) {
+                    ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
+                }
+
+                // NOTE: structs have a null variable.value
+                if (variable.value != null) {
+                    _ = llvm.LLVMBuildStore(self.builder, variable.value, ptr);
+                }
+
+                if (assignment_statement.is_dereference) {
+                    ptr = self.environment.get_variable(identifier.name).?.value;
+                }
+
+                const new_variable = try self.create_variable(.{
+                    .value = ptr,
                     .type = null,
                     .node = variable.node,
-                    .node_type = variable.node_type,
+                    .node_type = typ,
                     .stack_level = null,
-                }));
-                return;
-            }
-
-            var ptr: llvm.LLVMValueRef = undefined;
-            var typ = variable.node_type;
-            if (assignment_statement.is_declaration) {
-                var x = try self.get_llvm_type(variable.node_type);
-                if (variable.node_type.TYPE == .FUNCTION_TYPE) {
-                    x = llvm.LLVMPointerType(x, 0);
+                });
+                // Adding variable doesnt actually replace the variable of previous scope
+                if (assignment_statement.is_declaration) {
+                    try self.environment.add_variable(identifier.name, new_variable);
+                } else {
+                    try self.environment.set_variable(identifier.name, new_variable);
                 }
-                ptr = llvm.LLVMBuildAlloca(self.builder, x, try std.fmt.allocPrintZ(self.arena, "{s}", .{identifier.name}));
-            } else {
-                ptr = self.environment.get_variable(identifier.name).?.value;
-                typ = self.environment.get_variable(identifier.name).?.node_type;
-                // TODO: Do this in more places! (everywhere get_llvm_type or get_variable?)  Also check types in return and cmp
-                std.debug.print("TYP {s}: {any} vs {any} -- {any}\n", .{ identifier.name, typ.TYPE, variable.node_type.TYPE, variable.node });
-                std.debug.assert(self.compare_types(typ, variable.node_type, assignment_statement.is_dereference));
-            }
+            },
+            .UNARY_EXPRESSION => {
+                const xd = assignment_statement.lhs.UNARY_EXPRESSION.expression;
+                const a = try self.generate_expression_value(xd, null);
+                const variable = try self.generate_expression_value(assignment_statement.rhs, null);
+                _ = llvm.LLVMBuildStore(self.builder, variable.value, a.value);
+            },
+            .FIELD_ACCESS => |field_access| {
+                const xd = assignment_statement.lhs.FIELD_ACCESS.expression;
+                const name = field_access.name;
+                const ptr = self.environment.get_variable(xd.PRIMARY_EXPRESSION.IDENTIFIER.name).?;
 
-            if (assignment_statement.is_dereference) {
-                ptr = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(typ), ptr, "");
-            }
+                const x = try self.get_struct_field(ptr, name);
 
-            // NOTE: structs have a null variable.value
-            if (variable.value != null) {
-                _ = llvm.LLVMBuildStore(self.builder, variable.value, ptr);
-            }
-
-            if (assignment_statement.is_dereference) {
-                ptr = self.environment.get_variable(identifier.name).?.value;
-            }
-
-            const new_variable = try self.create_variable(.{
-                .value = ptr,
-                .type = null,
-                .node = variable.node,
-                .node_type = typ,
-                .stack_level = null,
-            });
-            // Adding variable doesnt actually replace the variable of previous scope
-            if (assignment_statement.is_declaration) {
-                try self.environment.add_variable(identifier.name, new_variable);
-            } else {
-                try self.environment.set_variable(identifier.name, new_variable);
-            }
-        } else {
-            const xd = assignment_statement.lhs.UNARY_EXPRESSION.expression;
-            const a = try self.generate_expression_value(xd, null);
-            const variable = try self.generate_expression_value(assignment_statement.rhs, null);
-            _ = llvm.LLVMBuildStore(self.builder, variable.value, a.value);
+                const variable = try self.generate_expression_value(assignment_statement.rhs, null);
+                _ = llvm.LLVMBuildStore(self.builder, variable.value, x.value);
+            },
+            else => unreachable,
         }
     }
 
@@ -739,6 +753,20 @@ pub const CodeGen = struct {
                     .node_type = exp.typ,
                 });
             },
+            .FIELD_ACCESS => |exp| {
+                const ptr = self.environment.get_variable(exp.expression.PRIMARY_EXPRESSION.IDENTIFIER.name).?;
+
+                const x = try self.get_struct_field(ptr, exp.name);
+                const loaded = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(x.type), x.value, "");
+
+                return try self.create_variable(.{
+                    .value = loaded,
+                    .type = null,
+                    .stack_level = null,
+                    .node = expression,
+                    .node_type = x.type,
+                });
+            },
             else => unreachable,
         };
     }
@@ -763,6 +791,27 @@ pub const CodeGen = struct {
             .node = node,
             .node_type = node_type,
         });
+    }
+
+    fn get_struct_field(self: *CodeGen, ptr: *Variable, name: []const u8) !struct { value: llvm.LLVMValueRef, type: *parser.Node } {
+        var fieldIndex: ?usize = null;
+        for (0.., ptr.node_type.TYPE.STRUCT_TYPE.fields) |i, field| {
+            std.debug.print("STRUCT: {s}\n", .{name});
+            if (std.mem.eql(u8, name, field.PRIMARY_EXPRESSION.IDENTIFIER.name)) {
+                fieldIndex = i;
+                break;
+            }
+        }
+        if (fieldIndex == null) unreachable;
+
+        const zero = llvm.LLVMConstInt(llvm.LLVMInt32Type(), 0, 0);
+        const llvmFieldIndex = llvm.LLVMConstInt(llvm.LLVMInt32Type(), fieldIndex.?, 0);
+        const indices = @constCast(&[_]llvm.LLVMValueRef{ zero, llvmFieldIndex });
+
+        return .{
+            .value = llvm.LLVMBuildGEP2(self.builder, try self.get_llvm_type(ptr.node_type), ptr.value, indices, indices.len, try std.fmt.allocPrintZ(self.arena, "{s}", .{name})),
+            .type = ptr.node_type.TYPE.STRUCT_TYPE.fields[fieldIndex.?].PRIMARY_EXPRESSION.IDENTIFIER.type.?,
+        };
     }
 
     fn get_llvm_type(self: *CodeGen, node: *parser.Node) !llvm.LLVMTypeRef {
