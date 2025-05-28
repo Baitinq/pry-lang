@@ -151,7 +151,7 @@ pub const CodeGen = struct {
                 if (self.environment.scope_stack.items.len == 1) {
                     try self.environment.add_variable(identifier.name, try self.create_variable(.{
                         .value = variable.value,
-                        .type = null,
+                        .type = variable.type,
                         .node = variable.node,
                         .node_type = variable.node_type,
                         .stack_level = null,
@@ -190,7 +190,7 @@ pub const CodeGen = struct {
 
                 const new_variable = try self.create_variable(.{
                     .value = ptr,
-                    .type = null,
+                    .type = variable.type,
                     .node = variable.node,
                     .node_type = typ,
                     .stack_level = null,
@@ -848,6 +848,10 @@ pub const CodeGen = struct {
                 if (std.mem.eql(u8, t.name, "bool")) return llvm.LLVMInt1Type();
                 if (std.mem.eql(u8, t.name, "void")) return llvm.LLVMVoidType();
                 if (std.mem.eql(u8, t.name, "varargs")) return llvm.LLVMPointerType(llvm.LLVMInt64Type(), 0); // Hack for varargs (only used for printf)
+                if (self.environment.get_variable(t.name)) |v| {
+                    std.debug.assert(v.type != null);
+                    return v.type;
+                }
                 std.debug.print("Unknown type: {s}\n", .{t.name});
                 unreachable;
             },
