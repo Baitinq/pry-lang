@@ -211,9 +211,8 @@ pub const CodeGen = struct {
             .FIELD_ACCESS => |field_access| {
                 const xd = assignment_statement.lhs.FIELD_ACCESS.expression;
                 const name = field_access.name;
-                const ptr = self.environment.get_variable(xd.PRIMARY_EXPRESSION.IDENTIFIER.name).?;
 
-                const x = try self.get_struct_field(ptr, name);
+                const x = try self.get_struct_field(xd, name);
 
                 const variable = try self.generate_expression_value(assignment_statement.rhs, null);
                 _ = llvm.LLVMBuildStore(self.builder, variable.value, x.value);
@@ -391,7 +390,7 @@ pub const CodeGen = struct {
         try self.generate(import_declaration.program);
     }
 
-    fn generate_expression_value(self: *CodeGen, expression: *parser.Node, name: ?[]const u8) !*Variable {
+    fn generate_expression_value(self: *CodeGen, expression: *parser.Node, name: ?[]const u8) CodeGenError!*Variable {
         errdefer std.debug.print("Error generating statement value\n", .{});
         return switch (expression.*) {
             .FUNCTION_DEFINITION => |function_definition| {
@@ -777,9 +776,7 @@ pub const CodeGen = struct {
                 });
             },
             .FIELD_ACCESS => |exp| {
-                const ptr = self.environment.get_variable(exp.expression.PRIMARY_EXPRESSION.IDENTIFIER.name).?;
-
-                const x = try self.get_struct_field(ptr, exp.name);
+                const x = try self.get_struct_field(exp.expression, exp.name);
                 const loaded = llvm.LLVMBuildLoad2(self.builder, try self.get_llvm_type(x.type), x.value, "");
 
                 return try self.create_variable(.{
@@ -816,10 +813,30 @@ pub const CodeGen = struct {
         });
     }
 
-    fn get_struct_field(self: *CodeGen, ptr: *Variable, name: []const u8) !struct { value: llvm.LLVMValueRef, type: *parser.Node } {
+    fn get_struct_field(self: *CodeGen, node: *parser.Node, name: []const u8) !struct { value: llvm.LLVMValueRef, type: *parser.Node } {
+        var ptr: *Variable = undefined;
+        switch (node.*) {
+            .PRIMARY_EXPRESSION => {
+                ptr = self.environment.get_variable(node.PRIMARY_EXPRESSION.IDENTIFIER.name).?;
+            },
+            .UNARY_EXPRESSION => {
+                ptr = try self.generate_expression_value(node.UNARY_EXPRESSION.expression, "");
+            },
+            else => unreachable,
+        }
+
+        var typ: *parser.Node = undefined;
+        if (ptr.node_type.TYPE == .STRUCT_TYPE) {
+            typ = ptr.node_type;
+        } else if (ptr.node_type.TYPE == .POINTER_TYPE) {
+            typ = self.environment.get_variable(ptr.node_type.TYPE.POINTER_TYPE.type.TYPE.SIMPLE_TYPE.name).?.node_type;
+        } else if (ptr.node_type.TYPE == .SIMPLE_TYPE) {
+            typ = self.environment.get_variable(ptr.node_type.TYPE.SIMPLE_TYPE.name).?.node_type;
+        } else {
+            unreachable;
+        }
         var fieldIndex: ?usize = null;
-        for (0.., ptr.node_type.TYPE.STRUCT_TYPE.fields) |i, field| {
-            std.debug.print("STRUCT: {s}\n", .{name});
+        for (0.., typ.TYPE.STRUCT_TYPE.fields) |i, field| {
             if (std.mem.eql(u8, name, field.PRIMARY_EXPRESSION.IDENTIFIER.name)) {
                 fieldIndex = i;
                 break;
@@ -832,8 +849,8 @@ pub const CodeGen = struct {
         const indices = @constCast(&[_]llvm.LLVMValueRef{ zero, llvmFieldIndex });
 
         return .{
-            .value = llvm.LLVMBuildGEP2(self.builder, try self.get_llvm_type(ptr.node_type), ptr.value, indices, indices.len, try std.fmt.allocPrintZ(self.arena, "{s}", .{name})),
-            .type = ptr.node_type.TYPE.STRUCT_TYPE.fields[fieldIndex.?].PRIMARY_EXPRESSION.IDENTIFIER.type.?,
+            .value = llvm.LLVMBuildGEP2(self.builder, try self.get_llvm_type(typ), ptr.value, indices, indices.len, try std.fmt.allocPrintZ(self.arena, "{s}", .{name})),
+            .type = typ.TYPE.STRUCT_TYPE.fields[fieldIndex.?].PRIMARY_EXPRESSION.IDENTIFIER.type.?,
         };
     }
 

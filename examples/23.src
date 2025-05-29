@@ -1,0 +1,40 @@
+extern malloc = (i64) => *void;
+
+import "!stdlib.src";
+
+let test = struct {
+	 x: i64,
+	 y: *i8,
+};
+
+let print_struct = (s: test) => void {
+	println("X: %d", s.x);
+	println("Y: %s", s.y);
+	return;
+};
+
+let main = () => i64 {
+	let inst = cast(*test, malloc(sizeof(test)));
+
+	print_struct(*inst);
+
+	(*inst).x = 4;
+	(*inst).y = "hi";
+
+	print_struct(*inst);
+
+	return 0;
+};
+
+/*
+
+Expected stdout:
+
+X: 0
+Y: (null)
+X: 4
+Y: hi
+
+Expected return: 0
+
+*/
