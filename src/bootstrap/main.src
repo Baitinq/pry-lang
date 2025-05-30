@@ -1,4 +1,5 @@
 import "!stdlib.src";
+import "!mem.src";
 
 import "tokenizer.src";
 
@@ -12,8 +13,12 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	println("%s", filename);
 
-	tokenizer_init(filename);
+	let alloc = arena_init(9999999999);
+
+	tokenizer_init(alloc, filename);
 	tokenizer_deinit();
+
+	arena_free(alloc);
 
 	return 0;
 };

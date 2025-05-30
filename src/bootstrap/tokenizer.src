@@ -9,12 +9,13 @@ extern fseek = (*i8, i64, i64) => i64;
 extern ftell = (*i8) => i64;
 extern fread = (*i8, i64, i64, *i8) => i64;
 extern fclose = (*i8) => *i8;
-extern malloc = (i64) => *void;
-extern free = (*void) => void;
 
 import "!stdlib.src";
+import "!mem.src";
 
 let offset = 0;
+
+let a = cast(*arena, null);
 
 let buf = cast(*i8, null);
 let file_size = 0;
@@ -29,7 +30,7 @@ let read_file = (filename: *i8) => *i8 {
 	file_size = ftell(file);
 	fseek(file, 0, 0);
 
-	buf = cast(*i8, malloc(file_size + 1));
+	buf = cast(*i8, arena_alloc(a, file_size + 1));
 
 	let bytes_read = fread(buf, 1, file_size, file);
 	(*(buf + cast(*i8, bytes_read))) = '\0';
@@ -91,7 +92,7 @@ let tokenizer_accept_string = (str: *i8) => bool {
 	let str_len = strlen(str);
 	if offset + str_len > file_size { return false; };
 
-	let s = cast(*i8, malloc(1000));
+	let s = cast(*i8, arena_alloc(a, 1000));
 	memcpy(cast(*void, s), cast(*void, buf + cast(*i8, offset)), str_len);
 
 	if strcmp(s, str) {
@@ -104,7 +105,7 @@ let tokenizer_accept_string = (str: *i8) => bool {
 
 let tokenizer_consume_until_condition = (condition: (i8) => bool) => *i8 {
 	let start = offset;
-	let res = cast(*i8, malloc(1000));
+	let res = cast(*i8, arena_alloc(a, 1000));
 
 	while true {
 		if offset >= file_size {
@@ -170,7 +171,7 @@ let tokenizer_accept_int_type = () => *i64 {
 	if strlen(string) == 0 {
 		return cast(*i64, null);
 	};
-	let x = cast(*i64, malloc(8));
+	let x = cast(*i64, arena_alloc(a, 8));
 	*x = atoi(string);
 	return x;
 };
@@ -317,7 +318,7 @@ let tokenizer_next = () => *i8 {
 	
 	let maybe_int = tokenizer_accept_int_type();
 	if maybe_int != cast(*i64, null) {
-		let t = cast(*i8, malloc(1000));
+		let t = cast(*i8, arena_alloc(a, 1000));
 		sprintf(t, "int:%d", *maybe_int);
 
 		return t;
@@ -325,7 +326,7 @@ let tokenizer_next = () => *i8 {
 
 	let maybe_char = tokenizer_accept_char_type();
 	if maybe_char != cast(*i8, null) {
-		let t = cast(*i8, malloc(1000));
+		let t = cast(*i8, arena_alloc(a, 1000));
 		sprintf(t, "char:%d", *maybe_char);
 
 		return t;
@@ -333,7 +334,7 @@ let tokenizer_next = () => *i8 {
 
 	let maybe_string = tokenizer_accept_string_type();
 	if maybe_string != cast(*i8, null) {
-		let t = cast(*i8, malloc(1000));
+		let t = cast(*i8, arena_alloc(a, 1000));
 		sprintf(t, "string:%s", maybe_string);
 
 		return t;
@@ -352,20 +353,21 @@ let tokenizer_next = () => *i8 {
 		return cast(*i8, null);
 	};
 
-	let t = cast(*i8, malloc(100));
+	let t = cast(*i8, arena_alloc(a, 100));
 	sprintf(t, "identifier:%s", string);
 	
 	return t;
 };
 
-let tokenizer_init = (filename: *i8) => i64 {
+let tokenizer_init = (alloc: *arena, filename: *i8) => i64 {
+	a = alloc;
 	let buf = read_file(filename);
 
 	println("File size: %d", file_size);
 
 	println("%s", buf);
 
-	tokens = cast(*i8, malloc(100000));
+	tokens = cast(*i8, arena_alloc(a, 100000));
 
 	while true {
 		let t = tokenizer_next();
@@ -387,8 +389,5 @@ let tokenizer_init = (filename: *i8) => i64 {
 };
 
 let tokenizer_deinit = () => i64 {
-	free(cast(*void, tokens));
-	free(cast(*void, buf));
-
 	return 0;
 };

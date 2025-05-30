@@ -23,9 +23,6 @@ let arena_free = (a: *arena) => void {
 };
 
 let arena_alloc = (a: *arena, size: i64) => *void {
-	if ((*a).offset + size > 10000000) {
-		println("LOOOOOOOOOOOOOOOOOOOL!");
-	};
 	let old_offset = (*a).offset;
 	(*a).offset = (*a).offset + size;
 	return cast(*void, cast(*i8, (*a).buf) + cast(*i8, old_offset));
