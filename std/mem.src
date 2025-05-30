@@ -1,0 +1,32 @@
+extern malloc = (i64) => *void;
+extern realloc = (*void, i64) => *void;
+extern free = (*void) => void;
+
+import "!stdlib.src";
+
+let arena = struct {
+	buf: *void,
+	offset: i64,
+};
+
+let arena_init = (size: i64) => *arena {
+	let a = cast(*arena, malloc(sizeof(arena)));
+	(*a).buf = malloc(size);
+	(*a).offset = 0;
+	return a;
+};
+
+let arena_free = (a: *arena) => void {
+	free((*a).buf);
+	free(cast(*void, a));
+	return;
+};
+
+let arena_alloc = (a: *arena, size: i64) => *void {
+	if ((*a).offset + size > 10000000) {
+		println("LOOOOOOOOOOOOOOOOOOOL!");
+	};
+	let old_offset = (*a).offset;
+	(*a).offset = (*a).offset + size;
+	return cast(*void, cast(*i8, (*a).buf) + cast(*i8, old_offset));
+};
