@@ -1,4 +1,4 @@
-extern malloc = (i64) => *void;
+extern calloc = (i64, i64) => *void;
 extern realloc = (*void, i64) => *void;
 extern free = (*void) => void;
 
@@ -10,8 +10,8 @@ let arena = struct {
 };
 
 let arena_init = (size: i64) => *arena {
-	let a = cast(*arena, malloc(sizeof(arena)));
-	(*a).buf = malloc(size);
+	let a = cast(*arena, calloc(1, sizeof(arena)));
+	(*a).buf = calloc(1, size);
 	(*a).offset = 0;
 	return a;
 };
