@@ -727,6 +727,17 @@ pub const CodeGen = struct {
                     .STRUCT_TYPE => |t| {
                         const struct_type = llvm.LLVMStructCreateNamed(self.llvm_context, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}));
 
+                        // Needed for recursive structs
+                        if (name != null) {
+                            try self.environment.add_variable(name.?, try self.create_variable(.{
+                                .value = null,
+                                .type = struct_type,
+                                .stack_level = null,
+                                .node = expression,
+                                .node_type = expression,
+                            }));
+                        }
+
                         var llvm_types = std.ArrayList(llvm.LLVMTypeRef).init(self.arena);
 
                         for (t.fields) |field| {
