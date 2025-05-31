@@ -13,14 +13,62 @@ extern fclose = (*i8) => *i8;
 import "!stdlib.src";
 import "!mem.src";
 
+/* Keywords */
+let TOKEN_IMPORT     = 1;
+let TOKEN_LET        = 2;
+let TOKEN_EXTERN     = 3;
+let TOKEN_IF         = 4;
+let TOKEN_WHILE      = 5;
+let TOKEN_RETURN     = 6;
+let TOKEN_BREAK      = 7;
+let TOKEN_CONTINUE   = 8;
+let TOKEN_ARROW      = 9;
+let TOKEN_STRUCT     = 10;
+
+/* Identifiers */
+let TOKEN_IDENTIFIER = 11;
+
+/* Literals */
+let TOKEN_NUMBER     = 12;
+let TOKEN_BOOLEAN    = 13;
+let TOKEN_NULL       = 14;
+let TOKEN_CHAR       = 15;
+let TOKEN_STRING     = 16;
+
+/* Operators */
+let TOKEN_EQUALS     = 17;
+let TOKEN_PLUS       = 18;
+let TOKEN_MINUS      = 19;
+let TOKEN_MUL        = 20;
+let TOKEN_DIV        = 21;
+let TOKEN_MOD        = 22;
+let TOKEN_BANG       = 23;
+let TOKEN_LESS       = 24;
+let TOKEN_GREATER    = 25;
+let TOKEN_DOT        = 26;
+
+/* Punctuation */
+let TOKEN_SEMICOLON  = 27;
+let TOKEN_COMMA      = 28;
+let TOKEN_COLON      = 29;
+let TOKEN_LPAREN     = 30;
+let TOKEN_RPAREN     = 31;
+let TOKEN_LBRACE     = 32;
+let TOKEN_RBRACE     = 33;
+
+let token = struct {
+	type: i64,
+	data: *void,
+};
+
 let tokenizer = struct {
-	tokens: *i8,
-	tokens_len: i64,
 	buf: *i8,
 	file_size: i64,
 	offset: i64,
 
 	arena: *arena,
+	tokens: *token,
+	tokens_len: i64,
 };
 
 let read_file = (t: *tokenizer, filename: *i8) => void {
@@ -42,34 +90,119 @@ let read_file = (t: *tokenizer, filename: *i8) => void {
 	return;
 };
 
-let add_token = (t: *tokenizer, token: *i8) => i64 {
-	println("Add token: %s", token);
-	let i = 0;
-	while true {
-		let c = (*(token + cast(*i8, i)));
+let add_token = (t: *tokenizer, to: *token) => void {
+	println("Add token: %d", (*to).type);
 
-		(*((*t).tokens + cast(*i8, (*t).tokens_len))) = c;
+	(*((*t).tokens + cast(*token, (*t).tokens_len))) = *to;
+	(*t).tokens_len = (*t).tokens_len + 1;
 
-		(*t).tokens_len = (*t).tokens_len + 1;
-		i = i + 1;
-
-		if c == '\0' {
-			return 0;
-		};
-	};
-
-	return 0;
+	return;
 };
 
 let print_tokens = (t: *tokenizer) => i64 {
 	let i = 0;
 	while i < (*t).tokens_len {
-		let c = (*((*t).tokens + cast(*i8, i)));
-		if c == '\0' {
-			c = '\n';
-		};
+		let to = (*((*t).tokens + cast(*token, i)));
 
-		printf("%c", c);
+		if (to.type == TOKEN_IMPORT) {
+			printf("Import\n");
+		};
+		if (to.type == TOKEN_LET) {
+			printf("Let\n");
+		};
+		if (to.type == TOKEN_EXTERN) {
+			printf("Extern\n");
+		};
+		if (to.type == TOKEN_IF) {
+			printf("If\n");
+		};
+		if (to.type == TOKEN_WHILE) {
+			printf("While\n");
+		};
+		if (to.type == TOKEN_RETURN) {
+			printf("Return\n");
+		};
+		if (to.type == TOKEN_BREAK) {
+			printf("Break\n");
+		};
+		if (to.type == TOKEN_CONTINUE) {
+			printf("Continue\n");
+		};
+		if (to.type == TOKEN_ARROW) {
+			printf("Arrow\n");
+		};
+		if (to.type == TOKEN_STRUCT) {
+			printf("Struct\n");
+		};
+		if (to.type == TOKEN_IDENTIFIER) {
+			printf("Identifier: %s\n", cast(*i8, to.data));
+		};
+		if (to.type == TOKEN_NUMBER) {
+			printf("Number: %d\n", cast(i64, to.data));
+		};
+		if (to.type == TOKEN_BOOLEAN) {
+			printf("Boolean: %d\n", cast(i1, to.data));
+		};
+		if (to.type == TOKEN_NULL) {
+			printf("Null\n");
+		};
+		if (to.type == TOKEN_CHAR) {
+			printf("Char: %c\n", cast(i8, to.data));
+		};
+		if (to.type == TOKEN_STRING) {
+			printf("String: %s\n", cast(*i8, to.data));
+		};
+		if (to.type == TOKEN_EQUALS) {
+			printf("Equals\n");
+		};
+		if (to.type == TOKEN_PLUS) {
+			printf("Plus\n");
+		};
+		if (to.type == TOKEN_MINUS) {
+			printf("Minus\n");
+		};
+		if (to.type == TOKEN_MUL) {
+			printf("Mul\n");
+		};
+		if (to.type == TOKEN_DIV) {
+			printf("Div\n");
+		};
+		if (to.type == TOKEN_MOD) {
+			printf("Mod\n");
+		};
+		if (to.type == TOKEN_BANG) {
+			printf("Bang\n");
+		};
+		if (to.type == TOKEN_LESS) {
+			printf("Less\n");
+		};
+		if (to.type == TOKEN_GREATER) {
+			printf("Greater\n");
+		};
+		if (to.type == TOKEN_DOT) {
+			printf("Dot\n");
+		};
+		if (to.type == TOKEN_SEMICOLON) {
+			printf("Semicolon\n");
+		};
+		if (to.type == TOKEN_COMMA) {
+			printf("Comma\n");
+		};
+		if (to.type == TOKEN_COLON) {
+			printf("Colon\n");
+		};
+		if (to.type == TOKEN_LPAREN) {
+			printf("LParen\n");
+		};
+		if (to.type == TOKEN_RPAREN) {
+			printf("RParen\n");
+		};
+		if (to.type == TOKEN_LBRACE) {
+			printf("LBrace\n");
+		};
+		if (to.type == TOKEN_RBRACE) {
+			printf("RBrace\n");
+		};
 
 		i = i + 1;
 	};
@@ -229,119 +362,151 @@ let tokenizer_skip_comments = (t: *tokenizer) => void {
 	return;
 };
 
-let tokenizer_next = (t: *tokenizer) => *i8 {
+let tokenizer_next = (t: *tokenizer) => *token {
 	tokenizer_skip_whitespace(t);
 	tokenizer_skip_comments(t);
 	tokenizer_skip_whitespace(t);
 
 	if (*t).offset >= (*t).file_size {
-		return "EOF";
+		println("FILE EXCEED");
+		return cast(*token, null);
 	};
+	
+	let to = cast(*token, arena_alloc((*t).arena, sizeof(token)));
 
 	if tokenizer_accept_string(t, "import") {
-	    return "import";
+	    (*to).type = TOKEN_IMPORT;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "let") {
-	    return "let";
+	    (*to).type = TOKEN_LET;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "extern") {
-	    return "extern";
+	    (*to).type = TOKEN_EXTERN;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "if") {
-	    return "if";
+	    (*to).type = TOKEN_IF;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "while") {
-	    return "while";
+	    (*to).type = TOKEN_WHILE;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "return") {
-	    return "return";
+	    (*to).type = TOKEN_RETURN;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "break") {
-	    return "break";
+	    (*to).type = TOKEN_BREAK;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "true") {
-	    return "bool:true";
+	    (*to).type = TOKEN_BOOLEAN;
+	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
+	    *data = true;
+	    (*to).data = cast(*void, data);
+	    return to;
 	};
 	if tokenizer_accept_string(t, "false") {
-	    return "bool:false";
+	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
+	    *data = false;
+	    (*to).data = cast(*void, data);
+	    return to;
 	};
 
 	if tokenizer_accept_string(t, "=>") {
-	    return "=>";
+	    (*to).type = TOKEN_ARROW;
+	    return to;
 	};
 	if tokenizer_accept_string(t, ";") {
-	    return ";";
+	    (*to).type = TOKEN_SEMICOLON;
+	    return to;
 	};
 	if tokenizer_accept_string(t, ",") {
-	    return ",";
+	    (*to).type = TOKEN_COMMA;
+	    return to;
 	};
 	if tokenizer_accept_string(t, ":") {
-	    return ":";
+	    (*to).type = TOKEN_COLON;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "(") {
-	    return "(";
+	    (*to).type = TOKEN_LPAREN;
+	    return to;
 	};
 	if tokenizer_accept_string(t, ")") {
-	    return ")";
+	    (*to).type = TOKEN_RPAREN;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "{") {
-	    return "{";
+	    (*to).type = TOKEN_LBRACE;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "}") {
-	    return "}";
+	    (*to).type = TOKEN_RBRACE;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "=") {
-	    return "=";
+	    (*to).type = TOKEN_EQUALS;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "+") {
-	    return "+";
+	    (*to).type = TOKEN_PLUS;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "-") {
-	    return "-";
+	    (*to).type = TOKEN_MINUS;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "*") {
-	    return "*";
+	    (*to).type = TOKEN_MUL;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "/") {
-	    return "/";
+	    (*to).type = TOKEN_DIV;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "%") {
-	    return "%";
+	    (*to).type = TOKEN_MOD;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "!") {
-	    return "!";
+	    (*to).type = TOKEN_BANG;
+	    return to;
 	};
 	if tokenizer_accept_string(t, "<") {
-	    return "<";
+	    (*to).type = TOKEN_LESS;
+	    return to;
 	};
 	if tokenizer_accept_string(t, ">") {
-	    return ">";
+	    (*to).type = TOKEN_GREATER;
+	    return to;
 	};
 	if tokenizer_accept_string(t, ".") {
-	    return ".";
+	    (*to).type = TOKEN_DOT;
+	    return to;
 	};
 	
 	let maybe_int = tokenizer_accept_int_type(t);
 	if maybe_int != cast(*i64, null) {
-		let to = cast(*i8, arena_alloc((*t).arena, 1000));
-		sprintf(to, "int:%d", *maybe_int);
-
+		(*to).type = TOKEN_NUMBER;
+		(*to).data = cast(*void, maybe_int);
 		return to;
 	};
 
 	let maybe_char = tokenizer_accept_char_type(t);
 	if maybe_char != cast(*i8, null) {
-		let to = cast(*i8, arena_alloc((*t).arena, 1000));
-		sprintf(to, "char:%d", *maybe_char);
-
+		(*to).type = TOKEN_CHAR;
+		(*to).data = cast(*void, maybe_char);
 		return to;
 	};
 
 	let maybe_string = tokenizer_accept_string_type(t);
 	if maybe_string != cast(*i8, null) {
-		let to = cast(*i8, arena_alloc((*t).arena, 1000));
-		sprintf(to, "string:%s", maybe_string);
-
+		(*to).type = TOKEN_STRING;
+		(*to).data = cast(*void, maybe_string);
 		return to;
 	};
 
@@ -355,19 +520,22 @@ let tokenizer_next = (t: *tokenizer) => *i8 {
 		return true;
 	});
 	if strlen(string) == 0 {
-		return cast(*i8, null);
+		println("NO IDENT!");
+		return cast(*token, null);
 	};
 
-	let to = cast(*i8, arena_alloc((*t).arena, 100));
-	sprintf(to, "identifier:%s", string);
-	
+	(*to).type = TOKEN_IDENTIFIER;
+	(*to).data = cast(*void, string);
+
 	return to;
 };
 
 let tokenizer_init = (alloc: *arena, filename: *i8) => i64 {
 	let t = cast(*tokenizer, arena_alloc(alloc, sizeof(tokenizer)));
 	(*t).arena = alloc;
-	(*t).tokens = cast(*i8, arena_alloc((*t).arena, 100000));
+	(*t).tokens = cast(*i8, arena_alloc((*t).arena, 100));
+	(*t).tokens_len = 0;
+	(*t).offset = 0;
 
 	read_file(t, filename);
 
@@ -375,14 +543,10 @@ let tokenizer_init = (alloc: *arena, filename: *i8) => i64 {
 
 	println("%s", (*t).buf);
 
-
 	while true {
 		let tk = tokenizer_next(t);
-		if tk == cast(*i8, null) {
+		if tk == cast(*token, null) {
 			println("NULL TOKEN!");
-			return 1;
-		};
-		if strcmp(tk, "EOF") {
 			break;
 		};
 		add_token(t, tk);

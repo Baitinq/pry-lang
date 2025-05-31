@@ -92,6 +92,7 @@ pub const Node = union(enum) {
     TYPE: union(enum) {
         SIMPLE_TYPE: struct {
             name: []const u8,
+            underlying_type: ?*Node,
         },
         FUNCTION_TYPE: struct {
             parameters: []*Node,
@@ -863,6 +864,7 @@ pub const Parser = struct {
                     .TYPE = .{
                         .SIMPLE_TYPE = .{
                             .name = try self.arena.dupe(u8, ident),
+                            .underlying_type = null,
                         },
                     },
                 });

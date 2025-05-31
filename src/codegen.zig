@@ -521,6 +521,7 @@ pub const CodeGen = struct {
                                 .type = try self.create_node(.{
                                     .TYPE = .{ .SIMPLE_TYPE = .{
                                         .name = "void",
+                                        .underlying_type = null,
                                     } },
                                 }),
                             },
@@ -532,6 +533,7 @@ pub const CodeGen = struct {
                         .TYPE = .{
                             .SIMPLE_TYPE = .{
                                 .name = "i64",
+                                .underlying_type = null,
                             },
                         },
                     }));
@@ -546,6 +548,7 @@ pub const CodeGen = struct {
                         .TYPE = .{
                             .SIMPLE_TYPE = .{
                                 .name = "bool",
+                                .underlying_type = null,
                             },
                         },
                     }));
@@ -555,6 +558,7 @@ pub const CodeGen = struct {
                         .TYPE = .{
                             .SIMPLE_TYPE = .{
                                 .name = "i8",
+                                .underlying_type = null,
                             },
                         },
                     }));
@@ -573,6 +577,7 @@ pub const CodeGen = struct {
                                         .type = try self.create_node(.{
                                             .TYPE = .{ .SIMPLE_TYPE = .{
                                                 .name = "i8",
+                                                .underlying_type = null,
                                             } },
                                         }),
                                     },
@@ -605,6 +610,7 @@ pub const CodeGen = struct {
                 var result: llvm.LLVMValueRef = undefined;
                 var node_type: *parser.Node = try self.create_node(.{ .TYPE = .{ .SIMPLE_TYPE = .{
                     .name = "i64",
+                    .underlying_type = null,
                 } } });
 
                 if (exp.addition) {
@@ -655,6 +661,7 @@ pub const CodeGen = struct {
                             .TYPE = .{
                                 .SIMPLE_TYPE = .{
                                     .name = "bool",
+                                    .underlying_type = null,
                                 },
                             },
                         });
@@ -665,6 +672,7 @@ pub const CodeGen = struct {
                             .TYPE = .{
                                 .SIMPLE_TYPE = .{
                                     .name = "i64",
+                                    .underlying_type = null,
                                 },
                             },
                         });
@@ -699,6 +707,7 @@ pub const CodeGen = struct {
                     .TYPE = .{
                         .SIMPLE_TYPE = .{
                             .name = "bool",
+                            .underlying_type = null,
                         },
                     },
                 }));
@@ -725,6 +734,10 @@ pub const CodeGen = struct {
                         });
                     },
                     .STRUCT_TYPE => |t| {
+                        const simple_type_node = try self.create_node(.{ .TYPE = .{ .SIMPLE_TYPE = .{
+                            .name = name.?,
+                            .underlying_type = expression,
+                        } } });
                         const struct_type = llvm.LLVMStructCreateNamed(self.llvm_context, try std.fmt.allocPrintZ(self.arena, "{s}", .{name.?}));
 
                         // Needed for recursive structs
@@ -734,7 +747,7 @@ pub const CodeGen = struct {
                                 .type = struct_type,
                                 .stack_level = null,
                                 .node = expression,
-                                .node_type = expression,
+                                .node_type = simple_type_node,
                             }));
                         }
 
@@ -749,7 +762,7 @@ pub const CodeGen = struct {
                             .type = struct_type,
                             .stack_level = null,
                             .node = expression,
-                            .node_type = expression,
+                            .node_type = simple_type_node,
                         });
                     },
                     else => unreachable,
@@ -779,6 +792,7 @@ pub const CodeGen = struct {
                         .TYPE = .{
                             .SIMPLE_TYPE = .{
                                 .name = "i64",
+                                .underlying_type = null,
                             },
                         },
                     }),
@@ -847,7 +861,7 @@ pub const CodeGen = struct {
             unreachable;
         }
         var fieldIndex: ?usize = null;
-        for (0.., typ.TYPE.STRUCT_TYPE.fields) |i, field| {
+        for (0.., typ.TYPE.SIMPLE_TYPE.underlying_type.?.TYPE.STRUCT_TYPE.fields) |i, field| {
             if (std.mem.eql(u8, name, field.PRIMARY_EXPRESSION.IDENTIFIER.name)) {
                 fieldIndex = i;
                 break;
@@ -861,7 +875,7 @@ pub const CodeGen = struct {
 
         return .{
             .value = llvm.LLVMBuildGEP2(self.builder, try self.get_llvm_type(typ), ptr.value, indices, indices.len, try std.fmt.allocPrintZ(self.arena, "{s}", .{name})),
-            .type = typ.TYPE.STRUCT_TYPE.fields[fieldIndex.?].PRIMARY_EXPRESSION.IDENTIFIER.type.?,
+            .type = typ.TYPE.SIMPLE_TYPE.underlying_type.?.TYPE.STRUCT_TYPE.fields[fieldIndex.?].PRIMARY_EXPRESSION.IDENTIFIER.type.?,
         };
     }
 
