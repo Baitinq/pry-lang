@@ -138,7 +138,7 @@ let print_tokens = (t: *tokenizer) => i64 {
 			printf("Identifier: %s\n", cast(*i8, to.data));
 		};
 		if (to.type == TOKEN_NUMBER) {
-			printf("Number: %d\n", cast(i64, to.data));
+			printf("Number: %d\n", *cast(*i64, to.data));
 		};
 		if (to.type == TOKEN_BOOLEAN) {
 			printf("Boolean: %d\n", cast(i1, to.data));
@@ -309,7 +309,7 @@ let tokenizer_accept_int_type = (t: *tokenizer) => *i64 {
 	if strlen(string) == 0 {
 		return cast(*i64, null);
 	};
-	let x = cast(*i64, arena_alloc((*t).arena, 8));
+	let x = cast(*i64, arena_alloc((*t).arena, sizeof(i64)));
 	*x = atoi(string);
 	return x;
 };
@@ -368,7 +368,6 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	tokenizer_skip_whitespace(t);
 
 	if (*t).offset >= (*t).file_size {
-		println("FILE EXCEED");
 		return cast(*token, null);
 	};
 	
@@ -533,7 +532,7 @@ let tokenizer_next = (t: *tokenizer) => *token {
 let tokenizer_init = (alloc: *arena, filename: *i8) => i64 {
 	let t = cast(*tokenizer, arena_alloc(alloc, sizeof(tokenizer)));
 	(*t).arena = alloc;
-	(*t).tokens = cast(*i8, arena_alloc((*t).arena, 100));
+	(*t).tokens = cast(*token, arena_alloc((*t).arena, sizeof(token) * 1000)); /* why does it not care about type here */
 	(*t).tokens_len = 0;
 	(*t).offset = 0;
 
@@ -546,7 +545,6 @@ let tokenizer_init = (alloc: *arena, filename: *i8) => i64 {
 	while true {
 		let tk = tokenizer_next(t);
 		if tk == cast(*token, null) {
-			println("NULL TOKEN!");
 			break;
 		};
 		add_token(t, tk);

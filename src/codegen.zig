@@ -248,7 +248,7 @@ pub const CodeGen = struct {
 
         for (0.., function_call_statement.arguments) |i, argument| {
             const arg = try self.generate_expression_value(argument, null);
-            const expected_type = function.node_type.TYPE.FUNCTION_TYPE.parameters[i];
+            const expected_type = function.node_type.TYPE.FUNCTION_TYPE.parameters[i]; //TODO: If varargs we shouldnt do this
             std.debug.print("2 TYP {s}: {any} vs {any}\n", .{ function_call_statement.expression.PRIMARY_EXPRESSION.IDENTIFIER.name, expected_type.TYPE, arg.node_type.TYPE });
             std.debug.assert(self.compare_types(expected_type, arg.node_type, false));
             try arguments.append(arg.value);
@@ -1066,6 +1066,7 @@ const Environment = struct {
     }
 
     fn add_variable(self: *Environment, name: []const u8, variable: *Variable) !void {
+        // TODO: Dont allow shadowing if value != value or type != type (across things)
         try self.scope_stack.getLast().variables.put(name, variable);
     }
 

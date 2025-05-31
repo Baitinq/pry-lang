@@ -13,7 +13,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	println("%s", filename);
 
-	let alloc = arena_init(9999999999);
+	let alloc = arena_init(999999999);
 
 	tokenizer_init(alloc, filename);
 	tokenizer_deinit();
