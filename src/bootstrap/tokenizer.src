@@ -147,7 +147,7 @@ let print_tokens = (t: *tokenizer) => i64 {
 			printf("Null\n");
 		};
 		if (to.type == TOKEN_CHAR) {
-			printf("Char: %c\n", cast(i8, to.data));
+			printf("Char: %c\n", *cast(*i8, to.data));
 		};
 		if (to.type == TOKEN_STRING) {
 			printf("String: %s\n", cast(*i8, to.data));
@@ -330,6 +330,10 @@ let tokenizer_accept_char_type = (t: *tokenizer) => *i8 {
 		return cast(*i8, null);
 	};
 
+	if strlen(string) != 1 {
+		return cast(*i8, null);
+	};
+
 	return string;
 };
 
@@ -401,6 +405,10 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	    (*to).type = TOKEN_BREAK;
 	    return to;
 	};
+	if tokenizer_accept_string(t, "continue") {
+	    (*to).type = TOKEN_CONTINUE;
+	    return to;
+	};
 	if tokenizer_accept_string(t, "true") {
 	    (*to).type = TOKEN_BOOLEAN;
 	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
@@ -409,9 +417,18 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	    return to;
 	};
 	if tokenizer_accept_string(t, "false") {
+	    (*to).type = TOKEN_BOOLEAN;
 	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
 	    *data = false;
 	    (*to).data = cast(*void, data);
+	    return to;
+	};
+	if tokenizer_accept_string(t, "null") {
+	    (*to).type = TOKEN_NULL;
+	    return to;
+	};
+	if tokenizer_accept_string(t, "struct") {
+	    (*to).type = TOKEN_STRUCT;
 	    return to;
 	};
 
