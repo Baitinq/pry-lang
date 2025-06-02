@@ -2,13 +2,6 @@ extern strlen = (*i8) => i64;
 extern memcpy = (*void, *void, i64) => void;
 extern sprintf = (*i8, *i8, varargs) => void;
 extern atoi = (*i8) => i64;
-extern fopen = (*i8, *i8) => *i8;
-extern fgets = (*i8, i64, *i8) => void;
-extern feof = (*i8) => bool;
-extern fseek = (*i8, i64, i64) => i64;
-extern ftell = (*i8) => i64;
-extern fread = (*i8, i64, i64, *i8) => i64;
-extern fclose = (*i8) => *i8;
 
 import "!stdlib.src";
 import "!mem.src";
@@ -63,46 +56,16 @@ let token = struct {
 
 let tokenizer = struct {
 	buf: *i8,
-	file_size: i64,
+	buf_len: i64,
 	offset: i64,
 
 	arena: *arena,
-	tokens: *token,
-	tokens_len: i64,
 };
 
-let read_file = (t: *tokenizer, filename: *i8) => void {
-	let file = fopen(filename, "r");
-
-	fseek(file, 0, 2);
-	(*t).file_size = ftell(file);
-	fseek(file, 0, 0);
-
-	let buf = cast(*i8, arena_alloc((*t).arena, (*t).file_size + 1));
-
-	let bytes_read = fread(buf, 1, (*t).file_size, file);
-	(*(buf + cast(*i8, bytes_read))) = '\0';
-
-	fclose(file);
-
-	(*t).buf = buf;
-
-	return;
-};
-
-let add_token = (t: *tokenizer, to: *token) => void {
-	println("Add token: %d", (*to).type);
-
-	(*((*t).tokens + cast(*token, (*t).tokens_len))) = *to;
-	(*t).tokens_len = (*t).tokens_len + 1;
-
-	return;
-};
-
-let print_tokens = (t: *tokenizer) => i64 {
+let print_tokens = (ts: *token, ts_len: i64) => i64 {
 	let i = 0;
-	while i < (*t).tokens_len {
-		let to = (*((*t).tokens + cast(*token, i)));
+	while i < ts_len {
+		let to = (*(ts + cast(*token, i)));
 
 		if (to.type == TOKEN_IMPORT) {
 			printf("Import\n");
@@ -142,6 +105,7 @@ let print_tokens = (t: *tokenizer) => i64 {
 		};
 		if (to.type == TOKEN_BOOLEAN) {
 			printf("Boolean: %d\n", cast(i1, to.data));
+			/* TODO: FIX */
 		};
 		if (to.type == TOKEN_NULL) {
 			printf("Null\n");
@@ -212,7 +176,7 @@ let print_tokens = (t: *tokenizer) => i64 {
 
 let tokenizer_skip_whitespace = (t: *tokenizer) => void {
 	while true {
-		if (*t).offset >= (*t).file_size { return; };
+		if (*t).offset >= (*t).buf_len { return; };
 		let c = (*((*t).buf + cast(*i8, (*t).offset)));
 		if !iswhitespace(c) {
 			return;
@@ -225,7 +189,7 @@ let tokenizer_skip_whitespace = (t: *tokenizer) => void {
 
 let tokenizer_accept_string = (t: *tokenizer, str: *i8) => bool {
 	let str_len = strlen(str);
-	if (*t).offset + str_len > (*t).file_size { return false; };
+	if (*t).offset + str_len > (*t).buf_len { return false; };
 
 	let s = cast(*i8, arena_alloc((*t).arena, 1000));
 	memcpy(cast(*void, s), cast(*void, (*t).buf + cast(*i8, (*t).offset)), str_len);
@@ -243,7 +207,7 @@ let tokenizer_consume_until_condition = (t: *tokenizer, condition: (i8) => bool)
 	let res = cast(*i8, arena_alloc((*t).arena, 1000));
 
 	while true {
-		if (*t).offset >= (*t).file_size {
+		if (*t).offset >= (*t).buf_len {
 			return res;
 		};
 
@@ -371,7 +335,7 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	tokenizer_skip_comments(t);
 	tokenizer_skip_whitespace(t);
 
-	if (*t).offset >= (*t).file_size {
+	if (*t).offset >= (*t).buf_len {
 		return cast(*token, null);
 	};
 	
@@ -546,34 +510,41 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	return to;
 };
 
-let tokenizer_init = (alloc: *arena, filename: *i8) => i64 {
+let tokenizer_init = (alloc: *arena, file: slice) => *tokenizer {
 	let t = cast(*tokenizer, arena_alloc(alloc, sizeof(tokenizer)));
 	(*t).arena = alloc;
-	(*t).tokens = cast(*token, arena_alloc((*t).arena, sizeof(token) * 1000)); /* why does it not care about type here */
-	(*t).tokens_len = 0;
 	(*t).offset = 0;
+	(*t).buf = file.data;
+	(*t).buf_len = file.data_len;
 
-	read_file(t, filename);
-
-	println("File size: %d", (*t).file_size);
+	println("File size: %d", (*t).buf_len);
 
 	println("%s", (*t).buf);
+
+	return t;
+};
+
+let tokenizer_tokenize = (t: *tokenizer) => slice {
+	let tokens = cast(*token, arena_alloc((*t).arena, sizeof(token) * 1000)); /* why does it not care about type here */
+	let tokens_len = 0;
 
 	while true {
 		let tk = tokenizer_next(t);
 		if tk == cast(*token, null) {
 			break;
 		};
-		add_token(t, tk);
+		println("Add token: %d", (*tk).type);
+
+		(*(tokens + cast(*token, tokens_len))) = *tk;
+		tokens_len = tokens_len + 1;
 	};
 
-	println("PRINT TOKENS");
+	println("PRINT TOKENS: %d", tokens_len);
 
-	print_tokens(t);
+	print_tokens(tokens, tokens_len);
 
-	return 0;
-};
-
-let tokenizer_deinit = () => i64 {
-	return 0;
+	let res = slice{};
+	res.data = tokens;
+	res.data_len = tokens_len;
+	return res;
 };

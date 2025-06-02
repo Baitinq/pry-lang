@@ -1,7 +1,40 @@
+extern fopen = (*i8, *i8) => *i8;
+extern fgets = (*i8, i64, *i8) => void;
+extern feof = (*i8) => bool;
+extern fseek = (*i8, i64, i64) => i64;
+extern ftell = (*i8) => i64;
+extern fread = (*i8, i64, i64, *i8) => i64;
+extern fclose = (*i8) => *i8;
+
 import "!stdlib.src";
 import "!mem.src";
 
+let slice = struct {
+	data: *void,
+	data_len: i64,
+};
+
 import "tokenizer.src";
+
+let read_file = (filename: *i8, alloc: *arena) => slice {
+	let file = fopen(filename, "r");
+
+	fseek(file, 0, 2);
+	let file_size = ftell(file);
+	fseek(file, 0, 0);
+
+	let buf = cast(*i8, arena_alloc(alloc, file_size + 1));
+
+	let bytes_read = fread(buf, 1, file_size, file);
+	(*(buf + cast(*i8, bytes_read))) = '\0';
+
+	fclose(file);
+
+	let sl = slice{};
+	sl.data = cast(*void, buf);
+	sl.data_len = file_size;
+	return sl;
+};
 
 let main = (argc: i64, argv: **i8) => i64 {
 	if argc < 2 {
@@ -15,8 +48,10 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	let alloc = arena_init(999999999);
 
-	tokenizer_init(alloc, filename);
-	tokenizer_deinit();
+	let file = read_file(filename, alloc);
+
+	let t = tokenizer_init(alloc, file);
+	let ts = tokenizer_tokenize(t);
 
 	arena_free(alloc);
 
