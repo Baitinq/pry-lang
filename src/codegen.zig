@@ -780,8 +780,7 @@ pub const CodeGen = struct {
             },
             .SIZEOF_STATEMENT => |exp| {
                 const typ = try self.get_llvm_type(exp.typ);
-                const size_in_bits = llvm.LLVMSizeOfTypeInBits(self.llvm_target_data, typ);
-                const size_in_bytes = size_in_bits / 8;
+                const size_in_bytes = llvm.LLVMStoreSizeOfType(self.llvm_target_data, typ);
 
                 const size_val = llvm.LLVMConstInt(llvm.LLVMInt64Type(), size_in_bytes, 0);
 

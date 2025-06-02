@@ -104,8 +104,7 @@ let print_tokens = (ts: *token, ts_len: i64) => i64 {
 			printf("Number: %d\n", *cast(*i64, to.data));
 		};
 		if (to.type == TOKEN_BOOLEAN) {
-			printf("Boolean: %d\n", cast(i1, to.data));
-			/* TODO: FIX */
+			printf("Boolean: %d\n", *cast(*bool, to.data));
 		};
 		if (to.type == TOKEN_NULL) {
 			printf("Null\n");
