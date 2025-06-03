@@ -1,0 +1,43 @@
+import "llvm.src";
+
+let codegen = struct {
+	llvm_module: *void,
+	llvm_context: *void,
+	builder: *void,
+};
+
+let codegen_init = (alloc: *arena) => *codegen {
+	LLVMInitializeX86TargetInfo();
+	LLVMInitializeX86TargetMC();
+	LLVMInitializeX86Target();
+	LLVMInitializeX86AsmPrinter();
+	LLVMInitializeX86AsmParser();
+
+	let module = LLVMModuleCreateWithName("module");
+        let context = LLVMGetGlobalContext();
+        let builder = LLVMCreateBuilder();
+	
+	let c = cast(*codegen, arena_alloc(alloc, sizeof(codegen)));
+	
+	(*c).llvm_module = module;
+	(*c).llvm_context = context;
+	(*c).builder = builder;
+
+	return c;
+};
+
+let codegen_generate = (c: *codegen) => i64 {
+	return 0;
+};
+
+let codegen_compile = (c: *codegen) => i64 {
+	LLVMDumpModule((*c).llvm_module);
+	return 0;
+};
+
+let codegen_deinit = (c: *codegen) => void {
+        LLVMDisposeModule((*c).llvm_module);
+        LLVMShutdown();
+        LLVMDisposeBuilder((*c).builder);
+	return;
+};

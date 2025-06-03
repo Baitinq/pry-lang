@@ -16,6 +16,7 @@ let slice = struct {
 
 import "tokenizer.src";
 import "parser.src";
+import "codegen.src";
 
 let read_file = (filename: *i8, alloc: *arena) => slice {
 	let file = fopen(filename, "r");
@@ -56,6 +57,11 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	let p = parser_init(cast(*token, ts.data), ts.data_len, alloc);
 	let ns = parse(p);
+
+	let c = codegen_init(alloc);
+	let res = codegen_generate(c);
+	let res = codegen_compile(c);
+	codegen_deinit(c);
 
 	arena_free(alloc);
 

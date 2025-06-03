@@ -1,0 +1,14 @@
+extern LLVMInitializeX86TargetInfo = () => void;
+extern LLVMInitializeX86TargetMC = () => void;
+extern LLVMInitializeX86Target = () => void;
+extern LLVMInitializeX86AsmPrinter = () => void;
+extern LLVMInitializeX86AsmParser = () => void;
+
+extern LLVMModuleCreateWithName = (*i8) => *void;
+extern LLVMGetGlobalContext = () => *void;
+extern LLVMCreateBuilder = () => *void; /* TODO: Create types */
+extern LLVMDisposeModule = (*void) => void;
+extern LLVMShutdown = () => void;
+extern LLVMDisposeBuilder = (*void) => void;
+
+extern LLVMDumpModule = (*void) => void;
