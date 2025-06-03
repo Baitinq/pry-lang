@@ -1,0 +1,246 @@
+ let Node = struct {
+	type: i64,
+	data: *void,
+ };
+
+let NODE_PROGRAM = 1;
+let NODE_STATEMENT = 2;
+let NODE_ASSIGNMENT_STATEMENT = 3;
+let NODE_IMPORT_DECLARATION = 4;
+let NODE_FUNCTION_CALL_STATEMENT = 5;
+let NODE_IF_STATEMENT = 6;
+let NODE_WHILE_STATEMENT = 7;
+let NODE_EQUALITY_EXPRESSION = 8;
+let NODE_ADDITIVE_EXPRESSION = 9;
+let NODE_MULTIPLICATIVE_EXPRESSION = 10;
+let NODE_UNARY_EXPRESSION = 11;
+let NODE_POSTFIX_EXPRESSION = 12;
+let NODE_PRIMARY_EXPRESSION_NUMBER = 13;
+let NODE_PRIMARY_EXPRESSION_BOOLEAN = 14;
+let NODE_PRIMARY_EXPRESSION_NULL = 15;
+let NODE_PRIMARY_EXPRESSION_CHAR = 16;
+let NODE_PRIMARY_EXPRESSION_STRING = 17;
+let NODE_PRIMARY_EXPRESSION_IDENTIFIER = 18;
+let NODE_FUNCTION_DEFINITION = 19;
+let NODE_STRUCT_INSTANCIATION = 20;
+let NODE_FIELD_ACCESS = 21;
+let NODE_TYPE_SIMPLE_TYPE = 22;
+let NODE_TYPE_FUNCTION_TYPE = 23;
+let NODE_TYPE_POINTER_TYPE = 24;
+let NODE_TYPE_STRUCT_TYPE = 25;
+let NODE_RETURN_STATEMENT = 26;
+let NODE_CAST_STATEMENT = 27;
+let NODE_SIZEOF_STATEMENT = 28;
+let NODE_BREAK_STATEMENT = 29;
+let NODE_CONTINUE_STATEMENT = 30;
+
+let EQUALITY_EXPRESSION_TYPE_EQ = 0;
+let EQUALITY_EXPRESSION_TYPE_NE = 1;
+let EQUALITY_EXPRESSION_TYPE_GE = 2;
+let EQUALITY_EXPRESSION_TYPE_LE = 3;
+let EQUALITY_EXPRESSION_TYPE_LT = 4;
+let EQUALITY_EXPRESSION_TYPE_GT = 5;
+
+let MULTIPLICATIVE_EXPRESSION_TYPE_MUL = 0;
+let MULTIPLICATIVE_EXPRESSION_TYPE_DIV = 1;
+let MULTIPLICATIVE_EXPRESSION_TYPE_MOD = 2;
+
+let UNARY_EXPRESSION_TYPE_NOT = 0;
+let UNARY_EXPRESSION_TYPE_MINUS = 1;
+let UNARY_EXPRESSION_TYPE_STAR = 2;
+
+let NODE_PROGRAM_DATA = struct {
+    statements: *Node,
+    statements_len: i64,
+};
+
+let NODE_STATEMENT_DATA = struct {
+    statement: *Node,
+};
+
+let NODE_ASSIGNMENT_STATEMENT_DATA = struct {
+    is_declaration: bool,
+    is_dereference: bool,
+    lhs: *Node,
+    rhs: *Node,
+};
+
+let NODE_IMPORT_DECLARATION_DATA = struct {
+    filename: *i8,
+    program: *Node,
+};
+
+let NODE_FUNCTION_CALL_STATEMENT_DATA = struct {
+    expression: *Node,
+    arguments: *Node,
+    arguments_len: i64,
+};
+
+let NODE_IF_STATEMENT_DATA = struct {
+    condition: *Node,
+    statements: *Node,
+    statements_len: i64,
+};
+
+let NODE_WHILE_STATEMENT_DATA = struct {
+    condition: *Node,
+    statements: *Node,
+    statements_len: i64,
+};
+
+let NODE_EQUALITY_EXPRESSION_DATA = struct {
+    lhs: *Node,
+    rhs: *Node,
+    typ: i64,
+};
+
+let NODE_ADDITIVE_EXPRESSION_DATA = struct {
+    addition: bool,
+    lhs: *Node,
+    rhs: *Node,
+};
+
+let NODE_MULTIPLICATIVE_EXPRESSION_DATA = struct {
+    lhs: *Node,
+    rhs: *Node,
+    typ: i64,
+};
+
+let NODE_UNARY_EXPRESSION_DATA = struct {
+    typ: i64,
+    expression: *Node,
+};
+
+let NODE_POSTFIX_EXPRESSION_DATA = struct {
+    lhs: *Node,
+    rhs: *Node,
+};
+
+let NODE_PRIMARY_EXPRESSION_NUMBER_DATA = struct {
+    value: i64,
+};
+
+let NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA = struct {
+    value: bool,
+};
+
+let NODE_PRIMARY_EXPRESSION_CHAR_DATA = struct {
+    value: i8,
+};
+
+let NODE_PRIMARY_EXPRESSION_STRING_DATA = struct {
+    value: *i8,
+};
+
+let NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA = struct {
+    name: *i8,
+    type: *Node,
+};
+
+let NODE_FUNCTION_DEFINITION_DATA = struct {
+    statements: *Node,
+    statements_len: i64,
+    parameters: *Node,
+    parameters_len: i64,
+    retur_type: *Node,
+};
+
+let NODE_STRUCT_INSTANCIATION_DATA = struct {
+    typ: *i8,
+};
+
+let NODE_FIELD_ACCESS_DATA = struct {
+    expression: *Node,
+    name: *i8,
+};
+
+let NODE_TYPE_SIMPLE_TYPE_DATA = struct {
+    name: *i8,
+    underlying_type: *Node,
+};
+
+let NODE_TYPE_FUNCTION_TYPE_DATA = struct {
+    parameters: *Node,
+    parameters_len: i64,
+    retur_type: *Node,
+};
+
+let NODE_TYPE_POINTER_TYPE_DATA = struct {
+    type: *Node,
+};
+
+let NODE_TYPE_STRUCT_TYPE_DATA = struct {
+    fields: *Node,
+    fields_len: i64,
+};
+
+let NODE_RETURN_STATEMENT_DATA = struct {
+    expression: *Node,
+};
+
+let NODE_CAST_STATEMENT_DATA = struct {
+    typ: *Node,
+    expression: *Node,
+};
+
+let NODE_SIZEOF_STATEMENT_DATA = struct {
+    typ: *Node,
+};
+
+
+let parser = struct {
+	tokens: *token,
+	tokens_len: i64,
+
+	offset: i64,
+
+	arena: *arena,
+};
+
+let parser_init = (ts: *token, ts_len: i64, ar: *arena) => *parser {
+	let p = cast(*parser, arena_alloc(ar, sizeof(parser)));
+
+	(*p).tokens = ts;
+	(*p).tokens_len = ts_len;
+	(*p).offset = 0;
+	(*p).arena = ar;
+
+	return p;
+};
+
+let create_node = (p: *parser, n: Node) => *Node {
+	let res = cast(*Node, arena_alloc((*p).arena, 100));
+	*res = n;
+	return res;
+};
+
+/* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
+let parse_statement = (p: *parser) => *Node {
+	return cast(*Node, null);
+};
+
+let parse_program = (p: *parser) => *Node {
+	let nodes = cast(*Node, arena_alloc((*p).arena, 10000));
+
+	let i = 0;
+	while (*p).offset < (*p).tokens_len {
+		let s = parse_statement(p);
+		if s == cast(*Node, null) {
+			return s;
+		};
+		(*(nodes + cast(*Node, i))) = s;
+		i = i + 1;
+	};
+
+	let d = cast(*NODE_PROGRAM_DATA, arena_alloc((*p).arena, 100));
+	(*d).statements = nodes;
+	(*d).statements_len = i;
+	let n = Node{};
+	n.type = NODE_PROGRAM;
+	n.data = cast(*void, d);
+	return create_node(p, n);
+};
+
+let parse = (p: *parser) => *Node {
+	return parse_program(p);
+};

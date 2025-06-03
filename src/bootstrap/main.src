@@ -15,6 +15,7 @@ let slice = struct {
 };
 
 import "tokenizer.src";
+import "parser.src";
 
 let read_file = (filename: *i8, alloc: *arena) => slice {
 	let file = fopen(filename, "r");
@@ -52,6 +53,9 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	let t = tokenizer_init(alloc, file);
 	let ts = tokenizer_tokenize(t);
+
+	let p = parser_init(cast(*token, ts.data), ts.data_len, alloc);
+	let ns = parse(p);
 
 	arena_free(alloc);
 
