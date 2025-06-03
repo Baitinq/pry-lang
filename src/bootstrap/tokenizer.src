@@ -293,10 +293,6 @@ let tokenizer_accept_char_type = (t: *tokenizer) => *i8 {
 		return cast(*i8, null);
 	};
 
-	if strlen(string) != 1 {
-		return cast(*i8, null);
-	};
-
 	return string;
 };
 
