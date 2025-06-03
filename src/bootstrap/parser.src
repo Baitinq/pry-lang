@@ -209,30 +209,137 @@ let parser_init = (ts: *token, ts_len: i64, ar: *arena) => *parser {
 };
 
 let create_node = (p: *parser, n: Node) => *Node {
-	let res = cast(*Node, arena_alloc((*p).arena, 100));
+	let res = cast(*Node, arena_alloc((*p).arena, sizeof(Node)));
 	*res = n;
 	return res;
 };
 
-/* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
-let parse_statement = (p: *parser) => *Node {
+let parser_peek_token = (p: *parser) => *token {
+    if (*p).offset >= (*p).tokens_len {
+	return cast(*token, null);
+     };
+
+    return ((*p).tokens + cast(*token, (*p).offset));
+};
+
+ let parser_consume_token = (p: *parser) => *token {
+    if (*p).offset >= (*p).tokens_len {
+	return cast(*token, null);
+     };
+	
+    let t = ((*p).tokens + cast(*token, (*p).offset));
+    (*p).offset = (*p).offset + 1;
+    return t;
+};
+
+let parser_accept_token = (p: *parser, t: i64) => *token {
+    let curr_token = parser_peek_token(p);
+    if curr_token == cast(*token, null) {
+	return cast(*token, null);
+    };
+
+    if (*curr_token).type == t {
+	return parser_consume_token(p);
+    };
+    return cast(*token, null);
+};
+
+/* PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN */
+let parser_parse_primary_expression = (p: *parser) => *Node {
+	let tok = parser_consume_token(p);
+	if tok == cast(*token, null) {
+	    return cast(*Node, null); 
+	};
+
+	if (*tok).type == TOKEN_IDENTIFIER {
+	    let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
+	    (*d).name = (*tok).data;
+	    (*d).type = cast(*Node, null); /* TODO */
+	    let n = Node{};
+	    n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
+	    n.data = cast(*void, d);
+	    return create_node(p, n);
+	};
+
+	if (*tok).type == TOKEN_NUMBER {
+	    let d = cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_NUMBER_DATA)));
+	    (*d).value = *(cast(*i64, (*tok).data));
+	    let n = Node{};
+	    n.type = NODE_PRIMARY_EXPRESSION_NUMBER;
+	    n.data = cast(*void, d);
+	    return create_node(p, n);
+	};
+
 	return cast(*Node, null);
 };
 
+/* AssignmentStatement ::= ("let")? ("*")? Expression EQUALS Expression */
+let parse_assignment_statement = (p: *parser) => *Node {
+	let is_declaration = false;
+	if parser_accept_token(p, TOKEN_LET) != cast(*token, null) {
+	    println("IS DECLARATION");
+	    is_declaration = true;
+	};
+
+	/* TODO: is_dereference */
+
+	let lhs = parser_parse_primary_expression(p); /* TODO */
+	if lhs == cast(*Node, null) {
+	    return cast(*Node, null);
+	};	
+	
+	if parser_accept_token(p, TOKEN_EQUALS) == cast(*token, null) {
+	    return cast(*Node, null);
+	};
+	
+	let rhs = parser_parse_primary_expression(p); /* TODO */
+	if rhs == cast(*Node, null) {
+	    return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_ASSIGNMENT_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_ASSIGNMENT_STATEMENT_DATA )));
+	(*d).is_declaration = is_declaration;
+	(*d).is_dereference = false;
+	(*d).lhs = lhs;
+	(*d).rhs = rhs;
+	let n = Node{};
+	n.type = NODE_ASSIGNMENT_STATEMENT;
+	n.data = cast(*void, d);
+	println("CONTINUE");
+	return create_node(p, n);
+};
+
+/* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
+let parse_statement = (p: *parser) => *Node {
+	let assignment = parse_assignment_statement(p);
+	if assignment == cast(*Node, null) {
+	    return cast(*Node, null);
+	};
+
+	if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+	    return cast(*Node, null);
+	};
+	
+	return assignment;
+};
+
+/* Program ::= Statement+ */
 let parse_program = (p: *parser) => *Node {
-	let nodes = cast(*Node, arena_alloc((*p).arena, 10000));
+	let nodes = cast(*Node, arena_alloc((*p).arena, sizeof(Node) * 1000));
 
 	let i = 0;
 	while (*p).offset < (*p).tokens_len {
 		let s = parse_statement(p);
 		if s == cast(*Node, null) {
+			println("ERROR! Null node %d", (*p).offset);
 			return s;
 		};
+		println("PARSE 1 stmt");
 		(*(nodes + cast(*Node, i))) = s;
 		i = i + 1;
 	};
 
-	let d = cast(*NODE_PROGRAM_DATA, arena_alloc((*p).arena, 100));
+	let d = cast(*NODE_PROGRAM_DATA, arena_alloc((*p).arena, sizeof(NODE_PROGRAM_DATA)));
 	(*d).statements = nodes;
 	(*d).statements_len = i;
 	let n = Node{};
@@ -244,3 +351,12 @@ let parse_program = (p: *parser) => *Node {
 let parse = (p: *parser) => *Node {
 	return parse_program(p);
 };
+
+/*
+
+For example -2:
+
+* parsing assignment statement
+* parsing ident and num literals
+
+*/
