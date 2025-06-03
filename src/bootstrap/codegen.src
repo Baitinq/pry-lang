@@ -54,6 +54,7 @@ let codegen_compile = (c: *codegen) => i64 {
             LLVMRelocDefault,
             LLVMCodeModelDefault,
         );
+        LLVMDisposeMessage(triple);
         result = LLVMVerifyModule((*c).llvm_module, LLVMAbortProcessAction, message);
         if result != 0 {
             println("Verification output: %s", *message);
@@ -69,6 +70,7 @@ let codegen_compile = (c: *codegen) => i64 {
             LLVMObjectFile,
             cast(**i8, null),
         );
+        LLVMDisposeTargetMachine(target_machine);
         println("Object file generated: %s", filename);
 
 	return 0;

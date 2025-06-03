@@ -16,6 +16,7 @@ extern LLVMGetDefaultTargetTriple = () => *i8;
 extern LLVMGetTargetFromTriple = (*i8, **void, **i8) => i64;
 extern LLVMDisposeMessage = (*i8) => void;
 extern LLVMCreateTargetMachine = (*void, *i8, *i8, *i8, i64, i64, i64) => *void;
+extern LLVMDisposeTargetMachine = (*void) => void;
 
 let LLVMCodeGenLevelDefault = 2;
 let LLVMRelocDefault = 0;
