@@ -12,3 +12,19 @@ extern LLVMShutdown = () => void;
 extern LLVMDisposeBuilder = (*void) => void;
 
 extern LLVMDumpModule = (*void) => void;
+extern LLVMGetDefaultTargetTriple = () => *i8;
+extern LLVMGetTargetFromTriple = (*i8, **void, **i8) => i64;
+extern LLVMDisposeMessage = (*i8) => void;
+extern LLVMCreateTargetMachine = (*void, *i8, *i8, *i8, i64, i64, i64) => *void;
+
+let LLVMCodeGenLevelDefault = 2;
+let LLVMRelocDefault = 0;
+let LLVMCodeModelDefault = 0;
+
+extern LLVMVerifyModule = (*void, i64, **i8) => i64;
+
+let LLVMAbortProcessAction = 0;
+
+extern LLVMTargetMachineEmitToFile = (*void, *void, *i8, i64, **i8) => i64;
+
+let LLVMObjectFile = 1;

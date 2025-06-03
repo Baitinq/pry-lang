@@ -4,6 +4,7 @@ let codegen = struct {
 	llvm_module: *void,
 	llvm_context: *void,
 	builder: *void,
+	arena: *arena,
 };
 
 let codegen_init = (alloc: *arena) => *codegen {
@@ -22,6 +23,7 @@ let codegen_init = (alloc: *arena) => *codegen {
 	(*c).llvm_module = module;
 	(*c).llvm_context = context;
 	(*c).builder = builder;
+	(*c).arena = alloc;
 
 	return c;
 };
@@ -31,7 +33,44 @@ let codegen_generate = (c: *codegen) => i64 {
 };
 
 let codegen_compile = (c: *codegen) => i64 {
+        /* Dump module */
 	LLVMDumpModule((*c).llvm_module);
+
+	/* Generate code */
+        let triple = LLVMGetDefaultTargetTriple();
+        let target_ref = cast(**void, arena_alloc((*c).arena, sizeof(**void)));
+        let message = cast(**i8, null);
+        let result = LLVMGetTargetFromTriple(triple, target_ref, message);
+        if result != 0 {
+            println("Target output: %s", *message);
+            LLVMDisposeMessage(*message);
+        };
+        let target_machine = LLVMCreateTargetMachine(
+            *target_ref,
+            triple,
+            "",
+            "",
+            LLVMCodeGenLevelDefault,
+            LLVMRelocDefault,
+            LLVMCodeModelDefault,
+        );
+        result = LLVMVerifyModule((*c).llvm_module, LLVMAbortProcessAction, message);
+        if result != 0 {
+            println("Verification output: %s", *message);
+            LLVMDisposeMessage(*message);
+        };
+
+        /* Generate the object file */
+        let filename = "bootstrap_output.o";
+        LLVMTargetMachineEmitToFile(
+            target_machine,
+            (*c).llvm_module,
+            filename,
+            LLVMObjectFile,
+            cast(**i8, null),
+        );
+        println("Object file generated: %s", filename);
+
 	return 0;
 };
 
