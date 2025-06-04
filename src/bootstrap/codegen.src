@@ -8,11 +8,11 @@ let codegen = struct {
 };
 
 let codegen_init = (alloc: *arena) => *codegen {
-	LLVMInitializeX86TargetInfo();
-	LLVMInitializeX86TargetMC();
-	LLVMInitializeX86Target();
-	LLVMInitializeX86AsmPrinter();
-	LLVMInitializeX86AsmParser();
+	LLVMInitializeAllTargetInfos();
+	LLVMInitializeAllTargetMCs();
+	LLVMInitializeAllTargets();
+	LLVMInitializeAllAsmPrinters();
+	LLVMInitializeAllAsmParsers();
 
 	let module = LLVMModuleCreateWithName("module");
         let context = LLVMGetGlobalContext();
