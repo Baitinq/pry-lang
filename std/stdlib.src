@@ -1,4 +1,5 @@
 extern printf = (*i8, varargs) => void;
+extern exit = (i64) => void;
 
 /* TODO: This has a bug (with varargs i think) */
 let println = (str: *i8, args: varargs) => void {
@@ -77,4 +78,13 @@ let iswhitespace = (c: i8) => bool {
 	};
 
 	return false;
+};
+
+let assert = (cond: bool) => void {
+	if !cond {
+		println("UNREACHABLE");
+		exit(1);
+	};
+
+	return;
 };
