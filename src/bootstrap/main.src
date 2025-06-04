@@ -56,10 +56,10 @@ let main = (argc: i64, argv: **i8) => i64 {
 	let ts = tokenizer_tokenize(t);
 
 	let p = parser_init(cast(*token, ts.data), ts.data_len, alloc);
-	let ns = parse(p);
+	let ast = parse(p);
 
 	let c = codegen_init(alloc);
-	let res = codegen_generate(c);
+	let res = codegen_generate(c, ast);
 	let res = codegen_compile(c);
 	codegen_deinit(c);
 

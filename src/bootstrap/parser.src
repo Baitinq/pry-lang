@@ -50,7 +50,7 @@ let UNARY_EXPRESSION_TYPE_MINUS = 1;
 let UNARY_EXPRESSION_TYPE_STAR = 2;
 
 let NODE_PROGRAM_DATA = struct {
-    statements: *Node,
+    statements: **Node,
     statements_len: i64,
 };
 
@@ -78,13 +78,13 @@ let NODE_FUNCTION_CALL_STATEMENT_DATA = struct {
 
 let NODE_IF_STATEMENT_DATA = struct {
     condition: *Node,
-    statements: *Node,
+    statements: **Node,
     statements_len: i64,
 };
 
 let NODE_WHILE_STATEMENT_DATA = struct {
     condition: *Node,
-    statements: *Node,
+    statements: **Node,
     statements_len: i64,
 };
 
@@ -138,7 +138,7 @@ let NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA = struct {
 };
 
 let NODE_FUNCTION_DEFINITION_DATA = struct {
-    statements: *Node,
+    statements: **Node,
     statements_len: i64,
     parameters: *Node,
     parameters_len: i64,
@@ -325,7 +325,7 @@ let parse_statement = (p: *parser) => *Node {
 
 /* Program ::= Statement+ */
 let parse_program = (p: *parser) => *Node {
-	let nodes = cast(*Node, arena_alloc((*p).arena, sizeof(Node) * 1000));
+	let nodes = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 1000));
 
 	let i = 0;
 	while (*p).offset < (*p).tokens_len {
@@ -334,8 +334,7 @@ let parse_program = (p: *parser) => *Node {
 			println("ERROR! Null node %d", (*p).offset);
 			return s;
 		};
-		println("PARSE 1 stmt");
-		(*(nodes + cast(*Node, i))) = s;
+		(*(nodes + cast(**Node, i))) = s;
 		i = i + 1;
 	};
 

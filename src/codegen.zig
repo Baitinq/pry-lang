@@ -853,7 +853,7 @@ pub const CodeGen = struct {
         if (ptr.node_type.TYPE == .STRUCT_TYPE) {
             typ = ptr.node_type;
         } else if (ptr.node_type.TYPE == .POINTER_TYPE) {
-            typ = self.environment.get_variable(ptr.node_type.TYPE.POINTER_TYPE.type.TYPE.SIMPLE_TYPE.name).?.node_type;
+            typ = self.environment.get_variable(ptr.node_type.TYPE.POINTER_TYPE.type.TYPE.SIMPLE_TYPE.name).?.node_type; //TODO: we shouldnt be able to get fields of pointers, we have to dref first.
         } else if (ptr.node_type.TYPE == .SIMPLE_TYPE) {
             typ = self.environment.get_variable(ptr.node_type.TYPE.SIMPLE_TYPE.name).?.node_type;
         } else {
