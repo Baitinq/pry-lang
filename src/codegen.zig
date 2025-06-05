@@ -215,6 +215,8 @@ pub const CodeGen = struct {
                 const x = try self.get_struct_field(xd, name);
 
                 const variable = try self.generate_expression_value(assignment_statement.rhs, null);
+                std.debug.print("7TYP {s}: {any} vs {any} -- {any}\n", .{ name, x.type, variable.node_type.TYPE, variable.node });
+                std.debug.assert(self.compare_types(x.type, variable.node_type, assignment_statement.is_dereference));
                 _ = llvm.LLVMBuildStore(self.builder, variable.value, x.value);
             },
             else => unreachable,

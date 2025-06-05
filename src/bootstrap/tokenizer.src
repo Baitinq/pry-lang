@@ -517,7 +517,7 @@ let tokenizer_init = (alloc: *arena, file: slice) => *tokenizer {
 	let t = cast(*tokenizer, arena_alloc(alloc, sizeof(tokenizer)));
 	(*t).arena = alloc;
 	(*t).offset = 0;
-	(*t).buf = file.data;
+	(*t).buf = cast(*i8, file.data);
 	(*t).buf_len = file.data_len;
 
 	println("File size: %d", (*t).buf_len);
@@ -547,7 +547,7 @@ let tokenizer_tokenize = (t: *tokenizer) => slice {
 	print_tokens(tokens, tokens_len);
 
 	let res = slice{};
-	res.data = tokens;
+	res.data = cast(*void, tokens);
 	res.data_len = tokens_len;
 	return res;
 };

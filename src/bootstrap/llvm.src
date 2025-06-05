@@ -266,7 +266,7 @@ let LLVMTargetRef = newtype *void;
 
 extern LLVMModuleCreateWithName = (*i8) => LLVMModuleRef;
 extern LLVMGetGlobalContext = () => LLVMContextRef;
-extern LLVMCreateBuilder = () => LLVMBuilderRef; /* TODO: Create types */
+extern LLVMCreateBuilder = () => LLVMBuilderRef;
 extern LLVMDisposeModule = (LLVMModuleRef) => void;
 extern LLVMShutdown = () => void;
 extern LLVMDisposeBuilder = (LLVMBuilderRef) => void;

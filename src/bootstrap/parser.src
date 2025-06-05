@@ -253,7 +253,7 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 
 	if (*tok).type == TOKEN_IDENTIFIER {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
-	    (*d).name = (*tok).data;
+	    (*d).name = cast(*i8, (*tok).data);
 	    (*d).type = cast(*Node, null); /* TODO */
 	    let n = Node{};
 	    n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
