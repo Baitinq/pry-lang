@@ -765,6 +765,15 @@ pub const CodeGen = struct {
                             .node_type = simple_type_node,
                         });
                     },
+                    .SIMPLE_TYPE => |t| {
+                        return try self.create_variable(.{
+                            .value = null,
+                            .type = try self.get_llvm_type(t.underlying_type.?),
+                            .stack_level = null,
+                            .node = expression,
+                            .node_type = t.underlying_type.?,
+                        });
+                    },
                     else => unreachable,
                 }
             },

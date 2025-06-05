@@ -16,6 +16,7 @@ pub const TokenType = union(enum) {
     CONTINUE: void,
     ARROW: void,
     STRUCT: void,
+    TYPE: void,
 
     // Identifiers
     IDENTIFIER: []u8,
@@ -101,6 +102,7 @@ pub const Tokenizer = struct {
         if (self.accept_string("false")) return self.create_token(.{ .BOOLEAN = false });
         if (self.accept_string("null")) return self.create_token(.{ .NULL = void{} });
         if (self.accept_string("struct")) return self.create_token(.{ .STRUCT = void{} });
+        if (self.accept_string("newtype")) return self.create_token(.{ .TYPE = void{} });
 
         if (self.accept_string("=>")) return self.create_token(.{ .ARROW = void{} });
         if (self.accept_string(";")) return self.create_token(.{ .SEMICOLON = void{} });

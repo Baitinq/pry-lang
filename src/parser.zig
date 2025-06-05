@@ -589,11 +589,12 @@ pub const Parser = struct {
         }
     }
 
-    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
+    // PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | TypeDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
     fn parse_primary_expression(self: *Parser) ParserError!*Node {
         errdefer if (!self.try_context) std.debug.print("Error parsing primary expression {any}\n", .{self.peek_token()});
 
         if (self.accept_parse(parse_function_definition)) |stmt| return stmt;
+        if (self.accept_parse(parse_type_definition)) |stmt| return stmt;
         if (self.accept_parse(parse_struct_definition)) |stmt| return stmt;
         if (self.accept_parse(parse_struct_instanciation)) |stmt| return stmt;
 
@@ -704,6 +705,24 @@ pub const Parser = struct {
         }
 
         return node_list.items;
+    }
+
+    // TypeDefinition ::= "newtype" Type
+    fn parse_type_definition(self: *Parser) ParserError!*Node {
+        errdefer if (!self.try_context) std.debug.print("Error parsing type definition {any}\n", .{self.peek_token()});
+
+        _ = try self.parse_token(tokenizer.TokenType.TYPE);
+
+        const typ = try self.parse_type();
+
+        return self.create_node(.{
+            .TYPE = .{
+                .SIMPLE_TYPE = .{
+                    .name = "",
+                    .underlying_type = typ,
+                },
+            },
+        });
     }
 
     // StructDefinition ::= "struct" LBRACE StructFields? RBRACE

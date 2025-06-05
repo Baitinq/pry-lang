@@ -17,6 +17,7 @@ let TOKEN_BREAK      = 7;
 let TOKEN_CONTINUE   = 8;
 let TOKEN_ARROW      = 9;
 let TOKEN_STRUCT     = 10;
+let TOKEN_TYPE       = 34;
 
 /* Identifiers */
 let TOKEN_IDENTIFIER = 11;
@@ -96,6 +97,9 @@ let print_tokens = (ts: *token, ts_len: i64) => i64 {
 		};
 		if (to.type == TOKEN_STRUCT) {
 			printf("Struct\n");
+		};
+		if (to.type == TOKEN_TYPE) {
+			printf("Type\n");
 		};
 		if (to.type == TOKEN_IDENTIFIER) {
 			printf("Identifier: %s\n", cast(*i8, to.data));
@@ -388,6 +392,10 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	};
 	if tokenizer_accept_string(t, "struct") {
 	    (*to).type = TOKEN_STRUCT;
+	    return to;
+	};
+	if tokenizer_accept_string(t, "newtype") {
+	    (*to).type = TOKEN_TYPE;
 	    return to;
 	};
 

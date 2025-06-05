@@ -34,7 +34,7 @@ UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PostfixExpression
 
 PostfixExpression ::= PrimaryExpression (FieldAccess | FunctionCallStatement | CastStatement | SizeOfStatement)*
 
-PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
+PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | TypeDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN
 
 FunctionDefinition ::= LPAREN FunctionParameters? RPAREN ARROW IDENTIFIER LBRACE Statement* ReturnStatement SEMICOLON RBRACE
 
@@ -45,6 +45,8 @@ Type ::= IDENTIFIER | FunctionType
 FunctionType ::= LPAREN (Type ("," Type)*)? RPAREN ARROW Type
 
 ParameterTypes ::= Type ("," Type)*
+
+TypeDefinition ::= "newtype" Type
 
 StructDefinition ::= "struct" LBRACE (StructField ("," StructField)*)? RBRACE
 
