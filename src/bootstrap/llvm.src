@@ -258,28 +258,34 @@ let LLVMInitializeAllDisassemblers = () => void {
 	return;
 };
 
-extern LLVMModuleCreateWithName = (*i8) => *void;
-extern LLVMGetGlobalContext = () => *void;
-extern LLVMCreateBuilder = () => *void; /* TODO: Create types */
-extern LLVMDisposeModule = (*void) => void;
-extern LLVMShutdown = () => void;
-extern LLVMDisposeBuilder = (*void) => void;
+let LLVMBuilderRef = newtype *void;
+let LLVMModuleRef = newtype *void;
+let LLVMTargetMachineRef = newtype *void;
+let LLVMContextRef = newtype *void;
+let LLVMTargetRef = newtype *void;
 
-extern LLVMDumpModule = (*void) => void;
+extern LLVMModuleCreateWithName = (*i8) => LLVMModuleRef;
+extern LLVMGetGlobalContext = () => LLVMContextRef;
+extern LLVMCreateBuilder = () => LLVMBuilderRef; /* TODO: Create types */
+extern LLVMDisposeModule = (LLVMModuleRef) => void;
+extern LLVMShutdown = () => void;
+extern LLVMDisposeBuilder = (LLVMBuilderRef) => void;
+
+extern LLVMDumpModule = (LLVMModuleRef) => void;
 extern LLVMGetDefaultTargetTriple = () => *i8;
-extern LLVMGetTargetFromTriple = (*i8, **void, **i8) => i64;
+extern LLVMGetTargetFromTriple = (*i8, *LLVMTargetRef, **i8) => i64;
 extern LLVMDisposeMessage = (*i8) => void;
-extern LLVMCreateTargetMachine = (*void, *i8, *i8, *i8, i64, i64, i64) => *void;
-extern LLVMDisposeTargetMachine = (*void) => void;
+extern LLVMCreateTargetMachine = (LLVMTargetRef, *i8, *i8, *i8, i64, i64, i64) => LLVMTargetMachineRef;
+extern LLVMDisposeTargetMachine = (LLVMTargetMachineRef) => void;
 
 let LLVMCodeGenLevelDefault = 2;
 let LLVMRelocDefault = 0;
 let LLVMCodeModelDefault = 0;
 
-extern LLVMVerifyModule = (*void, i64, **i8) => i64;
+extern LLVMVerifyModule = (LLVMModuleRef, i64, **i8) => i64;
 
 let LLVMAbortProcessAction = 0;
 
-extern LLVMTargetMachineEmitToFile = (*void, *void, *i8, i64, **i8) => i64;
+extern LLVMTargetMachineEmitToFile = (LLVMTargetMachineRef, LLVMModuleRef, *i8, i64, **i8) => i64;
 
 let LLVMObjectFile = 1;

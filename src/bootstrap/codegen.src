@@ -1,9 +1,9 @@
 import "llvm.src";
 
 let codegen = struct {
-	llvm_module: *void,
-	llvm_context: *void,
-	builder: *void,
+	llvm_module: LLVMModuleRef,
+	llvm_context: LLVMContextRef,
+	builder: LLVMBuilderRef,
 	arena: *arena,
 };
 
@@ -71,7 +71,7 @@ let codegen_compile = (c: *codegen) => i64 {
 
 	/* Generate code */
         let triple = LLVMGetDefaultTargetTriple();
-        let target_ref = cast(**void, arena_alloc((*c).arena, sizeof(**void)));
+        let target_ref = cast(*LLVMTargetRef, arena_alloc((*c).arena, sizeof(*LLVMTargetRef)));
         let message = cast(**i8, null);
         let result = LLVMGetTargetFromTriple(triple, target_ref, message);
         if result != 0 {
