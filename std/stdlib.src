@@ -82,7 +82,7 @@ let iswhitespace = (c: i8) => bool {
 
 let assert = (cond: bool) => void {
 	if !cond {
-		println("UNREACHABLE");
+		println("ASSERTION FAILED");
 		exit(1);
 	};
 

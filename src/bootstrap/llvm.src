@@ -264,6 +264,12 @@ let LLVMTargetMachineRef = newtype *void;
 let LLVMContextRef = newtype *void;
 let LLVMTargetRef = newtype *void;
 
+let LLVMValueRef = newtype *void;
+let LLVMTypeRef = newtype *void;
+
+extern LLVMConstInt = (LLVMTypeRef, i64, i64) => LLVMValueRef;
+extern LLVMInt64Type = () => LLVMTypeRef;
+
 extern LLVMModuleCreateWithName = (*i8) => LLVMModuleRef;
 extern LLVMGetGlobalContext = () => LLVMContextRef;
 extern LLVMCreateBuilder = () => LLVMBuilderRef;

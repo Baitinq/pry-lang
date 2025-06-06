@@ -28,8 +28,68 @@ let codegen_init = (alloc: *arena) => *codegen {
 	return c;
 };
 
+let create_node = (c: *codegen, n: Node) => *Node {
+	let res = cast(*Node, arena_alloc((*c).arena, sizeof(Node)));
+	*res = n;
+	return res;
+};
+
+let Variable = struct {
+	value: LLVMValueRef,
+	type: LLVMTypeRef,
+	node: *Node,
+	node_type: *Node,
+	stack_level: *i64,
+};
+
+let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
+	let v = cast(*Variable, arena_alloc((*c).arena, sizeof(Variable)));
+	*v = variable;
+	return v;
+};
+
+let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i8, node: *Node, node_type: *Node) => *Variable {
+	/* TODO: Global */
+	let v = Variable{};
+	v.value = literal_val;
+	v.type = cast(LLVMTypeRef, null);
+	v.stack_level = cast(*i64, null);
+	v.node = node;
+	v.node_type = node_type;
+	return codegen_create_variable(c, v);
+};
+
+let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
+	assert((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER);
+
+	let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
+	
+	println("X: %d", n);
+
+	let node_type = Node{};
+	node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+	let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+	(*d).name = "i64";
+	(*d).underlying_type = cast(*Node, null);
+	node_type.data = cast(*void, d);
+	
+	return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, create_node(c, node_type));
+};
+
 let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT_STATEMENT_DATA) => i64 {
-	println("HOLA");
+	let lhs = *((*stmt).lhs);
+	let prhs = (*stmt).rhs;
+
+	if (lhs.type == NODE_PRIMARY_EXPRESSION_IDENTIFIER) {
+		let identifier = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, lhs.data)).name;
+		println("XX %s", identifier);
+		let variable = codegen_generate_expression_value(c, prhs, identifier);
+		assert(variable != cast(*Variable, null));
+		return 0;
+	};
+
+	assert(false);
 	return 0;
 };
 
