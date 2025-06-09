@@ -60,21 +60,31 @@ let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i
 };
 
 let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
-	assert((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER);
+	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
+		let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
+		
+		println("X: %d", n);
 
-	let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
+		let node_type = Node{};
+		node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*d).name = "i64";
+		(*d).underlying_type = cast(*Node, null);
+		node_type.data = cast(*void, d);
+		
+		return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, create_node(c, node_type));
+	};
 	
-	println("X: %d", n);
+	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
+		println("ASS %d", (*expression).type);
+		assert(false); /* TODO */
+		println("ERT");
+	};
 
-	let node_type = Node{};
-	node_type.type = NODE_TYPE_SIMPLE_TYPE;
+	assert(false);
 
-	let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
-	(*d).name = "i64";
-	(*d).underlying_type = cast(*Node, null);
-	node_type.data = cast(*void, d);
-	
-	return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, create_node(c, node_type));
+	return cast(*Variable, null);
 };
 
 let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT_STATEMENT_DATA) => i64 {

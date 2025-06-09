@@ -1,7 +1,7 @@
- let Node = struct {
+let Node = struct {
 	type: i64,
 	data: *void,
- };
+};
 
 let NODE_PROGRAM = 1;
 let NODE_STATEMENT = 2;
@@ -140,7 +140,7 @@ let NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA = struct {
 let NODE_FUNCTION_DEFINITION_DATA = struct {
     statements: **Node,
     statements_len: i64,
-    parameters: *Node,
+    parameters: **Node,
     parameters_len: i64,
     retur_type: *Node,
 };
@@ -197,6 +197,9 @@ let parser = struct {
 	arena: *arena,
 };
 
+extern parser_parse_statement = (*parser) => *Node;
+extern parser_parse_expression = (*parser) => *Node;
+
 let parser_init = (ts: *token, ts_len: i64, ar: *arena) => *parser {
 	let p = cast(*parser, arena_alloc(ar, sizeof(parser)));
 
@@ -244,10 +247,139 @@ let parser_accept_token = (p: *parser, t: i64) => *token {
     return cast(*token, null);
 };
 
+let parser_accept_parse = (p: *parser, parsing_func: (*parser) => *Node) => *Node {
+	let prev_offset = (*p).offset;
+	let node = parsing_func(p);
+	if node == cast(*Node, null) {
+		(*p).offset = prev_offset;
+	};
+	return node;
+};
+
+/* ReturnStatement ::= RETURN (Expression)? */
+let parser_parse_return_statement = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_RETURN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let maybe_expr = parser_accept_parse(p, parser_parse_expression);
+	
+	let d = cast(*NODE_RETURN_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_RETURN_STATEMENT_DATA )));
+	(*d).expression = maybe_expr;
+
+	let r = Node{};
+	r.type = NODE_RETURN_STATEMENT;
+	r.data = cast(*void, d);
+
+	return create_node(p, r);
+};
+
+/* Type ::= IDENTIFIER | FunctionType */
+let parser_parse_type = (p: *parser) => *Node {
+	/* TODO: Function type */
+	let to = parser_consume_token(p);
+	assert(to != cast(*token, null));
+	assert((*to).type == TOKEN_IDENTIFIER);
+
+	let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+	(*d).name = cast(*i8, (*to).data);
+	(*d).underlying_type = cast(*Node, null);
+
+	let r = Node{};
+	r.type = NODE_TYPE_SIMPLE_TYPE;
+	r.data = cast(*void, d);
+
+	return create_node(p, r);
+};
+
+/* FunctionParameters ::= IDENTIFIER ":" Type ("," IDENTIFIER ":" Type)* */
+let parser_parse_function_parameters = (p: *parser) => *slice {
+	/* TODO: Params */
+
+	let node_list = cast(**Node, arena_alloc((*p).arena, sizeof(**Node) * 20));
+	let i = 0;
+	while true {
+		if i != 0 {
+			parser_accept_token(p, TOKEN_COMMA);
+		};
+		let ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+		if ident == cast(*token, null) {
+			break;
+		};
+		/* TODO: Rest */
+	};
+
+	let s = cast(*slice, arena_alloc((*p).arena, sizeof(slice)));
+	(*s).data = cast(*void, node_list);
+	(*s).data_len = 0;
+	return s;
+};
+
+/* FunctionDefinition ::= LPAREN FunctionParameters? RPAREN ARROW IDENTIFIER LBRACE Statement* ReturnStatement SEMICOLON RBRACE */
+let parser_parse_function_definition = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_LPAREN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	let params = parser_parse_function_parameters(p);
+	if params == cast(*slice, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_RPAREN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_ARROW) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	let retur_type = parser_parse_type(p);
+	if retur_type == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_LBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	
+	/* TODO: Body */
+	let statements = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 100));
+	let i = 0;
+	while true {
+		let n = parser_accept_parse(p, parser_parse_statement);
+		if n == cast(*Node, null) {
+			break;
+		};
+		(*(statements + cast(**Node, i))) = n;
+		i = i + 1;
+	};
+
+
+	if parser_accept_token(p, TOKEN_RBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+
+	let d = cast(*NODE_FUNCTION_DEFINITION_DATA, arena_alloc((*p).arena, sizeof(NODE_FUNCTION_DEFINITION_DATA)));
+	(*d).statements = statements;
+	(*d).statements_len = i;
+	(*d).parameters = cast(**Node, params.data);
+	(*d).parameters_len = params.data_len;
+	(*d).retur_type = cast(*Node, null);
+
+	let n = Node{};
+	n.type = NODE_FUNCTION_DEFINITION;
+	n.data = cast(*void, d);
+
+	return create_node(p, n); 
+};
+
 /* PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN */
 let parser_parse_primary_expression = (p: *parser) => *Node {
+	let stmt = parser_accept_parse(p, parser_parse_function_definition);
+	if stmt != cast(*Node, null) {
+		return stmt;
+	};
+
 	let tok = parser_consume_token(p);
 	if tok == cast(*token, null) {
+	println("NO TOK");
 	    return cast(*Node, null); 
 	};
 
@@ -270,6 +402,34 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	    return create_node(p, n);
 	};
 
+	println("DIFF TYPE: %d", (*tok).type);
+
+	return cast(*Node, null);
+};
+
+/* EqualityExpression ::= AdditiveExpression ("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression */
+let parser_parse_equality_expression = (p: *parser) => *Node {
+	/* TODO */
+	return cast(*Node, null);
+};
+
+/* AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpression)* */
+let parser_parse_additive_expression = (p: *parser) => *Node {
+	/* TODO */
+	return parser_parse_primary_expression(p);
+};
+
+/* Expression ::= EqualityExpression | AdditiveExpression */
+let parser_parse_expression = (p: *parser) => *Node {
+	let ex = parser_accept_parse(p, parser_parse_equality_expression);
+	if ex != cast(*Node, null) {
+		return ex;
+	};
+	let ax = parser_accept_parse(p, parser_parse_additive_expression);
+	if ax != cast(*Node, null) {
+		return ax;
+	};
+
 	return cast(*Node, null);
 };
 
@@ -283,8 +443,9 @@ let parse_assignment_statement = (p: *parser) => *Node {
 
 	/* TODO: is_dereference */
 
-	let lhs = parser_parse_primary_expression(p); /* TODO */
+	let lhs = parser_parse_expression(p); /* TODO */
 	if lhs == cast(*Node, null) {
+	println("ANOTHER BNLL");
 	    return cast(*Node, null);
 	};	
 	
@@ -292,8 +453,9 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	    return cast(*Node, null);
 	};
 	
-	let rhs = parser_parse_primary_expression(p); /* TODO */
+	let rhs = parser_parse_expression(p); /* TODO */
 	if rhs == cast(*Node, null) {
+		println("NUL EXP");
 	    return cast(*Node, null);
 	};
 
@@ -310,17 +472,27 @@ let parse_assignment_statement = (p: *parser) => *Node {
 };
 
 /* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
-let parse_statement = (p: *parser) => *Node {
-	let assignment = parse_assignment_statement(p);
-	if assignment == cast(*Node, null) {
-	    return cast(*Node, null);
+let parser_parse_statement = (p: *parser) => *Node {
+	let assignment = parser_accept_parse(p, parse_assignment_statement);
+	if assignment != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return assignment;
 	};
 
-	if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
-	    return cast(*Node, null);
+	let retu = parser_accept_parse(p, parser_parse_return_statement);
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
 	};
+
+
+	println("None");
 	
-	return assignment;
+	return cast(*Node, null);
 };
 
 /* Program ::= Statement+ */
@@ -329,11 +501,8 @@ let parse_program = (p: *parser) => *Node {
 
 	let i = 0;
 	while (*p).offset < (*p).tokens_len {
-		let s = parse_statement(p);
-		if s == cast(*Node, null) {
-			println("ERROR! Null node %d", (*p).offset);
-			return s;
-		};
+		let s = parser_parse_statement(p);
+		assert(s != cast(*Node, null));
 		(*(nodes + cast(**Node, i))) = s;
 		i = i + 1;
 	};
