@@ -420,8 +420,17 @@ pub const CodeGen = struct {
                 if (function_definition.return_type.TYPE == .FUNCTION_TYPE) {
                     return_type = llvm.LLVMPointerType(return_type, 0);
                 }
-                const function_type = llvm.LLVMFunctionType(return_type, llvm_param_types.items.ptr, @intCast(llvm_param_types.items.len), is_varargs) orelse return CodeGenError.CompilationError;
-                const function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name orelse "unnamed_func"}), function_type) orelse return CodeGenError.CompilationError;
+                var function: llvm.LLVMValueRef = null;
+                if (name != null) {
+                    if (self.environment.get_variable(name.?)) |x| {
+                        // If the function has been forward declared, we reuse its declaration
+                        function = x.value;
+                    }
+                }
+                if (function == null) {
+                    const function_type = llvm.LLVMFunctionType(return_type, llvm_param_types.items.ptr, @intCast(llvm_param_types.items.len), is_varargs) orelse return CodeGenError.CompilationError;
+                    function = llvm.LLVMAddFunction(self.llvm_module, try std.fmt.allocPrintZ(self.arena, "{s}", .{name orelse "unnamed_func"}), function_type) orelse return CodeGenError.CompilationError;
+                }
                 const function_entry = llvm.LLVMAppendBasicBlock(function, "entrypoint") orelse return CodeGenError.CompilationError;
                 llvm.LLVMPositionBuilderAtEnd(self.builder, function_entry);
 
@@ -1098,15 +1107,5 @@ const Environment = struct {
             }
         }
         return variable;
-    }
-
-    fn contains_variable(self: *Environment, name: []const u8) bool {
-        var i = self.scope_stack.items.len;
-        while (i > 0) {
-            i -= 1;
-            const scope = self.scope_stack.items[i];
-            if (scope.variables.contains(name)) return true;
-        }
-        return false;
     }
 };
