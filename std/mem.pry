@@ -2,7 +2,7 @@ extern calloc = (i64, i64) => *void;
 extern realloc = (*void, i64) => *void;
 extern free = (*void) => void;
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let arena = struct {
 	buf: *void,

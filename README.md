@@ -1,13 +1,13 @@
-# Programming Language
+# Pry Programming Language
 
-Simple statically typed and compiled programming language implemented in Zig, with support for variables, control flow, functions, and code generation using LLVM.
+Pry is a simple, elegant, statically typed and compiled programming language implemented in Zig, with support for variables, control flow, functions, and code generation using LLVM.
 
 ## Building and Running
 
 1. Ensure you have Zig and LLVM installed on your system.
 2. Run the compiler on an example file:
    ```
-   zig build run -- examples/8.src compile
+   zig build run -- examples/8.pry
    ```
 3. Link the generated object file to create an executable:
    ```
@@ -25,6 +25,7 @@ Simple statically typed and compiled programming language implemented in Zig, wi
 - **Functions**: Supports function declarations with parameters and return types.
 - **Expressions**: Includes additive, multiplicative, equality, and unary expressions.
 - **Code Generation with LLVM**: Translates AST to LLVM IR and generates object files for native execution.
+- **Import System**: Allows importing libraries and other Pry files.
 
 ## Example Program
 

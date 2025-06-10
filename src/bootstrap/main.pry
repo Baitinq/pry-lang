@@ -6,17 +6,17 @@ extern ftell = (*i8) => i64;
 extern fread = (*i8, i64, i64, *i8) => i64;
 extern fclose = (*i8) => *i8;
 
-import "!stdlib.src";
-import "!mem.src";
+import "!stdlib.pry";
+import "!mem.pry";
 
 let slice = struct {
 	data: *void,
 	data_len: i64,
 };
 
-import "tokenizer.src";
-import "parser.src";
-import "codegen.src";
+import "tokenizer.pry";
+import "parser.pry";
+import "codegen.pry";
 
 let read_file = (filename: *i8, alloc: *arena) => slice {
 	let file = fopen(filename, "r");

@@ -1,6 +1,6 @@
 /* As you see, the language supports variable scopes */
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let x = 18;
 

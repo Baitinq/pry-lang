@@ -1,6 +1,6 @@
 /* HELLO! Welcome to the unnamed language */
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let main = (argc: i64, argv: *i64) => i64 {
 	printf("%d\n", argc);

@@ -2,7 +2,7 @@
 extern malloc = (i64) => *void;
 extern free = (*void) => void;
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let init_array = (n: i64, arr: *i64) => i64 {
 	let i = 0;

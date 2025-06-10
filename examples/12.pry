@@ -1,4 +1,4 @@
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let main = () => i64 {
     let factorial = (n: i64) => i64 {

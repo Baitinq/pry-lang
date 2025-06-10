@@ -1,4 +1,4 @@
-import "llvm.src";
+import "llvm.pry";
 
 let codegen = struct {
 	llvm_module: LLVMModuleRef,

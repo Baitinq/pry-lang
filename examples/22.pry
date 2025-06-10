@@ -1,6 +1,6 @@
 extern malloc = (i64) => *void;
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 /* declare new struct type */
 let test = struct {

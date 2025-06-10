@@ -1,4 +1,4 @@
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let print_boolean = (b: bool) => i64 {
 	printf("%d\n", b);

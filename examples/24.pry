@@ -1,6 +1,6 @@
 extern malloc = (i64) => *void;
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let test = struct {
 	 x: i64,

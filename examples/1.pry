@@ -1,11 +1,9 @@
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let main = () => i64 {
-	let test = 1922;
+	let s = "hello";
 
-	let uwu = test;
-
-	printf("%d\n", uwu);
+	printf("%s\n", s);
 
 	return 0;
 };
@@ -14,7 +12,7 @@ let main = () => i64 {
 
 Expected stdout:
 
-1922
+hello
 
 Expected return: 0
 

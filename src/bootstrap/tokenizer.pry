@@ -3,8 +3,8 @@ extern memcpy = (*void, *void, i64) => void;
 extern sprintf = (*i8, *i8, varargs) => void;
 extern atoi = (*i8) => i64;
 
-import "!stdlib.src";
-import "!mem.src";
+import "!stdlib.pry";
+import "!mem.pry";
 
 /* Keywords */
 let TOKEN_IMPORT     = 1;

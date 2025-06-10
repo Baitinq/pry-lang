@@ -1,7 +1,7 @@
 extern malloc = (i64) => *i64;
 extern free = (*i64) => void;
 
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let main = () => i64 {
 	let x = malloc(8);

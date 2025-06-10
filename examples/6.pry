@@ -1,4 +1,4 @@
-import "!stdlib.src";
+import "!stdlib.pry";
 
 let print_input = (input_a: i64, input_b: i64) => i64 {
 	printf("%d\n", input_a);
