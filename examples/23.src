@@ -8,8 +8,8 @@ let test = struct {
 };
 
 let print_struct = (s: test) => void {
-	println("X: %d", s.x);
-	println("Y: %s", s.y);
+	printf("X: %d\n", s.x);
+	printf("Y: %s\n", s.y);
 	return;
 };
 

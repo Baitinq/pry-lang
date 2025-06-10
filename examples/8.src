@@ -12,7 +12,7 @@ let main = () => i64 {
 	};
 
 	let result = fib(30);
-	println("%d", result);
+	printf("%d\n", result);
 	return result;
 };
 

@@ -63,7 +63,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
 		let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
 		
-		println("X: %d", n);
+		printf("X: %d\n", n);
 
 		let node_type = Node{};
 		node_type.type = NODE_TYPE_SIMPLE_TYPE;
@@ -77,9 +77,9 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	};
 	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
-		println("ASS %d", (*expression).type);
+		printf("ASS %d\n", (*expression).type);
 		assert(false); /* TODO */
-		println("ERT");
+		printf("ERT\n");
 	};
 
 	assert(false);
@@ -93,7 +93,7 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 
 	if (lhs.type == NODE_PRIMARY_EXPRESSION_IDENTIFIER) {
 		let identifier = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, lhs.data)).name;
-		println("XX %s", identifier);
+		printf("XX %s\n", identifier);
 		let variable = codegen_generate_expression_value(c, prhs, identifier);
 		assert(variable != cast(*Variable, null));
 		return 0;
@@ -111,7 +111,7 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	if res != 0 {
 		return 1;
 	};
-	println("STMT: %d", stmt.type);
+	printf("STMT: %d\n", stmt.type);
 	return 0;
 };
 
@@ -145,7 +145,7 @@ let codegen_compile = (c: *codegen) => i64 {
         let message = cast(**i8, null);
         let result = LLVMGetTargetFromTriple(triple, target_ref, message);
         if result != 0 {
-            println("Target output: %s", *message);
+            printf("Target output: %s\n", *message);
             LLVMDisposeMessage(*message);
         };
         let target_machine = LLVMCreateTargetMachine(
@@ -160,7 +160,7 @@ let codegen_compile = (c: *codegen) => i64 {
         LLVMDisposeMessage(triple);
         result = LLVMVerifyModule((*c).llvm_module, LLVMAbortProcessAction, message);
         if result != 0 {
-            println("Verification output: %s", *message);
+            printf("Verification output: %s\n", *message);
             LLVMDisposeMessage(*message);
         };
 
@@ -174,7 +174,7 @@ let codegen_compile = (c: *codegen) => i64 {
             cast(**i8, null),
         );
         LLVMDisposeTargetMachine(target_machine);
-        println("Object file generated: %s", filename);
+        printf("Object file generated: %s\n", filename);
 
 	return 0;
 };

@@ -6,15 +6,15 @@ let x = 18;
 
 let foo = () => i64 {
 	let x = 1;
-	println("%d", x);
+	printf("%d\n", x);
 	return x;
 };
 
 let main = () => i64 {
-	println("%d", x);
+	printf("%d\n", x);
 	let x = 2;
 	let y = foo();
-	println("%d", x);
+	printf("%d\n", x);
 	return x + y;
 };
 

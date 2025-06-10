@@ -1,8 +1,8 @@
 import "!stdlib.src";
 
 let print_input = (input_a: i64, input_b: i64) => i64 {
-	println("%d", input_a);
-	println("%d", input_b);
+	printf("%d\n", input_a);
+	printf("%d\n", input_b);
 	return input_a + input_b;
 };
 

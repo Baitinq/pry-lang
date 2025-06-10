@@ -20,7 +20,7 @@ let main = () => i64 {
 
 	let i = 0;
 	while i < n {
-		println("%d", *(arr + cast(*i64, i)));
+		printf("%d\n", *(arr + cast(*i64, i)));
 		i = i + 1;
 	};
 	

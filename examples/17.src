@@ -6,8 +6,8 @@ import "!stdlib.src";
 let main = () => i64 {
 	let x = malloc(8);
 	*x = 10;
-	println("%p", x);
-	println("%d", *x);
+	printf("%p\n", x);
+	printf("%d\n", *x);
 	free(x);
 	return 0;
 };

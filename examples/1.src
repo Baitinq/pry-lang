@@ -3,7 +3,7 @@ import "!stdlib.src";
 let main = () => i64 {
 	let s = "hello";
 
-	println("%s", s);
+	printf("%s\n", s);
 
 	return 0;
 };

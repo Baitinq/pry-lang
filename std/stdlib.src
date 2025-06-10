@@ -1,13 +1,6 @@
 extern printf = (*i8, varargs) => void;
 extern exit = (i64) => void;
 
-/* TODO: This has a bug (with varargs i think) */
-let println = (str: *i8, args: varargs) => void {
-	printf(str, args);
-	printf("\n");
-	return;
-};
-
 let strcmp = (stra: *i8, strb: *i8) => bool {
 	let i = 0;
 	while true {
@@ -82,7 +75,7 @@ let iswhitespace = (c: i8) => bool {
 
 let assert = (cond: bool) => void {
 	if !cond {
-		println("ASSERTION FAILED");
+		printf("ASSERTION FAILED\n");
 		exit(1);
 	};
 

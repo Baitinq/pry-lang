@@ -3,7 +3,7 @@
 import "!stdlib.src";
 
 let main = (argc: i64, argv: *i64) => i64 {
-	println("%d", argc);
+	printf("%d\n", argc);
 	
 	return 2;
 };

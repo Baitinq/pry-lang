@@ -379,7 +379,7 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 
 	let tok = parser_consume_token(p);
 	if tok == cast(*token, null) {
-	println("NO TOK");
+	printf("NO TOK\n");
 	    return cast(*Node, null); 
 	};
 
@@ -402,7 +402,7 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	    return create_node(p, n);
 	};
 
-	println("DIFF TYPE: %d", (*tok).type);
+	printf("DIFF TYPE: %d\n", (*tok).type);
 
 	return cast(*Node, null);
 };
@@ -437,7 +437,7 @@ let parser_parse_expression = (p: *parser) => *Node {
 let parse_assignment_statement = (p: *parser) => *Node {
 	let is_declaration = false;
 	if parser_accept_token(p, TOKEN_LET) != cast(*token, null) {
-	    println("IS DECLARATION");
+	    printf("IS DECLARATION\n");
 	    is_declaration = true;
 	};
 
@@ -445,7 +445,7 @@ let parse_assignment_statement = (p: *parser) => *Node {
 
 	let lhs = parser_parse_expression(p); /* TODO */
 	if lhs == cast(*Node, null) {
-	println("ANOTHER BNLL");
+	printf("ANOTHER BNLL\n");
 	    return cast(*Node, null);
 	};	
 	
@@ -455,7 +455,7 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	
 	let rhs = parser_parse_expression(p); /* TODO */
 	if rhs == cast(*Node, null) {
-		println("NUL EXP");
+		printf("NUL EXP\n");
 	    return cast(*Node, null);
 	};
 
@@ -467,7 +467,7 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	let n = Node{};
 	n.type = NODE_ASSIGNMENT_STATEMENT;
 	n.data = cast(*void, d);
-	println("CONTINUE");
+	printf("CONTINUE\n");
 	return create_node(p, n);
 };
 
@@ -490,7 +490,7 @@ let parser_parse_statement = (p: *parser) => *Node {
 	};
 
 
-	println("None");
+	printf("None\n");
 	
 	return cast(*Node, null);
 };

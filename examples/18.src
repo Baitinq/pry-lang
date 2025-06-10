@@ -8,10 +8,10 @@ let main = () => i64 {
 	(*(x+cast(*i8, 0))) = 10;
 	(*(x+cast(*i8, 1))) = 20;
 	(*(x+cast(*i8, 2))) = 40;
-	println("%p", x);
-	println("%d", *(x+cast(*i8, 0)));
-	println("%d", *(x+cast(*i8, 1)));
-	println("%d", *(x+cast(*i8, 2)));
+	printf("%p\n", x);
+	printf("%d\n", *(x+cast(*i8, 0)));
+	printf("%d\n", *(x+cast(*i8, 1)));
+	printf("%d\n", *(x+cast(*i8, 2)));
 	free(cast(*void, x));
 	return 0;
 };

@@ -1,8 +1,8 @@
 import "!stdlib.src";
 
 let id = (a: i64) => i64 {
-	println("%d", a);
-	println("%d", 12);
+	printf("%d\n", a);
+	printf("%d\n", 12);
 	return a;
 };
 

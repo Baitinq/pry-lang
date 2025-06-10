@@ -16,7 +16,7 @@ let init_array = (n: i64, arr: *i64) => void {
 let print_array = (n: i64, arr: *i64) => void {
 	let i = 0;
 	while i < n {
-		println("%d", *(arr + cast(*i64, i)));
+		printf("%d\n", *(arr + cast(*i64, i)));
 		i = i + 1;
 	};
 	return;
@@ -51,12 +51,12 @@ let main = () => i64 {
 	let arr = cast(*i64, malloc(n * 8));
 	init_array(n, arr);
 
-	println("Pre-sorted:");
+	printf("Pre-sorted:\n");
 	print_array(n, arr);
 
 	sort_array(n, arr);
 
-	println("Sorted:");
+	printf("Sorted:\n");
 	print_array(n, arr);
 	
 	free(cast(*void, arr));

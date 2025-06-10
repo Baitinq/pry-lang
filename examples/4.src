@@ -2,13 +2,13 @@ import "!stdlib.src";
 
 let main = () => i64 {
 	let print_one = () => i64 {
-		println("%d", 1);
+		printf("%d\n", 1);
 		return 4;
 	};
 
 	let y = print_one() + 2;
 
-	println("%d", y);
+	printf("%d\n", y);
 
 	return y;
 };
