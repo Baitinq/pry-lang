@@ -1,0 +1,54 @@
+import "!stdlib.pry";
+import "!mem.pry";
+import "!hashmap.pry";
+
+let main = () => i64 {
+	let alloc = arena_init(1024);
+	
+	let map = hashmap_init(8, alloc);
+	
+	hashmap_put(map, "name", cast(*void, "Alice"));
+	hashmap_put(map, "city", cast(*void, "Boston"));
+	hashmap_put(map, "job", cast(*void, "Engineer"));
+	
+	let name = cast(*i8, hashmap_get(map, "name"));
+	let city = cast(*i8, hashmap_get(map, "city"));
+	let job = cast(*i8, hashmap_get(map, "job"));
+	
+	printf("Name: %s\n", name);
+	printf("City: %s\n", city);
+	printf("Job: %s\n", job);
+	
+	hashmap_put(map, "name", cast(*void, "Bob"));
+	hashmap_put(map, "city", cast(*void, "Seattle"));
+	
+	let new_name = cast(*i8, hashmap_get(map, "name"));
+	let new_city = cast(*i8, hashmap_get(map, "city"));
+	
+	printf("Updated Name: %s\n", new_name);
+	printf("Updated City: %s\n", new_city);
+	
+	let missing = hashmap_get(map, "missing");
+	if missing == cast(*void, null) {
+		printf("Missing key not found\n");
+	};
+	
+	arena_free(alloc);
+	
+	return 0;
+};
+
+/*
+
+Expected stdout:
+
+Name: Alice
+City: Boston
+Job: Engineer
+Updated Name: Bob
+Updated City: Seattle
+Missing key not found
+
+Expected return: 0
+
+*/

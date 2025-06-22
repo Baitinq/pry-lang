@@ -1,0 +1,81 @@
+import "!mem.pry";
+import "!stdlib.pry";
+
+let HashMapEntry = struct {
+	key: *i8,
+	value: *void,
+	next: *HashMapEntry,
+};
+
+let HashMap = struct {
+	buckets: **HashMapEntry,
+	bucket_count: i64,
+	arena: *arena,
+};
+
+let simple_hash = (key: *i8, bucket_count: i64) => i64 {
+	let hash = 0;
+	let i = 0;
+	while true {
+		let c = *(key + cast(*i8, i));
+		if c == '\0' {
+			return hash % bucket_count;
+		};
+		let x = cast(i64, c);
+		hash = hash + x;
+		i = i + 1;
+	};
+	return hash % bucket_count;
+};
+
+let hashmap_init = (bucket_count: i64, alloc: *arena) => *HashMap {
+	let map = cast(*HashMap, arena_alloc(alloc, sizeof(HashMap)));
+	(*map).buckets = cast(**HashMapEntry, arena_alloc(alloc, sizeof(*HashMapEntry) * bucket_count));
+	(*map).bucket_count = bucket_count;
+	(*map).arena = alloc;
+	
+	let i = 0;
+	while i < bucket_count {
+		(*((*map).buckets + cast(**HashMapEntry, i))) = cast(*HashMapEntry, null);
+		i = i + 1;
+	};
+	
+	return map;
+};
+
+let hashmap_put = (map: *HashMap, key: *i8, value: *void) => void {
+	let bucket_index = simple_hash(key, (*map).bucket_count);
+	let bucket = *((*map).buckets + cast(**HashMapEntry, bucket_index));
+	
+	let current = bucket;
+	while current != cast(*HashMapEntry, null) {
+		if strcmp((*current).key, key) {
+			(*current).value = value;
+			return;
+		};
+		current = (*current).next;
+	};
+	
+	let new_entry = cast(*HashMapEntry, arena_alloc((*map).arena, sizeof(HashMapEntry)));
+	(*new_entry).key = key;
+	(*new_entry).value = value;
+	(*new_entry).next = bucket;
+	
+	(*((*map).buckets + cast(**HashMapEntry, bucket_index))) = new_entry;
+	
+	return;
+};
+
+let hashmap_get = (map: *HashMap, key: *i8) => *void {
+	let bucket_index = simple_hash(key, (*map).bucket_count);
+	let current = *((*map).buckets + cast(**HashMapEntry, bucket_index));
+	
+	while current != cast(*HashMapEntry, null) {
+		if strcmp((*current).key, key) {
+			return (*current).value;
+		};
+		current = (*current).next;
+	};
+	
+	return cast(*void, null);
+};
