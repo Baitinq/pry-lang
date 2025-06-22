@@ -1,8 +1,9 @@
-# Pry Programming Language
+<h1>
+  Pry Programming Language
+  <img src="images/logo.svg" width="40" alt="Logo" />
+</h1>
 
 Pry is a simple, statically-typed programming language that compiles to native code via LLVM. It features a minimal C-like syntax with basic functional programming elements.
-
-<img src="images/logo.svg" width="200" alt="Logo" />
 
 ## Features
 
