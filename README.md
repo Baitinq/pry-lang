@@ -1,4 +1,4 @@
-![file](https://github.com/user-attachments/assets/c1c5edc6-eb3b-4cfd-a099-1344cfd24563)# Pry Programming Language
+# Pry Programming Language
 
 Pry is a simple, statically-typed programming language that compiles to native code via LLVM. It features a minimal C-like syntax with basic functional programming elements.
 
