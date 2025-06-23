@@ -160,7 +160,7 @@ let NODE_TYPE_SIMPLE_TYPE_DATA = struct {
 };
 
 let NODE_TYPE_FUNCTION_TYPE_DATA = struct {
-    parameters: *Node,
+    parameters: **Node,
     parameters_len: i64,
     retur_type: *Node,
 };
@@ -294,8 +294,6 @@ let parser_parse_type = (p: *parser) => *Node {
 
 /* FunctionParameters ::= IDENTIFIER ":" Type ("," IDENTIFIER ":" Type)* */
 let parser_parse_function_parameters = (p: *parser) => *slice {
-	/* TODO: Params */
-
 	let node_list = cast(**Node, arena_alloc((*p).arena, sizeof(**Node) * 20));
 	let i = 0;
 	while true {
@@ -306,12 +304,28 @@ let parser_parse_function_parameters = (p: *parser) => *slice {
 		if ident == cast(*token, null) {
 			break;
 		};
-		/* TODO: Rest */
+		if parser_accept_token(p, TOKEN_COLON) == cast(*token, null) {
+			return cast(*slice, null);
+		};
+		let type_annotation = parser_parse_type(p);
+		if type_annotation == cast(*Node, null) {
+			return cast(*slice, null);
+		};
+
+		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
+		(*d).name = cast(*i8, ident.data);
+		(*d).type = type_annotation;
+		let n = Node{};
+		n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
+		n.data = cast(*void, d);
+		(*(node_list + cast(**Node, i))) = create_node(p, n);
+
+		i = i + 1;
 	};
 
 	let s = cast(*slice, arena_alloc((*p).arena, sizeof(slice)));
 	(*s).data = cast(*void, node_list);
-	(*s).data_len = 0;
+	(*s).data_len = i;
 	return s;
 };
 
@@ -359,9 +373,9 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	let d = cast(*NODE_FUNCTION_DEFINITION_DATA, arena_alloc((*p).arena, sizeof(NODE_FUNCTION_DEFINITION_DATA)));
 	(*d).statements = statements;
 	(*d).statements_len = i;
-	(*d).parameters = cast(**Node, params.data);
-	(*d).parameters_len = params.data_len;
-	(*d).retur_type = cast(*Node, null);
+	(*d).parameters = cast(**Node, (*params).data);
+	(*d).parameters_len = (*params).data_len;
+	(*d).retur_type = retur_type;
 
 	let n = Node{};
 	n.type = NODE_FUNCTION_DEFINITION;

@@ -1,10 +1,60 @@
+import "!hashmap.pry";
+
 import "llvm.pry";
+
+let Variable = struct {
+	value: LLVMValueRef,
+	type: LLVMTypeRef,
+	node: *Node,
+	node_type: *Node,
+	stack_level: *i64,
+};
+
+let Scope = struct {
+	variables: *HashMap,
+};
+
+let Environment = struct {
+	scope_stack: **Scope,
+	scope_stack_len: i64,
+	arena: *arena,
+};
+
+let environment_create_scope = (e: *Environment) => void {
+	let scope = cast(*Scope, arena_alloc((*e).arena, sizeof(Scope)));
+	(*scope).variables = hashmap_init(16, (*e).arena);
+	(*((*e).scope_stack + cast(**Scope, (*e).scope_stack_len))) = scope;
+	(*e).scope_stack_len = (*e).scope_stack_len + 1;
+
+	return;
+};
+
+let environment_drop_scope = (e: *Environment) => void {
+	(*e).scope_stack_len = (*e).scope_stack_len - 1;
+
+	return;
+};
+
+let environment_init = (alloc: *arena) => *Environment {
+	let e = cast(*Environment, arena_alloc(alloc, sizeof(Environment)));
+	(*e).scope_stack = cast(**Scope, arena_alloc(alloc, sizeof(*Scope) * 20));
+	(*e).scope_stack_len = 0;
+	(*e).arena = alloc;
+
+	environment_create_scope(e);
+
+	return e;
+};
 
 let codegen = struct {
 	llvm_module: LLVMModuleRef,
 	llvm_context: LLVMContextRef,
 	builder: LLVMBuilderRef,
 	arena: *arena,
+	environment: *Environment,
+
+	current_function: LLVMValueRef,
+	current_function_retur_type: *Node,
 };
 
 let codegen_init = (alloc: *arena) => *codegen {
@@ -24,6 +74,7 @@ let codegen_init = (alloc: *arena) => *codegen {
 	(*c).llvm_context = context;
 	(*c).builder = builder;
 	(*c).arena = alloc;
+	(*c).environment = environment_init(alloc);
 
 	return c;
 };
@@ -34,18 +85,31 @@ let create_node = (c: *codegen, n: Node) => *Node {
 	return res;
 };
 
-let Variable = struct {
-	value: LLVMValueRef,
-	type: LLVMTypeRef,
-	node: *Node,
-	node_type: *Node,
-	stack_level: *i64,
-};
-
 let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
 	let v = cast(*Variable, arena_alloc((*c).arena, sizeof(Variable)));
 	*v = variable;
 	return v;
+};
+
+let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
+	printf("LLVM TYPE: %d\n", (*node).type);
+	assert((*node).type >= NODE_TYPE_SIMPLE_TYPE);
+	assert((*node).type <= NODE_TYPE_STRUCT_TYPE);
+	
+	assert((*node).type == NODE_TYPE_SIMPLE_TYPE); /* TODO */
+
+	let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*node).data);
+	
+	if strcmp(simple_type.name, "i64") {
+		let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+		*r = LLVMInt64Type();
+		return r;
+	};
+
+	printf("NO TYPE!\n");
+	assert(false);
+
+	return cast(*LLVMTypeRef, null);
 };
 
 let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i8, node: *Node, node_type: *Node) => *Variable {
@@ -58,6 +122,8 @@ let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i
 	v.node_type = node_type;
 	return codegen_create_variable(c, v);
 };
+
+extern codegen_generate_statement = (*codegen, *Node) => i64;
 
 let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
@@ -77,11 +143,89 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	};
 	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
+	/* TODO: IMPLEMENT */
 		printf("ASS %d\n", (*expression).type);
-		assert(false); /* TODO */
-		printf("ERT\n");
+
+		let builder_pos = LLVMGetInsertBlock((*c).builder);
+
+		let llvm_param_types = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
+		let param_types = cast(**Node, arena_alloc((*c).arena, sizeof(*Node) * 20));
+		/* TODO: VARARGS */
+
+		
+		let function_definition = *cast(*NODE_FUNCTION_DEFINITION_DATA, (*expression).data);
+
+		let i = 0;
+		/* TODO */
+		while i < function_definition.parameters_len {
+			i = i + 1;
+		};
+
+		let retur_type = codegen_get_llvm_type(c, function_definition.retur_type);
+		if retur_type == cast(*LLVMTypeRef, null) {
+			printf("LEL\n");
+			return cast(*Variable, null);
+		};
+
+		let function_type = LLVMFunctionType(*retur_type, llvm_param_types, i, 0);
+		let function = LLVMAddFunction((*c).llvm_module, name, function_type);
+                let function_entry = LLVMAppendBasicBlock(function, "entrypoint");
+                LLVMPositionBuilderAtEnd((*c).builder, function_entry);
+
+		/* TODO: SCOPE */
+		environment_create_scope((*c).environment);
+		let last_function = (*c).current_function;
+		(*c).current_function = function;
+		let last_function_retur_type = (*c).current_function_retur_type;
+		(*c).current_function_retur_type = function_definition.retur_type;
+
+		/* TODO: Defer */
+
+		let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_FUNCTION_TYPE_DATA)));
+		(*d).parameters = param_types;
+		(*d).parameters_len = i;
+		(*d).retur_type = function_definition.retur_type;
+		let n = Node{};
+		let node_type = create_node(c, n);
+		(*node_type).type = NODE_TYPE_FUNCTION_TYPE;
+		(*node_type).data = cast(*void, d);
+
+		/* TODO: Recurisve functions */
+
+		let params = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * function_definition.parameters_len));
+		LLVMGetParams(function, params);
+
+
+		/* TODO */
+		let parameters_index = 0;
+		while parameters_index < function_definition.parameters_len {
+			parameters_index = parameters_index + 1;
+		};
+
+		i = 0;
+		while i < function_definition.statements_len {
+			let stmt = *(function_definition.statements + cast(**Node, i));
+
+			let res = codegen_generate_statement(c, stmt);
+			if res != 0 {
+				return cast(*Variable, null);
+			};
+
+			i = i + 1;
+		};
+
+		LLVMPositionBuilderAtEnd((*c).builder, builder_pos);
+	
+		let v = Variable{};
+		v.value = function;
+		v.type = cast(LLVMTypeRef, null);
+		v.stack_level = cast(*i64, null);
+		v.node = expression;
+		v.node_type = node_type;
+		return codegen_create_variable(c, v);
 	};
 
+	printf("ASSERT 1\n");
 	assert(false);
 
 	return cast(*Variable, null);
@@ -99,19 +243,49 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		return 0;
 	};
 
+	printf("ASSERT 2 %d\n", lhs.type);
 	assert(false);
+	return 0;
+};
+
+let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEMENT_DATA) => i64 {
+	printf("HELLO!\n");
+	let expression = (*stmt).expression;
+
+	if expression == cast(*Node, null) {
+		printf("RETURN VOID!\n");
+		LLVMBuildRetVoid((*c).builder);
+		return 0;
+	};
+
+	let val = codegen_generate_expression_value(c, expression, cast(*i8, null));
+	if val == cast(*Variable, null) {
+		return 1;
+	};
+
+	/* TODO: Check type */
+
+	LLVMBuildRet((*c).builder, (*val).value);
+
+	printf("BYE!\n");
+
 	return 0;
 };
 
 let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	let stmt = *statement;
-	assert(stmt.type == NODE_ASSIGNMENT_STATEMENT); /* TODO: generate other node types */
 
-	let res = codegen_generate_assignment_statement(c, cast(*NODE_ASSIGNMENT_STATEMENT_DATA, stmt.data));
-	if res != 0 {
-		return 1;
+	if stmt.type == NODE_ASSIGNMENT_STATEMENT {
+		return codegen_generate_assignment_statement(c, cast(*NODE_ASSIGNMENT_STATEMENT_DATA, stmt.data));
 	};
-	printf("STMT: %d\n", stmt.type);
+
+	if stmt.type == NODE_RETURN_STATEMENT {
+		return codegen_generate_return_statement(c, cast(*NODE_RETURN_STATEMENT_DATA, stmt.data));
+	};
+
+	printf("ASSERT 3 %d\n", stmt.type);
+	assert(false);
+
 	return 0;
 };
 

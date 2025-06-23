@@ -499,17 +499,6 @@ pub const CodeGen = struct {
                 // TODO: This should be done with a defer when `builder_pos` is declared, but for some reason it doesn't work
                 llvm.LLVMPositionBuilderAtEnd(self.builder, builder_pos);
 
-                // Global functions
-                if (name == null or self.environment.scope_stack.items.len == 2) {
-                    return try self.create_variable(.{
-                        .value = function,
-                        .type = null,
-                        .stack_level = null,
-                        .node = expression,
-                        .node_type = node_type,
-                    });
-                }
-
                 return try self.create_variable(.{
                     .value = function,
                     .type = null,

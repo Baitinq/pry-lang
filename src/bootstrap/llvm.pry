@@ -258,6 +258,7 @@ let LLVMTargetRef = newtype *void;
 
 let LLVMValueRef = newtype *void;
 let LLVMTypeRef = newtype *void;
+let LLVMBasicBlockRef = newtype *void;
 
 extern LLVMConstInt = (LLVMTypeRef, i64, i64) => LLVMValueRef;
 extern LLVMInt64Type = () => LLVMTypeRef;
@@ -268,6 +269,8 @@ extern LLVMCreateBuilder = () => LLVMBuilderRef;
 extern LLVMDisposeModule = (LLVMModuleRef) => void;
 extern LLVMShutdown = () => void;
 extern LLVMDisposeBuilder = (LLVMBuilderRef) => void;
+
+extern LLVMGetInsertBlock = (LLVMBuilderRef) => LLVMBasicBlockRef;
 
 extern LLVMDumpModule = (LLVMModuleRef) => void;
 extern LLVMGetDefaultTargetTriple = () => *i8;
@@ -287,3 +290,13 @@ let LLVMAbortProcessAction = 0;
 extern LLVMTargetMachineEmitToFile = (LLVMTargetMachineRef, LLVMModuleRef, *i8, i64, **i8) => i64;
 
 let LLVMObjectFile = 1;
+
+extern LLVMFunctionType = (LLVMTypeRef, *LLVMTypeRef, i64, i64) => LLVMTypeRef;
+extern LLVMAddFunction = (LLVMModuleRef, *i8, LLVMTypeRef) => LLVMValueRef;
+extern LLVMAppendBasicBlock = (LLVMValueRef, *i8) => LLVMBasicBlockRef;
+extern LLVMPositionBuilderAtEnd = (LLVMBuilderRef, LLVMBasicBlockRef) => void;
+
+extern LLVMGetParams = (LLVMValueRef, *LLVMValueRef) => void;
+
+extern LLVMBuildRetVoid = (LLVMBuilderRef) => void;
+extern LLVMBuildRet = (LLVMBuilderRef, LLVMValueRef) => void;
