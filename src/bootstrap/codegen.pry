@@ -92,21 +92,93 @@ let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
 };
 
 let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
-	printf("LLVM TYPE: %d\n", (*node).type);
 	assert((*node).type >= NODE_TYPE_SIMPLE_TYPE);
 	assert((*node).type <= NODE_TYPE_STRUCT_TYPE);
 	
-	assert((*node).type == NODE_TYPE_SIMPLE_TYPE); /* TODO */
+	if (*node).type == NODE_TYPE_SIMPLE_TYPE {
+		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*node).data);
 
-	let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*node).data);
+		if strcmp(simple_type.name, "i8") {
+			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+			*r = LLVMInt8Type();
+			return r;
+		};
+		
+		if strcmp(simple_type.name, "i64") {
+			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+			*r = LLVMInt64Type();
+			return r;
+		};
+		
+		if strcmp(simple_type.name, "void") {
+			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+			*r = LLVMVoidType();
+			return r;
+		};
+		
+		if strcmp(simple_type.name, "varargs") { /* Hack for varargs (only used for printf) */
+			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+			*r = LLVMPointerType(LLVMInt64Type(), 0);
+			return r;
+		};
+
+		printf("NO SIMPLE TYPE %s!\n", simple_type.name);
+		assert(false);
+	};
 	
-	if strcmp(simple_type.name, "i64") {
+	if (*node).type == NODE_TYPE_FUNCTION_TYPE {
+		let function_type = *cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*node).data);
+		let retur_type = codegen_get_llvm_type(c, function_type.retur_type);
+		if retur_type == cast(*LLVMTypeRef, null) {
+			return cast(*LLVMTypeRef, null);
+		};
+		let paramtypes = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
+		let paramtypes_len = 0;
+		let is_varargs = 0;
+
+		let i = 0;
+		while i < function_type.parameters_len {
+			let param = *(function_type.parameters + cast(**Node, i));
+			if (*param).type == NODE_TYPE_SIMPLE_TYPE {
+				let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*param).data);
+				if strcmp(simple_type.name, "varargs") {
+					is_varargs = 1;
+					i = i + 1;
+					continue;
+				};
+			};
+			let typ = codegen_get_llvm_type(c, param);
+			if typ == cast(*LLVMTypeRef, null) {
+				return cast(*LLVMTypeRef, null);
+			};
+			if (*param).type == NODE_TYPE_FUNCTION_TYPE {
+				*typ = LLVMPointerType(*typ, 0);
+			};
+
+			(*(paramtypes + cast(*LLVMTypeRef, paramtypes_len))) = *typ;
+			paramtypes_len = paramtypes_len + 1;
+
+			i = i + 1;
+		};
+		let function_type = LLVMFunctionType(*retur_type, paramtypes, paramtypes_len, is_varargs);
 		let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
-		*r = LLVMInt64Type();
+		*r = function_type;
+		printf("FUNCTION\n");
 		return r;
 	};
 
-	printf("NO TYPE!\n");
+	if (*node).type == NODE_TYPE_POINTER_TYPE {
+		let pointer_type = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*node).data);
+		let inner_type = codegen_get_llvm_type(c, pointer_type.type);
+		if inner_type == cast(*LLVMTypeRef, null) {
+			return cast(*LLVMTypeRef, null);
+		};
+		let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+		*r = LLVMPointerType(*inner_type, 0);
+		return r;
+	};
+
+	printf("NO TYPEEE BOI %d\n", (*node).type);
 	assert(false);
 
 	return cast(*LLVMTypeRef, null);
@@ -126,7 +198,9 @@ let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i
 extern codegen_generate_statement = (*codegen, *Node) => i64;
 
 let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
+	printf("NAME: %s\n", name);
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
+		printf("THIS\n");
 		let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
 		
 		printf("X: %d\n", n);
@@ -143,6 +217,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	};
 	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
+		printf("THIS2\n");
 	/* TODO: IMPLEMENT */
 		printf("ASS %d\n", (*expression).type);
 
@@ -163,7 +238,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		let retur_type = codegen_get_llvm_type(c, function_definition.retur_type);
 		if retur_type == cast(*LLVMTypeRef, null) {
-			printf("LEL\n");
+			printf("LEL2\n");
 			return cast(*Variable, null);
 		};
 
@@ -208,6 +283,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 			let res = codegen_generate_statement(c, stmt);
 			if res != 0 {
+				printf("LEL\n");
 				return cast(*Variable, null);
 			};
 
@@ -222,6 +298,30 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		v.stack_level = cast(*i64, null);
 		v.node = expression;
 		v.node_type = node_type;
+		return codegen_create_variable(c, v);
+	};
+	
+	if ((*expression).type == NODE_TYPE_FUNCTION_TYPE) {
+		let e = *((*c).environment);
+		printf("LLEL\n");
+		assert(e.scope_stack_len == 1);
+		printf("THIS3\n");
+
+		/* TODO: Check if already exists */
+
+		let function_type = codegen_get_llvm_type(c, expression);
+		if function_type == cast(*LLVMTypeRef, null) {
+			printf("LOL\n");
+			return cast(*Variable, null);
+		};
+		let function = LLVMAddFunction((*c).llvm_module, name, *function_type);
+		let v = Variable{};
+		v.value = function;
+		v.type = cast(LLVMTypeRef, null);
+		v.stack_level = cast(*i64, null);
+		v.node = expression;
+		v.node_type = expression;
+		printf("RET\n");
 		return codegen_create_variable(c, v);
 	};
 

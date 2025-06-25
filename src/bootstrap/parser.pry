@@ -274,20 +274,126 @@ let parser_parse_return_statement = (p: *parser) => *Node {
 	return create_node(p, r);
 };
 
-/* Type ::= IDENTIFIER | FunctionType */
-let parser_parse_type = (p: *parser) => *Node {
-	/* TODO: Function type */
-	let to = parser_consume_token(p);
-	assert(to != cast(*token, null));
-	assert((*to).type == TOKEN_IDENTIFIER);
+extern parser_parse_type = (*parser) => *Node;
 
-	let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
-	(*d).name = cast(*i8, (*to).data);
-	(*d).underlying_type = cast(*Node, null);
+/* FunctionType ::= LPAREN (Type ("," Type)*)? RPAREN ARROW Type */
+let parser_parse_function_type = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_LPAREN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let parameters = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 20));
+	let parameters_len = 0;
+	let first = true;
+	while true {
+		if !first {
+			parser_accept_token(p, TOKEN_COMMA);
+		};
+		first = false;
+		let type_annotation = parser_accept_parse(p, parser_parse_type);
+		if type_annotation == cast(*Node, null) {
+			break;
+		};
+		(*(parameters + cast(**Node, parameters_len))) = type_annotation;
+		parameters_len = parameters_len + 1;
+
+	};
+	
+	if parser_accept_token(p, TOKEN_RPAREN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_ARROW) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let retur_typ = parser_parse_type(p);
+	if retur_typ == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_FUNCTION_TYPE_DATA)));
+	(*d).parameters = parameters;
+	(*d).parameters_len = parameters_len;
+	(*d).retur_type = retur_typ;
 
 	let r = Node{};
-	r.type = NODE_TYPE_SIMPLE_TYPE;
+	r.type = NODE_TYPE_FUNCTION_TYPE;
 	r.data = cast(*void, d);
+
+	return create_node(p, r);
+};
+
+/* Type ::= IDENTIFIER | FunctionType */
+let parser_parse_type = (p: *parser) => *Node {
+	let typ = parser_accept_parse(p, parser_parse_function_type);
+	if typ != cast(*Node, null) {
+		return typ;
+	};
+
+	let to = parser_consume_token(p);
+	assert(to != cast(*token, null));
+
+	if (*to).type == TOKEN_IDENTIFIER {
+		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*d).name = cast(*i8, (*to).data);
+		(*d).underlying_type = cast(*Node, null);
+
+		let r = Node{};
+		r.type = NODE_TYPE_SIMPLE_TYPE;
+		r.data = cast(*void, d);
+
+		return create_node(p, r);
+	};
+
+	if (*to).type == TOKEN_MUL {
+		let d = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
+		(*d).type = parser_parse_type(p);
+
+		let r = Node{};
+		r.type = NODE_TYPE_POINTER_TYPE;
+		r.data = cast(*void, d);
+
+		return create_node(p, r);
+	};
+
+	return cast(*Node, null);
+};
+
+/* ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type */
+let parser_parse_extern_declaration = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_EXTERN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+	if ident == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_EQUALS) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	let typ = parser_parse_type(p);
+	if typ == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
+	(*d).name = cast(*i8, (*ident).data);
+	(*d).type = cast(*Node, null);
+
+	let n = Node{};
+	n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
+	n.data = cast(*void, d);
+
+	let dd = cast(*NODE_ASSIGNMENT_STATEMENT_DATA, arena_alloc((*p).arena, sizeof(NODE_ASSIGNMENT_STATEMENT_DATA)));
+	(*dd).is_declaration = false;
+	(*dd).is_dereference = false;
+	(*dd).lhs = create_node(p, n);
+	(*dd).rhs = typ;
+
+	let r = Node{};
+	r.type = NODE_ASSIGNMENT_STATEMENT;
+	r.data = cast(*void, dd);
 
 	return create_node(p, r);
 };
@@ -503,6 +609,13 @@ let parser_parse_statement = (p: *parser) => *Node {
 	    return retu;
 	};
 
+	let retu = parser_accept_parse(p, parser_parse_extern_declaration);
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
+	};
 
 	printf("None\n");
 	

@@ -262,6 +262,8 @@ let LLVMBasicBlockRef = newtype *void;
 
 extern LLVMConstInt = (LLVMTypeRef, i64, i64) => LLVMValueRef;
 extern LLVMInt64Type = () => LLVMTypeRef;
+extern LLVMInt8Type = () => LLVMTypeRef;
+extern LLVMVoidType = () => LLVMTypeRef;
 
 extern LLVMModuleCreateWithName = (*i8) => LLVMModuleRef;
 extern LLVMGetGlobalContext = () => LLVMContextRef;
@@ -300,3 +302,4 @@ extern LLVMGetParams = (LLVMValueRef, *LLVMValueRef) => void;
 
 extern LLVMBuildRetVoid = (LLVMBuilderRef) => void;
 extern LLVMBuildRet = (LLVMBuilderRef, LLVMValueRef) => void;
+extern LLVMPointerType = (LLVMTypeRef, i64) => LLVMTypeRef;
