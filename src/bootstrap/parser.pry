@@ -72,7 +72,7 @@ let NODE_IMPORT_DECLARATION_DATA = struct {
 
 let NODE_FUNCTION_CALL_STATEMENT_DATA = struct {
     expression: *Node,
-    arguments: *Node,
+    arguments: **Node,
     arguments_len: i64,
 };
 
@@ -579,7 +579,7 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	    return cast(*Node, null);
 	};
 
-	let d = cast(*NODE_ASSIGNMENT_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_ASSIGNMENT_STATEMENT_DATA )));
+	let d = cast(*NODE_ASSIGNMENT_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_ASSIGNMENT_STATEMENT_DATA)));
 	(*d).is_declaration = is_declaration;
 	(*d).is_dereference = false;
 	(*d).lhs = lhs;
@@ -587,12 +587,86 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	let n = Node{};
 	n.type = NODE_ASSIGNMENT_STATEMENT;
 	n.data = cast(*void, d);
-	printf("CONTINUE\n");
+	return create_node(p, n);
+};
+
+/* FunctionArguments ::= Expression ("," Expression)* */
+let parser_parse_function_arguments = (p: *parser) => *slice {
+	let node_list = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 20));
+	let first = true;
+
+	let i = 0;
+	while true {
+		if !first {
+			parser_accept_token(p, TOKEN_COMMA);
+		};
+		first = false;
+		let maybe_expr = parser_accept_parse(p, parser_parse_expression);
+		if maybe_expr == cast(*Node, null) {
+			let s = cast(*slice, arena_alloc((*p).arena, sizeof(slice)));
+			(*s).data = cast(*void, node_list);
+			(*s).data_len = i;
+			return s;
+		};
+
+		(*(node_list + cast(**Node, i))) = maybe_expr;
+		i = i + 1;
+	};
+
+	let s = cast(*slice, arena_alloc((*p).arena, sizeof(slice)));
+	(*s).data = cast(*void, node_list);
+	(*s).data_len = i;
+	return s;
+};
+
+/* FunctionCallStatement ::= (IDENTIFIER | FunctionDefinition) LPAREN FunctionArguments? RPAREN */
+let parse_function_call_statement = (p: *parser) => *Node {
+	let ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+	if ident == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	/* TODO: Function definition call */
+		
+	if parser_accept_token(p, TOKEN_LPAREN) == cast(*token, null) {
+	    return cast(*Node, null);
+	};
+
+	let arguments = parser_parse_function_arguments(p);
+	if arguments == cast(*slice, null) {
+	    return cast(*Node, null);
+	};
+	
+	if parser_accept_token(p, TOKEN_RPAREN) == cast(*token, null) {
+	    return cast(*Node, null);
+	};
+
+	let expression_data = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
+	(*expression_data).name = cast(*i8, ident.data);
+	let expression = cast(*Node, arena_alloc((*p).arena, sizeof(Node)));
+	(*expression).type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
+	(*expression).data = cast(*void, expression_data);
+
+	let d = cast(*NODE_FUNCTION_CALL_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_FUNCTION_CALL_STATEMENT_DATA)));
+	(*d).expression = expression;
+	(*d).arguments = cast(**Node, arguments.data);
+	(*d).arguments_len = arguments.data_len;
+	let n = Node{};
+	n.type = NODE_FUNCTION_CALL_STATEMENT;
+	n.data = cast(*void, d);
 	return create_node(p, n);
 };
 
 /* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
 let parser_parse_statement = (p: *parser) => *Node {
+	let fn_call = parser_accept_parse(p, parse_function_call_statement);
+	if fn_call != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return fn_call;
+	};
+
 	let assignment = parser_accept_parse(p, parse_assignment_statement);
 	if assignment != cast(*Node, null) {
 		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
