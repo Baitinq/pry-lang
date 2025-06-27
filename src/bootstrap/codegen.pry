@@ -35,6 +35,16 @@ let environment_drop_scope = (e: *Environment) => void {
 	return;
 };
 
+/* TODO: */
+let environment_add_variale = (e: *Environment, name: *i8, variable: *Variable) => void {
+	return;
+};
+
+/* TODO: */
+let environment_set_variale = (e: *Environment, name: *i8, varbiable: *Variable) => void {
+	return;
+};
+
 let environment_init = (alloc: *arena) => *Environment {
 	let e = cast(*Environment, arena_alloc(alloc, sizeof(Environment)));
 	(*e).scope_stack = cast(**Scope, arena_alloc(alloc, sizeof(*Scope) * 20));
@@ -340,6 +350,9 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		printf("XX %s\n", identifier);
 		let variable = codegen_generate_expression_value(c, prhs, identifier);
 		assert(variable != cast(*Variable, null));
+
+		/* TODO IMPORTANT: Add variable to variables */
+
 		return 0;
 	};
 
@@ -372,6 +385,13 @@ let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEME
 	return 0;
 };
 
+let codegen_generate_function_call_statement = (c: *codegen, stmt: *NODE_FUNCTION_CALL_STATEMENT_DATA) => i64 {
+	printf("LELELEL\n");
+	assert(false);
+
+	return 0;
+};
+
 let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	let stmt = *statement;
 
@@ -381,6 +401,10 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 
 	if stmt.type == NODE_RETURN_STATEMENT {
 		return codegen_generate_return_statement(c, cast(*NODE_RETURN_STATEMENT_DATA, stmt.data));
+	};
+	
+	if stmt.type == NODE_FUNCTION_CALL_STATEMENT {
+		return codegen_generate_function_call_statement(c, cast(*NODE_FUNCTION_CALL_STATEMENT_DATA, stmt.data));
 	};
 
 	printf("ASSERT 3 %d\n", stmt.type);
