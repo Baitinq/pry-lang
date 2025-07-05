@@ -206,6 +206,7 @@ pub const CodeGen = struct {
                 const xd = assignment_statement.lhs.UNARY_EXPRESSION.expression;
                 const a = try self.generate_expression_value(xd, null);
                 const variable = try self.generate_expression_value(assignment_statement.rhs, null);
+                std.debug.assert(self.compare_types(a.node_type, variable.node_type, true));
                 _ = llvm.LLVMBuildStore(self.builder, variable.value, a.value);
             },
             .FIELD_ACCESS => |field_access| {
