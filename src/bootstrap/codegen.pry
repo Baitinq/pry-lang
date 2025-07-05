@@ -418,17 +418,81 @@ let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEME
 	return 0;
 };
 
-let codegen_generate_function_call_statement = (c: *codegen, stmt: *NODE_FUNCTION_CALL_STATEMENT_DATA) => i64 {
+let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
+	if (*fun).type == NODE_FUNCTION_DEFINITION {
+		let d = cast(*NODE_FUNCTION_DEFINITION_DATA, (*fun).data);
+		return (*d).retur_type;
+	};
+	if (*fun).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER {
+		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*fun).data);
+		let f = environment_get_variable((*ic).environment, (*d).name);
+		if f == cast(*Variable, null) {
+			return cast(*Node, null);
+		};
+		let f_type = (*f).node_type;
+		assert((*f_type).type == NODE_TYPE_FUNCTION_TYPE);
+		return get_function_return_type(ic, f_type);
+	};
+	if (*fun).type == NODE_TYPE_FUNCTION_TYPE  {
+		let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*fun).data);
+		return (*d).retur_type;
+	};
+	printf("HMM %d\n", (*fun).type);
+	assert(false);
+	return cast(*Node, null);
+};
+
+let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) => *Variable {
+	assert((*statement).type == NODE_FUNCTION_CALL_STATEMENT);
+	let stmt = cast(*NODE_FUNCTION_CALL_STATEMENT_DATA, (*statement).data);
 	let expression = (*(*stmt).expression);
 	assert(expression.type == NODE_PRIMARY_EXPRESSION_IDENTIFIER); /* TODO: Function definition support */
 
 	let ident = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, expression.data));
 	let function = environment_get_variable((*c).environment, ident.name);
+	if function == cast(*Variable, null) {
+		return cast(*Variable, null);
+	};
+	/* TODO: Support function ptr */
 
-	printf("LELELEL\n");
-	assert(false);
+	let arguments = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * (*stmt).arguments_len));
 
-	return 0;
+	let i = 0;
+	printf("arguments_len: %d\n", (*stmt).arguments_len);
+
+	while i < (*stmt).arguments_len {
+		let argument = (*((*stmt).arguments + cast(**Node, i))); /* TODO */
+		let arg = codegen_generate_expression_value(c, argument, cast(*i8, null));
+		if arg == cast(*Variable, null) {
+			printf("BAD");
+			assert(false);
+		};
+		/* TODO: Typecheck */
+
+		(*(arguments + cast(*LLVMValueRef, i))) = arg;
+
+		i = i + 1;
+	};
+
+	let function_type = codegen_get_llvm_type(c, (*function).node_type);
+	if function_type == cast(*LLVMTypeRef, null) {
+		printf("FN Type\n");
+		assert(false);
+	};
+
+	let res = LLVMBuildCall2((*c).builder, *function_type, (*function).value, arguments, i, "");
+
+	let function_return_type = get_function_return_type(c, (*function).node_type);
+
+	let v = Variable{};
+
+	v.value = res;
+	v.type = cast(LLVMTypeRef, null);
+	v.stack_level = cast(*i64, null);
+	v.node = statement;
+	v.node_type = function_return_type;
+
+	return codegen_create_variable(c, v);
 };
 
 let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
@@ -443,7 +507,8 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	};
 	
 	if stmt.type == NODE_FUNCTION_CALL_STATEMENT {
-		return codegen_generate_function_call_statement(c, cast(*NODE_FUNCTION_CALL_STATEMENT_DATA, stmt.data));
+		codegen_generate_function_call_statement(c, statement);
+		return 0;
 	};
 
 	printf("ASSERT 3 %d\n", stmt.type);

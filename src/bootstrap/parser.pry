@@ -649,8 +649,8 @@ let parse_function_call_statement = (p: *parser) => *Node {
 
 	let d = cast(*NODE_FUNCTION_CALL_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_FUNCTION_CALL_STATEMENT_DATA)));
 	(*d).expression = expression;
-	(*d).arguments = cast(**Node, arguments.data);
-	(*d).arguments_len = arguments.data_len;
+	(*d).arguments = cast(**Node, (*arguments).data);
+	(*d).arguments_len = (*arguments).data_len;
 	let n = Node{};
 	n.type = NODE_FUNCTION_CALL_STATEMENT;
 	n.data = cast(*void, d);
