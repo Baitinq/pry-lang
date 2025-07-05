@@ -35,13 +35,38 @@ let environment_drop_scope = (e: *Environment) => void {
 	return;
 };
 
-/* TODO: */
-let environment_add_variale = (e: *Environment, name: *i8, variable: *Variable) => void {
+let environment_get_variable = (e: *Environment, name: *i8) => *Variable {
+	let i = (*e).scope_stack_len;
+	let variable = cast(*Variable, null);
+
+	while i > 0 {
+		i = i - 1;
+		let scope = *(((*e).scope_stack + cast(**Scope, i)));
+		let v = cast(*Variable, hashmap_get((*scope).variables, name));
+		if v != cast(*Variable, null) {
+			if variable == cast(*Variable, null) {
+				variable = v;
+			};
+			let stack_level = cast(*i64, arena_alloc((*e).arena, sizeof(i64)));
+			(*stack_level) = i;
+			(*variable).stack_level = stack_level;
+		};
+	};
+
+	return variable;
+};
+
+let environment_add_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
+	let top_scope = *(((*e).scope_stack + cast(**Scope, (*e).scope_stack_len - 1)));
+	hashmap_put((*top_scope).variables, name, cast(*void, variable));
+
 	return;
 };
 
-/* TODO: */
-let environment_set_variale = (e: *Environment, name: *i8, varbiable: *Variable) => void {
+let environment_set_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
+	let existing = environment_get_variable(e, name);
+	(*existing) = (*variable);
+
 	return;
 };
 
@@ -264,7 +289,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let last_function_retur_type = (*c).current_function_retur_type;
 		(*c).current_function_retur_type = function_definition.retur_type;
 
-		/* TODO: Defer */
+		/* TODO: Defer. For now we do at the end */
 
 		let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_FUNCTION_TYPE_DATA)));
 		(*d).parameters = param_types;
@@ -308,6 +333,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		v.stack_level = cast(*i64, null);
 		v.node = expression;
 		v.node_type = node_type;
+
+		/* TODO: Move to defer */
+		(*c).current_function = last_function;
+		environment_drop_scope((*c).environment);
+		
+
 		return codegen_create_variable(c, v);
 	};
 	
@@ -351,7 +382,11 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		let variable = codegen_generate_expression_value(c, prhs, identifier);
 		assert(variable != cast(*Variable, null));
 
-		/* TODO IMPORTANT: Add variable to variables */
+		let env = (*(*c).environment);
+		/* TODO: Support assignments at non-global level */
+		assert(env.scope_stack_len == 1);
+
+		environment_add_variable((*c).environment, identifier, variable);
 
 		return 0;
 	};
@@ -380,12 +415,16 @@ let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEME
 
 	LLVMBuildRet((*c).builder, (*val).value);
 
-	printf("BYE!\n");
-
 	return 0;
 };
 
 let codegen_generate_function_call_statement = (c: *codegen, stmt: *NODE_FUNCTION_CALL_STATEMENT_DATA) => i64 {
+	let expression = (*(*stmt).expression);
+	assert(expression.type == NODE_PRIMARY_EXPRESSION_IDENTIFIER); /* TODO: Function definition support */
+
+	let ident = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, expression.data));
+	let function = environment_get_variable((*c).environment, ident.name);
+
 	printf("LELELEL\n");
 	assert(false);
 

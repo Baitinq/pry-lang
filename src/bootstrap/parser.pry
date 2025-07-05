@@ -642,7 +642,7 @@ let parse_function_call_statement = (p: *parser) => *Node {
 	};
 
 	let expression_data = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
-	(*expression_data).name = cast(*i8, ident.data);
+	(*expression_data).name = cast(*i8, (*ident).data);
 	let expression = cast(*Node, arena_alloc((*p).arena, sizeof(Node)));
 	(*expression).type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
 	(*expression).data = cast(*void, expression_data);
