@@ -251,6 +251,35 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, create_node(c, node_type));
 	};
 	
+	if ((*expression).type == NODE_PRIMARY_EXPRESSION_STRING) {
+		printf("THIS8\n");
+		let str = (*cast(*NODE_PRIMARY_EXPRESSION_STRING_DATA, (*expression).data)).value;
+		
+		printf("X string: %s\n", str);
+		let x = LLVMBuildGlobalStringPtr((*c).builder, str, "");
+
+		let inner_type_data = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*inner_type_data).name = "i8";
+		let inner_type = Node{};
+		inner_type.type = NODE_TYPE_SIMPLE_TYPE;
+		inner_type.data = cast(*void, inner_type_data);
+
+		let node_type_data = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
+		(*node_type_data).type = create_node(c, inner_type);
+		let node_type = Node{};
+		node_type.type = NODE_TYPE_POINTER_TYPE;
+		node_type.data = cast(*void, node_type_data);
+
+		let v = Variable{};
+		v.value = x;
+		v.type = cast(LLVMTypeRef, null);
+		v.stack_level = cast(*i64, null);
+		v.node = expression;
+		v.node_type = create_node(c, node_type);
+
+		return codegen_create_variable(c, v);
+	};
+	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
 		printf("THIS2\n");
 	/* TODO: IMPLEMENT */
@@ -282,7 +311,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
                 let function_entry = LLVMAppendBasicBlock(function, "entrypoint");
                 LLVMPositionBuilderAtEnd((*c).builder, function_entry);
 
-		/* TODO: SCOPE */
+
 		environment_create_scope((*c).environment);
 		let last_function = (*c).current_function;
 		(*c).current_function = function;

@@ -305,3 +305,4 @@ extern LLVMBuildRet = (LLVMBuilderRef, LLVMValueRef) => void;
 extern LLVMPointerType = (LLVMTypeRef, i64) => LLVMTypeRef;
 
 extern LLVMBuildCall2 = (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, *LLVMValueRef, i64, *i8) => LLVMValueRef;
+extern LLVMBuildGlobalStringPtr = (LLVMBuilderRef, *i8, *i8) => LLVMValueRef;
