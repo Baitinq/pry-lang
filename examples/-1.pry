@@ -1,11 +1,9 @@
 /* HELLO! Welcome to the unnamed language */
 
-let putchar = () => i64 {
-	return 0;
-};
+extern printf = (*i8, varargs) => void;
 
 let main = () => i64 {
-	putchar();
+	printf("HELLO WORLD!\n");
 	return 7;
 };
 

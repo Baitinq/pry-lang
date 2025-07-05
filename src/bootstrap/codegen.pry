@@ -498,7 +498,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		};
 		/* TODO: Typecheck */
 
-		(*(arguments + cast(*LLVMValueRef, i))) = arg;
+		(*(arguments + cast(*LLVMValueRef, i))) = (*arg).value;
 
 		i = i + 1;
 	};
