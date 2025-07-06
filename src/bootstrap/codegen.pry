@@ -281,6 +281,15 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_create_variable(c, v);
 	};
 	
+	if ((*expression).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER) {
+		let identifier = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*expression).data);
+		let variable = environment_get_variable((*c).environment, identifier.name);
+		if variable == cast(*Variable, null) {
+			printf("HEREBAD!\n");
+			return cast(*Variable, null);
+		};
+	};
+	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
 		printf("THIS2\n");
 	/* TODO: IMPLEMENT */
@@ -296,8 +305,29 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let function_definition = *cast(*NODE_FUNCTION_DEFINITION_DATA, (*expression).data);
 
 		let i = 0;
-		/* TODO */
+		let is_varargs = 0;
 		while i < function_definition.parameters_len {
+			let node = *(function_definition.parameters + cast(**Node, i));
+			assert((*node).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
+			let param = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*node).data);
+			let param_type = param.type;
+			if (*param_type).type == NODE_TYPE_SIMPLE_TYPE {
+				let simple_type = *(cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*param_type).data));
+				if strcmp(simple_type.name, "varargs") {
+					is_varargs = 1;
+				};
+			};
+			let llvm_param_type = codegen_get_llvm_type(c, param_type);
+			if llvm_param_type == cast(*LLVMTypeRef, null) {
+				printf("LEL3\n");
+				return cast(*Variable, null);
+			};
+			if (*param_type).type == NODE_TYPE_SIMPLE_TYPE {
+                        	(*llvm_param_type) = LLVMPointerType(*llvm_param_type, 0);
+			};
+
+			(*(llvm_param_types + cast(*LLVMTypeRef, i))) = *llvm_param_type;
+			(*(param_types + cast(**Node, i))) = param_type;
 			i = i + 1;
 		};
 
@@ -339,6 +369,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		/* TODO */
 		let parameters_index = 0;
 		while parameters_index < function_definition.parameters_len {
+			/* DO */
 			parameters_index = parameters_index + 1;
 		};
 

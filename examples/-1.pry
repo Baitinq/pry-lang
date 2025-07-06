@@ -6,8 +6,8 @@ let test = () => i64 {
 	return 2;
 };
 
-let main = () => i64 {
-	printf("HELLO WORLD!\n");
+let main = (argc: i64) => i64 {
+	printf("HELLO WORLD %d!\n", argc);
 	return test();
 };
 
