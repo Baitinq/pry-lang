@@ -231,6 +231,7 @@ let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i
 };
 
 extern codegen_generate_statement = (*codegen, *Node) => i64;
+extern codegen_generate_function_call_statement = (*codegen, *Node) => *Variable;
 
 let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
 	printf("NAME: %s\n", name);
@@ -394,8 +395,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		printf("RET\n");
 		return codegen_create_variable(c, v);
 	};
+	
+	if ((*expression).type == NODE_FUNCTION_CALL_STATEMENT) {
+		return codegen_generate_function_call_statement(c, expression);
+	};
 
-	printf("ASSERT 1\n");
+	printf("ASSERT 1: %d\n", (*expression).type);
 	assert(false);
 
 	return cast(*Variable, null);

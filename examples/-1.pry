@@ -2,9 +2,13 @@
 
 extern printf = (*i8, varargs) => void;
 
+let test = () => i64 {
+	return 2;
+};
+
 let main = () => i64 {
 	printf("HELLO WORLD!\n");
-	return 7;
+	return test();
 };
 
 /*

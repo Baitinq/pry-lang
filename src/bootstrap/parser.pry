@@ -199,6 +199,7 @@ let parser = struct {
 
 extern parser_parse_statement = (*parser) => *Node;
 extern parser_parse_expression = (*parser) => *Node;
+extern parse_function_call_statement = (*parser) => *Node;
 
 let parser_init = (ts: *token, ts_len: i64, ar: *arena) => *parser {
 	let p = cast(*parser, arena_alloc(ar, sizeof(parser)));
@@ -542,10 +543,99 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 	return cast(*Node, null);
 };
 
+/* PostfixExpression ::= PrimaryExpression (CastStatement | SizeOfStatement | FunctionCallStatement | FieldAccess )* */
+let parser_parse_postfix_expression = (p: *parser) => *Node {
+	let ex = parser_accept_parse(p, parse_function_call_statement);
+	if ex != cast(*Node, null) {
+		return ex;
+	};
+	return parser_parse_primary_expression(p);
+};
+
+/* UnaryExpression ::= ("!" | "-" | "*") UnaryExpression | PostfixExpression */
+let parser_parse_unary_expression = (p: *parser) => *Node {
+	let typ = -1;
+	if parser_accept_token(p, TOKEN_BANG) != cast(*token, null) {
+	    typ = UNARY_EXPRESSION_TYPE_NOT;
+	};
+	if parser_accept_token(p, TOKEN_MINUS) != cast(*token, null) {
+	    typ = UNARY_EXPRESSION_TYPE_MINUS;
+	};
+	if parser_accept_token(p, TOKEN_MUL) != cast(*token, null) {
+	    typ = UNARY_EXPRESSION_TYPE_STAR;
+	};
+	if typ == -1 {
+		return parser_parse_postfix_expression(p);
+	};
+
+	let new_lhs_data = cast(*NODE_UNARY_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_UNARY_EXPRESSION_DATA)));
+	((*new_lhs_data).typ) = typ;
+	((*new_lhs_data).expression) = parser_parse_unary_expression(p); /* TODO: try? */
+	let new_lhs = Node{};
+	new_lhs.type = NODE_UNARY_EXPRESSION;
+	new_lhs.data = cast(*void, new_lhs_data);
+	return create_node(p, new_lhs);
+};
+
+/* MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)* */
+let parser_parse_multiplicative_expression = (p: *parser) => *Node {
+	let lhs = parser_parse_unary_expression(p);
+
+	while true {
+		let typ = -1;
+		if parser_accept_token(p, TOKEN_MUL) != cast(*token, null) {
+		    typ = MULTIPLICATIVE_EXPRESSION_TYPE_MUL;
+		};
+		if parser_accept_token(p, TOKEN_DIV) != cast(*token, null) {
+		    typ = MULTIPLICATIVE_EXPRESSION_TYPE_DIV;
+		};
+		if parser_accept_token(p, TOKEN_MOD) != cast(*token, null) {
+		    typ = MULTIPLICATIVE_EXPRESSION_TYPE_MOD;
+		};
+		if typ == -1 {
+			break;
+		};
+
+		let rhs = parser_parse_unary_expression(p);
+
+		let new_lhs_data = cast(*NODE_MULTIPLICATIVE_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_MULTIPLICATIVE_EXPRESSION_DATA)));
+		((*new_lhs_data).lhs) = lhs;
+		((*new_lhs_data).rhs) = rhs;
+		((*new_lhs_data).typ) = typ;
+		let new_lhs = Node{};
+		new_lhs.type = NODE_MULTIPLICATIVE_EXPRESSION;
+		new_lhs.data = cast(*void, new_lhs_data);
+		lhs = create_node(p, new_lhs);
+	};
+	return lhs;
+};
+
 /* AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpression)* */
 let parser_parse_additive_expression = (p: *parser) => *Node {
-	/* TODO */
-	return parser_parse_primary_expression(p);
+	let lhs = parser_parse_multiplicative_expression(p);
+
+	while true {
+		let plus = parser_accept_token(p, TOKEN_PLUS);
+		let minus = parser_accept_token(p, TOKEN_MINUS);
+
+		if plus == cast(*token, null) {
+			if minus == cast(*token, null) {
+				break;
+			};
+		};
+
+		let rhs = parser_parse_multiplicative_expression(p);
+
+		let new_lhs_data = cast(*NODE_ADDITIVE_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_ADDITIVE_EXPRESSION_DATA)));
+		((*new_lhs_data).addition) = plus != cast(*token, null);
+		((*new_lhs_data).lhs) = lhs;
+		((*new_lhs_data).rhs) = rhs;
+		let new_lhs = Node{};
+		new_lhs.type = NODE_ADDITIVE_EXPRESSION;
+		new_lhs.data = cast(*void, new_lhs_data);
+		lhs = create_node(p, new_lhs);
+	};
+	return lhs;
 };
 
 /* Expression ::= EqualityExpression | AdditiveExpression */
