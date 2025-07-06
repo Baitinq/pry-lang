@@ -285,9 +285,22 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let identifier = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*expression).data);
 		let variable = environment_get_variable((*c).environment, identifier.name);
 		if variable == cast(*Variable, null) {
-			printf("HEREBAD!\n");
 			return cast(*Variable, null);
 		};
+		let v_type = (*variable).node_type;
+		/* TODO */
+		assert((*v_type).type != NODE_TYPE_FUNCTION_TYPE);
+		let param_type = codegen_get_llvm_type(c, v_type);
+		if param_type == cast(*LLVMTypeRef, null) {
+			printf("LEL4\n");
+			return cast(*Variable, null);
+		};
+		if (*v_type).type == NODE_TYPE_FUNCTION_TYPE {
+			(*param_type) = LLVMPointerType(*param_type, 0);
+		};
+		let param_value = LLVMBuildLoad2((*c).builder, *param_type, (*variable).value, "");
+
+		return codegen_generate_literal(c, param_value, name, expression, (*variable).node_type);
 	};
 	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
@@ -299,8 +312,6 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		let llvm_param_types = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
 		let param_types = cast(**Node, arena_alloc((*c).arena, sizeof(*Node) * 20));
-		/* TODO: VARARGS */
-
 		
 		let function_definition = *cast(*NODE_FUNCTION_DEFINITION_DATA, (*expression).data);
 
@@ -322,7 +333,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 				printf("LEL3\n");
 				return cast(*Variable, null);
 			};
-			if (*param_type).type == NODE_TYPE_SIMPLE_TYPE {
+			if (*param_type).type == NODE_TYPE_FUNCTION_TYPE {
                         	(*llvm_param_type) = LLVMPointerType(*llvm_param_type, 0);
 			};
 
@@ -369,7 +380,29 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		/* TODO */
 		let parameters_index = 0;
 		while parameters_index < function_definition.parameters_len {
-			/* DO */
+			let p = (*(params + cast(*LLVMValueRef, parameters_index)));
+			let param_node = *(function_definition.parameters + cast(**Node, parameters_index));
+			assert((*param_node).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
+			let param = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*param_node).data);
+			let param_type = param.type;
+			let llvm_param_type = codegen_get_llvm_type(c, param_type);
+			if llvm_param_type == cast(*LLVMTypeRef, null) {
+				printf("LEL3\n");
+				return cast(*Variable, null);
+			};
+			if (*param_type).type == NODE_TYPE_FUNCTION_TYPE {
+                        	(*llvm_param_type) = LLVMPointerType(*llvm_param_type, 0);
+			};
+			let alloca = LLVMBuildAlloca((*c).builder, *llvm_param_type, param.name);
+			LLVMBuildStore((*c).builder, p, alloca);
+			
+			let v = Variable{};
+			v.value = alloca;
+			v.type = cast(LLVMTypeRef, null);
+			v.stack_level = cast(*i64, null);
+			v.node = param_node;
+			v.node_type = param_type;
+			environment_add_variable((*c).environment, param.name, codegen_create_variable(c, v));
 			parameters_index = parameters_index + 1;
 		};
 
@@ -492,7 +525,8 @@ let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*fun).data);
 		let f = environment_get_variable((*ic).environment, (*d).name);
 		if f == cast(*Variable, null) {
-			return cast(*Node, null);
+			printf("NO variable: %s\n", (*d).name);
+			assert(false);
 		};
 		let f_type = (*f).node_type;
 		assert((*f_type).type == NODE_TYPE_FUNCTION_TYPE);
@@ -516,7 +550,8 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 	let ident = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, expression.data));
 	let function = environment_get_variable((*c).environment, ident.name);
 	if function == cast(*Variable, null) {
-		return cast(*Variable, null);
+		printf("NO variable: %s\n", ident.name);
+		assert(false);
 	};
 	/* TODO: Support function ptr */
 
@@ -529,7 +564,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		let argument = (*((*stmt).arguments + cast(**Node, i))); /* TODO */
 		let arg = codegen_generate_expression_value(c, argument, cast(*i8, null));
 		if arg == cast(*Variable, null) {
-			printf("BAD");
+			printf("BAD\n");
 			assert(false);
 		};
 		/* TODO: Typecheck */

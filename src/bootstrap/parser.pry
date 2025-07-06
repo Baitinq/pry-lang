@@ -420,7 +420,7 @@ let parser_parse_function_parameters = (p: *parser) => *slice {
 		};
 
 		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
-		(*d).name = cast(*i8, ident.data);
+		(*d).name = cast(*i8, (*ident).data); /* TODO: Typecheck struct access */
 		(*d).type = type_annotation;
 		let n = Node{};
 		n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
