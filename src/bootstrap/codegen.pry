@@ -145,6 +145,12 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 			return r;
 		};
 		
+		if strcmp(simple_type.name, "bool") {
+			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+			*r = LLVMInt1Type();
+			return r;
+		};
+		
 		if strcmp(simple_type.name, "void") {
 			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
 			*r = LLVMVoidType();
@@ -250,6 +256,26 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		node_type.data = cast(*void, d);
 		
 		return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, create_node(c, node_type));
+	};
+	
+	if ((*expression).type == NODE_PRIMARY_EXPRESSION_BOOLEAN) {
+		printf("THIS\n");
+		let b = (*cast(*NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA, (*expression).data)).value;
+		
+		let node_type = Node{};
+		node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*d).name = "bool";
+		(*d).underlying_type = cast(*Node, null);
+		node_type.data = cast(*void, d);
+
+		let int_value = 0;
+		if b == true {
+			int_value = 1;
+		};
+		
+		return codegen_generate_literal(c, LLVMConstInt(LLVMInt1Type(), int_value, 0), name, expression, create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_STRING) {

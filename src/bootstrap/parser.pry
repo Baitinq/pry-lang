@@ -523,6 +523,15 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	    return create_node(p, n);
 	};
 	
+	if (*tok).type == TOKEN_BOOLEAN {
+	    let d = cast(*NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA)));
+	    (*d).value = *(cast(*bool, (*tok).data));
+	    let n = Node{};
+	    n.type = NODE_PRIMARY_EXPRESSION_BOOLEAN;
+	    n.data = cast(*void, d);
+	    return create_node(p, n);
+	};
+	
 	if (*tok).type == TOKEN_STRING {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_STRING_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_STRING_DATA)));
 	    (*d).value = cast(*i8, (*tok).data);
