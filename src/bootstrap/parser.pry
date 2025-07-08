@@ -360,6 +360,48 @@ let parser_parse_type = (p: *parser) => *Node {
 	return cast(*Node, null);
 };
 
+/* IfStatement ::= "if" Expression LBRACE Statement* RBRACE */
+let parser_parse_if_statement = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_IF) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let expression = parser_parse_expression(p);
+	if expression == cast(*Node, null) {
+	    return cast(*Node, null);
+	};
+	
+	if parser_accept_token(p, TOKEN_LBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let statements = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 100));
+	let i = 0;
+	while true {
+		let n = parser_accept_parse(p, parser_parse_statement);
+		if n == cast(*Node, null) {
+			break;
+		};
+		(*(statements + cast(**Node, i))) = n;
+		i = i + 1;
+	};
+	
+	if parser_accept_token(p, TOKEN_RBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	
+	let dd = cast(*NODE_IF_STATEMENT_DATA, arena_alloc((*p).arena, sizeof(NODE_IF_STATEMENT_DATA)));
+	(*dd).condition = expression;
+	(*dd).statements = statements;
+	(*dd).statements_len = i;
+
+	let r = Node{};
+	r.type = NODE_IF_STATEMENT;
+	r.data = cast(*void, dd);
+
+	return create_node(p, r);
+};
+
 /* ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type */
 let parser_parse_extern_declaration = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_EXTERN) == cast(*token, null) {
@@ -801,6 +843,14 @@ let parser_parse_statement = (p: *parser) => *Node {
 	};
 
 	let retu = parser_accept_parse(p, parser_parse_extern_declaration);
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
+	};
+	
+	let retu = parser_accept_parse(p, parser_parse_if_statement);
 	if retu != cast(*Node, null) {
 		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
 		    return cast(*Node, null);

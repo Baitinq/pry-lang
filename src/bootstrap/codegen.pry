@@ -470,7 +470,6 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		/* TODO: Move to defer */
 		(*c).current_function = last_function;
 		environment_drop_scope((*c).environment);
-		
 
 		return codegen_create_variable(c, v);
 	};
@@ -634,6 +633,40 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 	return codegen_create_variable(c, v);
 };
 
+let codegen_generate_if_statement = (c: *codegen, statement: *NODE_IF_STATEMENT_DATA) => *void {
+	let condition_value = codegen_generate_expression_value(c, (*statement).condition, cast(*i8, null));
+	assert(condition_value != cast(*Variable, null));
+
+	let current_block = LLVMGetInsertBlock((*c).builder);
+
+	let then_block = LLVMAppendBasicBlock((*c).current_function, "then_block");
+	LLVMPositionBuilderAtEnd((*c).builder, then_block);
+
+	let i = 0;
+	while i < (*statement).statements_len {
+		let stmt = (*((*statement).statements + cast(**Node, i)));
+		let res = codegen_generate_statement(c, stmt);
+		assert(res == 0);
+		i = i + 1;
+	};
+
+	let merge_block = LLVMAppendBasicBlock((*c).current_function, "merge_block");
+	let last_instr = LLVMGetLastInstruction(LLVMGetInsertBlock((*c).builder));
+	if last_instr == cast(LLVMValueRef, null) {
+		LLVMBuildBr((*c).builder, merge_block);
+	};
+	if last_instr != cast(LLVMValueRef, null) {
+		if LLVMIsATerminatorInst(last_instr) == cast(LLVMValueRef, null) {
+			LLVMBuildBr((*c).builder, merge_block);
+		};
+	};
+	LLVMPositionBuilderAtEnd((*c).builder, current_block);
+        LLVMBuildCondBr((*c).builder, (*condition_value).value, then_block, merge_block);
+        LLVMPositionBuilderAtEnd((*c).builder, merge_block);
+
+	return null;
+};
+
 let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	let stmt = *statement;
 
@@ -647,6 +680,11 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	
 	if stmt.type == NODE_FUNCTION_CALL_STATEMENT {
 		codegen_generate_function_call_statement(c, statement);
+		return 0;
+	};
+	
+	if stmt.type == NODE_IF_STATEMENT {
+		codegen_generate_if_statement(c, cast(*NODE_IF_STATEMENT_DATA, stmt.data));
 		return 0;
 	};
 

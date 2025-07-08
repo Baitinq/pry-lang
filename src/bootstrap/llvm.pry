@@ -310,3 +310,8 @@ extern LLVMBuildGlobalStringPtr = (LLVMBuilderRef, *i8, *i8) => LLVMValueRef;
 extern LLVMBuildAlloca = (LLVMBuilderRef, LLVMTypeRef, *i8) => LLVMValueRef;
 extern LLVMBuildStore = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef) => LLVMValueRef;
 extern LLVMBuildLoad2 = (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMGetLastInstruction = (LLVMBasicBlockRef) => LLVMValueRef;
+
+extern LLVMBuildBr = (LLVMBuilderRef, LLVMBasicBlockRef) => LLVMValueRef;
+extern LLVMIsATerminatorInst = (LLVMValueRef) => LLVMValueRef;
+extern LLVMBuildCondBr = (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, LLVMBasicBlockRef) => LLVMValueRef;
