@@ -317,6 +317,7 @@ extern LLVMBuildBr = (LLVMBuilderRef, LLVMBasicBlockRef) => LLVMValueRef;
 extern LLVMIsATerminatorInst = (LLVMValueRef) => LLVMValueRef;
 extern LLVMBuildCondBr = (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, LLVMBasicBlockRef) => LLVMValueRef;
 extern LLVMBuildICmp = (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildNeg = (LLVMBuilderRef, LLVMValueRef, *i8) => LLVMValueRef;
 
 let LLVMIntEQ = 32;
 let LLVMIntNE = 33;

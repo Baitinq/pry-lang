@@ -523,6 +523,55 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_generate_literal(c, cmp, name, expression, create_node(c, node_type));
 	};
 	
+	if ((*expression).type == NODE_UNARY_EXPRESSION) {
+		let exp = (*(cast(*NODE_UNARY_EXPRESSION_DATA, (*expression).data)));
+		let k = codegen_generate_expression_value(c, exp.expression, cast(*i8, null));
+		if k == cast(*Variable, null) {
+			return cast(*Variable, null);
+		};
+
+		let r = cast(LLVMValueRef, null);
+		let typ = (*k).node_type;
+
+		if exp.typ == UNARY_EXPRESSION_TYPE_NOT {
+			/* TODO: assert bool */
+                        r = LLVMBuildICmp((*c).builder, cast(LLVMIntPredicate, LLVMIntEQ), (*k).value, LLVMConstInt(LLVMInt1Type(), 0, 0), "");
+			let node_type = Node{};
+			node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+			let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+			(*d).name = "bool";
+			(*d).underlying_type = cast(*Node, null);
+			node_type.data = cast(*void, d);
+			typ = create_node(c, node_type);
+		};
+		
+		if exp.typ == UNARY_EXPRESSION_TYPE_MINUS {
+                        r = LLVMBuildNeg((*c).builder, (*k).value, "");
+			let node_type = Node{};
+			node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+			let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+			(*d).name = "i64";
+			(*d).underlying_type = cast(*Node, null);
+			node_type.data = cast(*void, d);
+			typ = create_node(c, node_type);
+		};
+		
+		if exp.typ == UNARY_EXPRESSION_TYPE_STAR {
+			/* TODO: assert ptr */
+			let n = (*k).node_type;
+			typ = (*cast(*NODE_TYPE_POINTER_TYPE_DATA, (*n).data)).type;
+			let ptr_type = codegen_get_llvm_type(c, typ);
+			if ptr_type == cast(*LLVMTypeRef, null) {
+				return cast(*Variable, null);
+			};
+                        r = LLVMBuildLoad2((*c).builder, *ptr_type, (*k).value, "");
+		};
+
+		return codegen_generate_literal(c, r, name, expression, typ);
+	};
+	
 	if ((*expression).type == NODE_TYPE_FUNCTION_TYPE) {
 		let e = *((*c).environment);
 		printf("LLEL\n");
