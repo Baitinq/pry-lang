@@ -200,6 +200,7 @@ let parser = struct {
 extern parser_parse_statement = (*parser) => *Node;
 extern parser_parse_expression = (*parser) => *Node;
 extern parse_function_call_statement = (*parser) => *Node;
+extern parser_parse_additive_expression = (*parser) => *Node;
 
 let parser_init = (ts: *token, ts_len: i64, ar: *arena) => *parser {
 	let p = cast(*parser, arena_alloc(ar, sizeof(parser)));
@@ -599,8 +600,105 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 
 /* EqualityExpression ::= AdditiveExpression ("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression */
 let parser_parse_equality_expression = (p: *parser) => *Node {
-	/* TODO */
-	return cast(*Node, null);
+	let lhs = parser_parse_additive_expression(p);
+	if lhs == cast(*Node, null) {
+	    return cast(*Node, null);
+	};	
+
+	let typ = -1;
+	let ex = parser_accept_parse(p, (ip: *parser) => *Node {
+		if parser_accept_token(ip, TOKEN_BANG) == cast(*token, null) {
+			return cast(*Node, null);
+		};
+		if parser_accept_token(ip, TOKEN_BANG) == cast(*token, null) {
+			return cast(*Node, null);
+		};
+		let n = Node{};
+		return create_node(ip, n);
+	});
+	if ex != cast(*Node, null) {
+		typ = EQUALITY_EXPRESSION_TYPE_EQ;
+	};
+
+	if (typ == -1) {
+		ex = parser_accept_parse(p, (ip: *parser) => *Node {
+			if (parser_accept_token(ip, TOKEN_BANG) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			if (parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			let n = Node{};
+			return create_node(ip, n);
+		});
+		if (ex != cast(*Node, null)) {
+			typ = EQUALITY_EXPRESSION_TYPE_NE;
+		};
+	};
+
+	if (typ == -1) {
+		ex = parser_accept_parse(p, (ip: *parser) => *Node {
+			if (parser_accept_token(ip, TOKEN_LESS) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			if (parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			let n = Node{};
+			return create_node(ip, n);
+		});
+		if (ex != cast(*Node, null)) {
+			typ = EQUALITY_EXPRESSION_TYPE_LE;
+		};
+	};
+
+	if (typ == -1) {
+		ex = parser_accept_parse(p, (ip: *parser) => *Node {
+			if (parser_accept_token(ip, TOKEN_GREATER) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			if (parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			let n = Node{};
+			return create_node(ip, n);
+		});
+		if (ex != cast(*Node, null)) {
+			typ = EQUALITY_EXPRESSION_TYPE_GE;
+		};
+	};
+
+	if (typ == -1) {
+		if (parser_accept_token(p, TOKEN_LESS) != cast(*token, null)) {
+			typ = EQUALITY_EXPRESSION_TYPE_LT;
+		};
+	};
+
+	if (typ == -1) {
+		if (parser_accept_token(p, TOKEN_GREATER) != cast(*token, null)) {
+			typ = EQUALITY_EXPRESSION_TYPE_GT;
+		};
+	};
+
+	if typ == -1 {
+		return cast(*Node, null);
+	};
+	
+	let rhs = parser_parse_additive_expression(p);
+	if rhs == cast(*Node, null) {
+	    return cast(*Node, null);
+	};	
+	
+	let d = cast(*NODE_EQUALITY_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_EQUALITY_EXPRESSION_DATA)));
+	(*d).lhs = lhs;
+	(*d).rhs = rhs;
+	(*d).typ = typ;
+
+	let n = Node{};
+	n.type = NODE_EQUALITY_EXPRESSION ;
+	n.data = cast(*void, d);
+
+	return create_node(p, n); 
 };
 
 /* PostfixExpression ::= PrimaryExpression (CastStatement | SizeOfStatement | FunctionCallStatement | FieldAccess )* */
@@ -618,11 +716,15 @@ let parser_parse_unary_expression = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_BANG) != cast(*token, null) {
 	    typ = UNARY_EXPRESSION_TYPE_NOT;
 	};
-	if parser_accept_token(p, TOKEN_MINUS) != cast(*token, null) {
-	    typ = UNARY_EXPRESSION_TYPE_MINUS;
+	if typ == -1 {
+		if parser_accept_token(p, TOKEN_MINUS) != cast(*token, null) {
+		    typ = UNARY_EXPRESSION_TYPE_MINUS;
+		};
 	};
-	if parser_accept_token(p, TOKEN_MUL) != cast(*token, null) {
-	    typ = UNARY_EXPRESSION_TYPE_STAR;
+	if typ == -1 {
+		if parser_accept_token(p, TOKEN_MUL) != cast(*token, null) {
+		    typ = UNARY_EXPRESSION_TYPE_STAR;
+		};
 	};
 	if typ == -1 {
 		return parser_parse_postfix_expression(p);

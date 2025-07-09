@@ -474,6 +474,55 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_create_variable(c, v);
 	};
 	
+	if ((*expression).type == NODE_EQUALITY_EXPRESSION) {
+		let exp = (*(cast(*NODE_EQUALITY_EXPRESSION_DATA, (*expression).data)));
+		let lhs_value = codegen_generate_expression_value(c, exp.lhs, cast(*i8, null));
+		if lhs_value == cast(*Variable, null) {
+			return cast(*Variable, null);
+		};
+		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
+		if rhs_value == cast(*Variable, null) {
+			return cast(*Variable, null);
+		};
+
+		/* TODO: compare types */
+		let op = -1;
+
+		if exp.typ == EQUALITY_EXPRESSION_TYPE_EQ {
+			op = LLVMIntEQ;
+		};
+		if exp.typ == EQUALITY_EXPRESSION_TYPE_NE {
+			op = LLVMIntNE;
+		};
+		if exp.typ == EQUALITY_EXPRESSION_TYPE_GE {
+			op = LLVMIntSGE;
+		};
+		if exp.typ == EQUALITY_EXPRESSION_TYPE_LE {
+			op = LLVMIntSLE;
+		};
+		if exp.typ == EQUALITY_EXPRESSION_TYPE_LT {
+			op = LLVMIntSLT;
+		};
+		if exp.typ == EQUALITY_EXPRESSION_TYPE_GT {
+			op = LLVMIntSGT;
+		};
+
+		assert(op != -1);
+
+		let cmp = LLVMBuildICmp((*c).builder, cast(LLVMIntPredicate, op), (*lhs_value).value, (*rhs_value).value, "");
+
+
+		let node_type = Node{};
+		node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*d).name = "bool";
+		(*d).underlying_type = cast(*Node, null);
+		node_type.data = cast(*void, d);
+
+		return codegen_generate_literal(c, cmp, name, expression, create_node(c, node_type));
+	};
+	
 	if ((*expression).type == NODE_TYPE_FUNCTION_TYPE) {
 		let e = *((*c).environment);
 		printf("LLEL\n");

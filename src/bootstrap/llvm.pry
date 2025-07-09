@@ -255,6 +255,7 @@ let LLVMModuleRef = newtype *void;
 let LLVMTargetMachineRef = newtype *void;
 let LLVMContextRef = newtype *void;
 let LLVMTargetRef = newtype *void;
+let LLVMIntPredicate = newtype i64;
 
 let LLVMValueRef = newtype *void;
 let LLVMTypeRef = newtype *void;
@@ -315,3 +316,15 @@ extern LLVMGetLastInstruction = (LLVMBasicBlockRef) => LLVMValueRef;
 extern LLVMBuildBr = (LLVMBuilderRef, LLVMBasicBlockRef) => LLVMValueRef;
 extern LLVMIsATerminatorInst = (LLVMValueRef) => LLVMValueRef;
 extern LLVMBuildCondBr = (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, LLVMBasicBlockRef) => LLVMValueRef;
+extern LLVMBuildICmp = (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+
+let LLVMIntEQ = 32;
+let LLVMIntNE = 33;
+let LLVMIntUGT = 34;
+let LLVMIntUGE = 35;
+let LLVMIntULT = 36;
+let LLVMIntULE = 37;
+let LLVMIntSGT = 38;
+let LLVMIntSGE = 39;
+let LLVMIntSLT = 40;
+let LLVMIntSLE = 41;
