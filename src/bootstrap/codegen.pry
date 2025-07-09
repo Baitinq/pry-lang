@@ -88,6 +88,8 @@ let codegen = struct {
 	arena: *arena,
 	environment: *Environment,
 
+	whil_loop_exit: LLVMBasicBlockRef,
+	whil_block: LLVMBasicBlockRef,
 	current_function: LLVMValueRef,
 	current_function_retur_type: *Node,
 };
@@ -765,6 +767,39 @@ let codegen_generate_if_statement = (c: *codegen, statement: *NODE_IF_STATEMENT_
 	return null;
 };
 
+let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STATEMENT_DATA) => *void {
+	let whil_block = LLVMAppendBasicBlock((*c).current_function, "while_block");
+	LLVMBuildBr((*c).builder, whil_block);
+	LLVMPositionBuilderAtEnd((*c).builder, whil_block);
+	
+	let condition_value = codegen_generate_expression_value(c, (*statement).condition, cast(*i8, null));
+	assert(condition_value != cast(*Variable, null));
+	
+	let inner_block = LLVMAppendBasicBlock((*c).current_function, "inner_block");
+	let outer_block = LLVMAppendBasicBlock((*c).current_function, "outer_block");
+        LLVMBuildCondBr((*c).builder, (*condition_value).value, inner_block, outer_block);
+
+	(*c).whil_loop_exit = outer_block;
+	(*c).whil_block = whil_block;
+	
+	LLVMPositionBuilderAtEnd((*c).builder, inner_block);
+	let i = 0;
+	while i < (*statement).statements_len {
+		let stmt = (*((*statement).statements + cast(**Node, i)));
+		let res = codegen_generate_statement(c, stmt);
+		assert(res == 0);
+		i = i + 1;
+	};
+	
+	LLVMBuildBr((*c).builder, whil_block);
+	LLVMPositionBuilderAtEnd((*c).builder, outer_block);
+
+	(*c).whil_loop_exit = cast(LLVMBasicBlockRef, null);
+	(*c).whil_block = cast(LLVMBasicBlockRef, null);
+	
+	return null;
+};
+
 let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	let stmt = *statement;
 
@@ -783,6 +818,11 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	
 	if stmt.type == NODE_IF_STATEMENT {
 		codegen_generate_if_statement(c, cast(*NODE_IF_STATEMENT_DATA, stmt.data));
+		return 0;
+	};
+	
+	if stmt.type == NODE_WHILE_STATEMENT {
+		codegen_generate_while_statement(c, cast(*NODE_WHILE_STATEMENT_DATA, stmt.data));
 		return 0;
 	};
 

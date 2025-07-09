@@ -403,6 +403,48 @@ let parser_parse_if_statement = (p: *parser) => *Node {
 	return create_node(p, r);
 };
 
+/* WhileStatement ::= "while" Expression LBRACE Statement* RBRACE */
+let parser_parse_while_statement = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_WHILE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let expression = parser_parse_expression(p);
+	if expression == cast(*Node, null) {
+	    return cast(*Node, null);
+	};
+	
+	if parser_accept_token(p, TOKEN_LBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let statements = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 100));
+	let i = 0;
+	while true {
+		let n = parser_accept_parse(p, parser_parse_statement);
+		if n == cast(*Node, null) {
+			break;
+		};
+		(*(statements + cast(**Node, i))) = n;
+		i = i + 1;
+	};
+	
+	if parser_accept_token(p, TOKEN_RBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	
+	let dd = cast(*NODE_WHILE_STATEMENT_DATA, arena_alloc((*p).arena, sizeof(NODE_WHILE_STATEMENT_DATA)));
+	(*dd).condition = expression;
+	(*dd).statements = statements;
+	(*dd).statements_len = i;
+
+	let r = Node{};
+	r.type = NODE_WHILE_STATEMENT;
+	r.data = cast(*void, dd);
+
+	return create_node(p, r);
+};
+
 /* ExternDeclaration ::= "extern" IDENTIFIER EQUALS Type */
 let parser_parse_extern_declaration = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_EXTERN) == cast(*token, null) {
@@ -607,10 +649,10 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 
 	let typ = -1;
 	let ex = parser_accept_parse(p, (ip: *parser) => *Node {
-		if parser_accept_token(ip, TOKEN_BANG) == cast(*token, null) {
+		if parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null) {
 			return cast(*Node, null);
 		};
-		if parser_accept_token(ip, TOKEN_BANG) == cast(*token, null) {
+		if parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null) {
 			return cast(*Node, null);
 		};
 		let n = Node{};
@@ -953,6 +995,14 @@ let parser_parse_statement = (p: *parser) => *Node {
 	};
 	
 	let retu = parser_accept_parse(p, parser_parse_if_statement);
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
+	};
+	
+	let retu = parser_accept_parse(p, parser_parse_while_statement);
 	if retu != cast(*Node, null) {
 		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
 		    return cast(*Node, null);
