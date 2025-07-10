@@ -525,6 +525,53 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_generate_literal(c, cmp, name, expression, create_node(c, node_type));
 	};
 	
+	if ((*expression).type == NODE_ADDITIVE_EXPRESSION) {
+		let exp = (*(cast(*NODE_ADDITIVE_EXPRESSION_DATA, (*expression).data)));
+		let lhs_value = codegen_generate_expression_value(c, exp.lhs, cast(*i8, null));
+		if lhs_value == cast(*Variable, null) {
+			return cast(*Variable, null);
+		};
+		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
+		if rhs_value == cast(*Variable, null) {
+			return cast(*Variable, null);
+		};
+
+		/* TODO: Compare types */
+
+		let result = cast(LLVMValueRef, null);
+		let node_type = Node{};
+		node_type.type = NODE_TYPE_SIMPLE_TYPE;
+
+		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*d).name = "i64";
+		(*d).underlying_type = cast(*Node, null);
+		node_type.data = cast(*void, d);
+
+		let pnode_type = create_node(c, node_type);
+
+		if exp.addition {
+			let nt = (*lhs_value).node_type;
+			if (*nt).type == NODE_TYPE_POINTER_TYPE {
+				let ipt = cast(*NODE_TYPE_POINTER_TYPE_DATA, (*nt).data);
+				let llvmipt = codegen_get_llvm_type(c, (*ipt).type);
+				assert(llvmipt != cast(*LLVMTypeRef, null));
+				let arr = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * 1));
+				(*(arr + cast(*LLVMValueRef, 0))) = (*rhs_value).value;
+				result = LLVMBuildGEP2((*c).builder, *llvmipt, (*lhs_value).value, arr, 1, "");
+				pnode_type = (*lhs_value).node_type;
+			};
+			if (*nt).type != NODE_TYPE_POINTER_TYPE {
+                        	result = LLVMBuildAdd((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+			};
+
+		};
+		if !exp.addition {
+			result = LLVMBuildSub((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+		};
+
+		return codegen_generate_literal(c, result, name, expression, pnode_type);
+	};
+	
 	if ((*expression).type == NODE_UNARY_EXPRESSION) {
 		let exp = (*(cast(*NODE_UNARY_EXPRESSION_DATA, (*expression).data)));
 		let k = codegen_generate_expression_value(c, exp.expression, cast(*i8, null));

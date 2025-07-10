@@ -318,6 +318,9 @@ extern LLVMIsATerminatorInst = (LLVMValueRef) => LLVMValueRef;
 extern LLVMBuildCondBr = (LLVMBuilderRef, LLVMValueRef, LLVMBasicBlockRef, LLVMBasicBlockRef) => LLVMValueRef;
 extern LLVMBuildICmp = (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildNeg = (LLVMBuilderRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildSub = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildAdd = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildGEP2 = (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, *LLVMValueRef, i64, *i8) => LLVMValueRef;
 
 let LLVMIntEQ = 32;
 let LLVMIntNE = 33;
