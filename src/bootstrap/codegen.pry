@@ -619,10 +619,55 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		assert(variable != cast(*Variable, null));
 
 		let env = (*(*c).environment);
-		/* TODO: Support assignments at non-global level */
-		assert(env.scope_stack_len == 1);
+		if env.scope_stack_len == 1 {
+			environment_add_variable((*c).environment, identifier, variable);
+			return 0;
+		};
 
-		environment_add_variable((*c).environment, identifier, variable);
+		let ptr = cast(LLVMValueRef, null);
+		let typ = (*variable).node_type;
+
+		if (*stmt).is_declaration {
+			let x = codegen_get_llvm_type(c, typ);
+			assert(x != cast(*LLVMTypeRef, null));
+			if (*typ).type == NODE_TYPE_FUNCTION_TYPE {
+				*x = LLVMPointerType(*x, 0);
+			};
+			ptr = LLVMBuildAlloca((*c).builder, *x, identifier);
+		};
+		if !(*stmt).is_declaration {
+			let v = environment_get_variable((*c).environment, identifier);
+			assert(v != cast(*Variable, null));
+			ptr = (*v).value;
+			typ = (*v).node_type;
+			/* TODO: compare types */
+		};
+
+		if (*stmt).is_dereference {
+			let ltyp = codegen_get_llvm_type(c, typ);
+			assert(ltyp != cast(*LLVMTypeRef, null));
+			ptr = LLVMBuildLoad2((*c).builder, *ltyp, ptr, "");
+		};
+
+		/* NOTE: structs have a null variable.value */
+		if (*variable).value != cast(LLVMValueRef, null) {
+			LLVMBuildStore((*c).builder, (*variable).value, ptr);
+		};
+	
+		let new_variable = Variable{};
+
+		new_variable.value = ptr;
+		new_variable.type = (*variable).type;
+		new_variable.stack_level = cast(*i64, null);
+		new_variable.node = (*variable).node;
+		new_variable.node_type = typ;
+		
+		if (*stmt).is_declaration {
+			environment_add_variable((*c).environment, identifier, codegen_create_variable(c, new_variable));
+		};
+		if !(*stmt).is_declaration {
+			environment_set_variable((*c).environment, identifier, codegen_create_variable(c, new_variable));
+		};
 
 		return 0;
 	};
