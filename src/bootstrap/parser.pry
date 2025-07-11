@@ -583,6 +583,17 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 		return stmt;
 	};
 
+	if parser_accept_token(p, TOKEN_LPAREN) != cast(*token, null) {
+		let expr = parser_parse_expression(p);
+		if expr == cast(*Node, null) {
+			return cast(*Node, null);
+		};
+		if parser_accept_token(p, TOKEN_RPAREN) == cast(*token, null) {
+			return cast(*Node, null);
+		};
+		return expr;
+	};
+
 	let tok = parser_consume_token(p);
 	if tok == cast(*token, null) {
 	printf("NO TOK\n");
