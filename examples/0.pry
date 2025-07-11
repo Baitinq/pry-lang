@@ -7,6 +7,7 @@ let strcmp = (stra: *i8, strb: *i8) => bool {
 	let i = 0;
 	while i < 10 {
 		printf("I: %d\n", i); /* CONTINUE */
+		let ca = (*(stra + cast(*i8, i)));
 		i = i + 1;
 	};
 

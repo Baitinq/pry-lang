@@ -278,6 +278,50 @@ let parser_parse_return_statement = (p: *parser) => *Node {
 
 extern parser_parse_type = (*parser) => *Node;
 
+/* CastStatement ::= "cast" LPAREN TYPE "," Expression RPAREN */
+let parser_parse_cast_statement = (p: *parser) => *Node {
+	let ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+	if ident == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	if !strcmp(cast(*i8, (*ident).data), "cast") {
+		return cast(*Node, null);
+	};
+
+	if parser_accept_token(p, TOKEN_LPAREN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	
+	let typ = parser_parse_type(p);
+	if typ == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+	
+	if parser_accept_token(p, TOKEN_COMMA) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let expression = parser_parse_expression(p);
+	if expression == cast(*Node, null) {
+	    return cast(*Node, null);
+	};
+	
+	if parser_accept_token(p, TOKEN_RPAREN) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_CAST_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_CAST_STATEMENT_DATA )));
+	(*d).typ = typ;
+	(*d).expression = expression;
+
+	let r = Node{};
+	r.type = NODE_CAST_STATEMENT;
+	r.data = cast(*void, d);
+
+	return create_node(p, r);
+};
+
 /* FunctionType ::= LPAREN (Type ("," Type)*)? RPAREN ARROW Type */
 let parser_parse_function_type = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_LPAREN) == cast(*token, null) {
@@ -756,6 +800,10 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 
 /* PostfixExpression ::= PrimaryExpression (CastStatement | SizeOfStatement | FunctionCallStatement | FieldAccess )* */
 let parser_parse_postfix_expression = (p: *parser) => *Node {
+	let ex = parser_accept_parse(p, parser_parse_cast_statement);
+	if ex != cast(*Node, null) {
+		return ex;
+	};
 	let ex = parser_accept_parse(p, parse_function_call_statement);
 	if ex != cast(*Node, null) {
 		return ex;
@@ -973,6 +1021,14 @@ let parse_function_call_statement = (p: *parser) => *Node {
 
 /* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
 let parser_parse_statement = (p: *parser) => *Node {
+	let fn_call = parser_accept_parse(p, parser_parse_cast_statement);
+	if fn_call != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return fn_call;
+	};
+
 	let fn_call = parser_accept_parse(p, parse_function_call_statement);
 	if fn_call != cast(*Node, null) {
 		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {

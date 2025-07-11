@@ -648,6 +648,19 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	if ((*expression).type == NODE_FUNCTION_CALL_STATEMENT) {
 		return codegen_generate_function_call_statement(c, expression);
 	};
+	
+	if ((*expression).type == NODE_CAST_STATEMENT) {
+		let exp = *cast(*NODE_CAST_STATEMENT_DATA, (*expression).data);
+		let val = codegen_generate_expression_value(c, exp.expression, "");
+		assert(val != cast(*Variable, null));
+		let v = Variable{};
+		v.value = (*val).value;
+		v.type = cast(LLVMTypeRef, null);
+		v.stack_level = cast(*i64, null);
+		v.node = expression;
+		v.node_type = exp.typ;
+		return codegen_create_variable(c, v);
+	};
 
 	printf("ASSERT 1: %d\n", (*expression).type);
 	assert(false);
