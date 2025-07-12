@@ -225,7 +225,23 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 };
 
 let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i8, node: *Node, node_type: *Node) => *Variable {
-	/* TODO: Global */
+	if name != cast(*i8, null) {
+		let e = (*c).environment;
+		if (*e).scope_stack_len == 1 {
+			let lt = codegen_get_llvm_type(c, node_type);
+			assert(lt != cast(*LLVMTypeRef, null));
+			let v = Variable{};
+			v.value = LLVMAddGlobal((*c).llvm_module, *lt, name);
+			v.type = cast(LLVMTypeRef, null);
+			v.stack_level = cast(*i64, null);
+			v.node = node;
+			v.node_type = node_type;
+			LLVMSetInitializer(v.value, literal_val);
+			return codegen_create_variable(c, v);
+		};
+	};
+
+
 	let v = Variable{};
 	v.value = literal_val;
 	v.type = cast(LLVMTypeRef, null);
@@ -760,7 +776,13 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		printf("NO variable: %s\n", ident.name);
 		assert(false);
 	};
-	/* TODO: Support function ptr */
+	let node = statement;
+	if LLVMGetValueKind((*function).value) != LLVMFunctionValueKind {
+		let lt = codegen_get_llvm_type(c, (*function).node_type);
+		assert(lt != cast(*LLVMTypeRef, null));
+		(*function).value = LLVMBuildLoad2((*c).builder, LLVMPointerType(*lt, 0), (*function).value, "");
+		node = (*function).node;
+	};
 
 	let arguments = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * (*stmt).arguments_len));
 
@@ -790,7 +812,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 	v.value = res;
 	v.type = cast(LLVMTypeRef, null);
 	v.stack_level = cast(*i64, null);
-	v.node = statement;
+	v.node = node;
 	v.node_type = function_return_type;
 
 	return codegen_create_variable(c, v);

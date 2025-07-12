@@ -258,6 +258,7 @@ let LLVMTargetRef = newtype *void;
 let LLVMIntPredicate = newtype i64;
 
 let LLVMValueRef = newtype *void;
+let LLVMValueKind = newtype i64;
 let LLVMTypeRef = newtype *void;
 let LLVMBasicBlockRef = newtype *void;
 
@@ -321,6 +322,10 @@ extern LLVMBuildNeg = (LLVMBuilderRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildSub = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildAdd = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildGEP2 = (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, *LLVMValueRef, i64, *i8) => LLVMValueRef;
+extern LLVMAddGlobal = (LLVMModuleRef, LLVMTypeRef, *i8) => LLVMValueRef;
+extern LLVMSetInitializer = (LLVMValueRef, LLVMValueRef) => void;
+extern LLVMGetValueKind = (LLVMValueRef) => LLVMValueKind;
+let LLVMFunctionValueKind = cast(LLVMValueKind, 5);
 
 let LLVMIntEQ = 32;
 let LLVMIntNE = 33;
