@@ -611,7 +611,6 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 		return cast(*Node, null);
 	};
 	
-	/* TODO: Body */
 	let statements = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 100));
 	let i = 0;
 	while true {
@@ -670,7 +669,7 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	if (*tok).type == TOKEN_IDENTIFIER {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
 	    (*d).name = cast(*i8, (*tok).data);
-	    (*d).type = cast(*Node, null); /* TODO */
+	    (*d).type = cast(*Node, null);
 	    let n = Node{};
 	    n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
 	    n.data = cast(*void, d);
@@ -854,7 +853,11 @@ let parser_parse_unary_expression = (p: *parser) => *Node {
 
 	let new_lhs_data = cast(*NODE_UNARY_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_UNARY_EXPRESSION_DATA)));
 	((*new_lhs_data).typ) = typ;
-	((*new_lhs_data).expression) = parser_parse_unary_expression(p); /* TODO: try? */
+	let e = parser_parse_unary_expression(p);
+	if e == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+	((*new_lhs_data).expression) = e;
 	let new_lhs = Node{};
 	new_lhs.type = NODE_UNARY_EXPRESSION;
 	new_lhs.data = cast(*void, new_lhs_data);
@@ -864,6 +867,9 @@ let parser_parse_unary_expression = (p: *parser) => *Node {
 /* MultiplicativeExpression ::= UnaryExpression (("*" | "/" | "%") UnaryExpression)* */
 let parser_parse_multiplicative_expression = (p: *parser) => *Node {
 	let lhs = parser_parse_unary_expression(p);
+	if lhs == cast(*Node, null) {
+		return cast(*Node, null);
+	};
 
 	while true {
 		let typ = -1;
@@ -881,6 +887,9 @@ let parser_parse_multiplicative_expression = (p: *parser) => *Node {
 		};
 
 		let rhs = parser_parse_unary_expression(p);
+		if rhs == cast(*Node, null) {
+			return cast(*Node, null);
+		};
 
 		let new_lhs_data = cast(*NODE_MULTIPLICATIVE_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_MULTIPLICATIVE_EXPRESSION_DATA)));
 		((*new_lhs_data).lhs) = lhs;
@@ -897,6 +906,9 @@ let parser_parse_multiplicative_expression = (p: *parser) => *Node {
 /* AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpression)* */
 let parser_parse_additive_expression = (p: *parser) => *Node {
 	let lhs = parser_parse_multiplicative_expression(p);
+	if lhs == cast(*Node, null) {
+		return cast(*Node, null);
+	};
 
 	while true {
 		let plus = parser_accept_token(p, TOKEN_PLUS);
@@ -909,6 +921,9 @@ let parser_parse_additive_expression = (p: *parser) => *Node {
 		};
 
 		let rhs = parser_parse_multiplicative_expression(p);
+		if rhs == cast(*Node, null) {
+			return cast(*Node, null);
+		};
 
 		let new_lhs_data = cast(*NODE_ADDITIVE_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_ADDITIVE_EXPRESSION_DATA)));
 		((*new_lhs_data).addition) = plus != cast(*token, null);
@@ -940,13 +955,15 @@ let parser_parse_expression = (p: *parser) => *Node {
 let parse_assignment_statement = (p: *parser) => *Node {
 	let is_declaration = false;
 	if parser_accept_token(p, TOKEN_LET) != cast(*token, null) {
-	    printf("IS DECLARATION\n");
 	    is_declaration = true;
 	};
+	
+	let is_dereference = false;
+	if parser_accept_token(p, TOKEN_MUL) != cast(*token, null) {
+	    is_dereference = true;
+	};
 
-	/* TODO: is_dereference */
-
-	let lhs = parser_parse_expression(p); /* TODO */
+	let lhs = parser_parse_expression(p);
 	if lhs == cast(*Node, null) {
 	    return cast(*Node, null);
 	};	
@@ -955,14 +972,14 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	    return cast(*Node, null);
 	};
 	
-	let rhs = parser_parse_expression(p); /* TODO */
+	let rhs = parser_parse_expression(p);
 	if rhs == cast(*Node, null) {
 	    return cast(*Node, null);
 	};
 
 	let d = cast(*NODE_ASSIGNMENT_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_ASSIGNMENT_STATEMENT_DATA)));
 	(*d).is_declaration = is_declaration;
-	(*d).is_dereference = false;
+	(*d).is_dereference = is_dereference;
 	(*d).lhs = lhs;
 	(*d).rhs = rhs;
 	let n = Node{};
@@ -1011,10 +1028,10 @@ let parser_parse_import_declaration = (p: *parser) => *Node {
 	let bytes_read = read(file, file_contents, file_size);
 	(*(file_contents + cast(*i8, bytes_read))) = '\0';
 
-	let todo = slice{};
-	todo.data = cast(*void, file_contents);
-	todo.data_len = file_size;
-	let inner_tokenizer = tokenizer_init((*p).arena, todo);
+	let f = slice{};
+	f.data = cast(*void, file_contents);
+	f.data_len = file_size;
+	let inner_tokenizer = tokenizer_init((*p).arena, f);
 	let tokens = tokenizer_tokenize(inner_tokenizer);
 
 	let buf2 = cast(*i8, arena_alloc((*p).arena, 90));
@@ -1197,12 +1214,3 @@ let parse_program = (p: *parser) => *Node {
 let parse = (p: *parser) => *Node {
 	return parse_program(p);
 };
-
-/*
-
-For example -2:
-
-* parsing assignment statement
-* parsing ident and num literals
-
-*/
