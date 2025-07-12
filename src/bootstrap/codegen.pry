@@ -21,15 +21,18 @@ let Environment = struct {
 };
 
 let environment_create_scope = (e: *Environment) => void {
+	printf("CREATE SCOPE!!!!!!!!!!!: %d\n", (*e).scope_stack_len);
 	let scope = cast(*Scope, arena_alloc((*e).arena, sizeof(Scope)));
 	(*scope).variables = hashmap_init(16, (*e).arena);
 	(*((*e).scope_stack + cast(**Scope, (*e).scope_stack_len))) = scope;
 	(*e).scope_stack_len = (*e).scope_stack_len + 1;
+	printf("AFTER SCOPE!!!!!!!!!!!: %d\n", (*e).scope_stack_len);
 
 	return;
 };
 
 let environment_drop_scope = (e: *Environment) => void {
+	printf("DROP SCOPE!!!!!!!!!!!\n");
 	(*e).scope_stack_len = (*e).scope_stack_len - 1;
 
 	return;
@@ -57,8 +60,11 @@ let environment_get_variable = (e: *Environment, name: *i8) => *Variable {
 };
 
 let environment_add_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
+	printf("B4 XXXX %d\n", (*e).scope_stack_len);
 	let top_scope = *(((*e).scope_stack + cast(**Scope, (*e).scope_stack_len - 1)));
+	printf("XXXX %d\n", (*e).scope_stack_len);
 	hashmap_put((*top_scope).variables, name, cast(*void, variable));
+	printf("XXXXY\n");
 
 	return;
 };
@@ -417,7 +423,6 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let params = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * function_definition.parameters_len));
 		LLVMGetParams(function, params);
 
-
 		/* TODO */
 		let parameters_index = 0;
 		while parameters_index < function_definition.parameters_len {
@@ -427,10 +432,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			let param = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*param_node).data);
 			let param_type = param.type;
 			let llvm_param_type = codegen_get_llvm_type(c, param_type);
-			if llvm_param_type == cast(*LLVMTypeRef, null) {
-				printf("LEL3\n");
-				return cast(*Variable, null);
-			};
+			assert(llvm_param_type != cast(*LLVMTypeRef, null));
 			if (*param_type).type == NODE_TYPE_FUNCTION_TYPE {
                         	(*llvm_param_type) = LLVMPointerType(*llvm_param_type, 0);
 			};
@@ -443,7 +445,10 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			v.stack_level = cast(*i64, null);
 			v.node = param_node;
 			v.node_type = param_type;
-			environment_add_variable((*c).environment, param.name, codegen_create_variable(c, v));
+let xx =codegen_create_variable(c, v);
+		printf("THERE %s\n", param.name);
+			environment_add_variable((*c).environment, param.name, xx);
+		printf("HERE\n");
 			parameters_index = parameters_index + 1;
 		};
 
@@ -452,10 +457,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			let stmt = *(function_definition.statements + cast(**Node, i));
 
 			let res = codegen_generate_statement(c, stmt);
-			if res != 0 {
-				printf("LEL\n");
-				return cast(*Variable, null);
-			};
+			assert(res == 0);
 
 			i = i + 1;
 		};
@@ -905,6 +907,12 @@ let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STAT
 	return null;
 };
 
+extern codegen_generate = (*codegen, *Node) => i64;
+
+let codegen_generate_import_declaration = (c: *codegen, statement: *NODE_IMPORT_DECLARATION_DATA) => i64 {
+	return codegen_generate(c, (*statement).program);
+};
+
 let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	let stmt = *statement;
 
@@ -929,6 +937,10 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	if stmt.type == NODE_WHILE_STATEMENT {
 		codegen_generate_while_statement(c, cast(*NODE_WHILE_STATEMENT_DATA, stmt.data));
 		return 0;
+	};
+	
+	if stmt.type == NODE_IMPORT_DECLARATION {
+		return codegen_generate_import_declaration(c, cast(*NODE_IMPORT_DECLARATION_DATA, stmt.data));
 	};
 
 	printf("ASSERT 3 %d\n", stmt.type);

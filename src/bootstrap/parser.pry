@@ -1,3 +1,24 @@
+import "tokenizer.pry";
+
+extern fopen = (*i8, *i8) => *i8;
+extern fgets = (*i8, i64, *i8) => void;
+extern feof = (*i8) => bool;
+extern fseek = (*i8, i64, i64) => i64;
+extern lseek = (i64, i64, i64) => i64;
+extern ftell = (*i8) => i64;
+extern fread = (*i8, i64, i64, *i8) => i64;
+extern fclose = (*i8) => *i8;
+
+extern strcpy = (*i8, *i8) => *i8;
+extern dirname = (*i8) => *i8;
+extern open = (*i8, i64) => i64;
+extern openat = (i64, *i8, i64) => i64;
+extern read = (i64, *i8, i64) => i64;
+extern realpath = (*i8, *i8) => *i8;
+extern snprintf = (*i8, i64, *i8, *i8, *i8) => i64;
+extern strcpy = (*i8, *i8) => *i8;
+extern strlen = (*i8) => i64;
+
 let Node = struct {
 	type: i64,
 	data: *void,
@@ -195,6 +216,7 @@ let parser = struct {
 	offset: i64,
 
 	arena: *arena,
+	filename: *i8,
 };
 
 extern parser_parse_statement = (*parser) => *Node;
@@ -202,13 +224,14 @@ extern parser_parse_expression = (*parser) => *Node;
 extern parse_function_call_statement = (*parser) => *Node;
 extern parser_parse_additive_expression = (*parser) => *Node;
 
-let parser_init = (ts: *token, ts_len: i64, ar: *arena) => *parser {
+let parser_init = (ts: *token, ts_len: i64, ar: *arena, filename: *i8) => *parser {
 	let p = cast(*parser, arena_alloc(ar, sizeof(parser)));
 
 	(*p).tokens = ts;
 	(*p).tokens_len = ts_len;
 	(*p).offset = 0;
 	(*p).arena = ar;
+	(*p).filename = filename;
 
 	return p;
 };
@@ -690,8 +713,6 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	    return create_node(p, n);
 	};
 
-	printf("DIFF TYPE: %d\n", (*tok).type);
-
 	return cast(*Node, null);
 };
 
@@ -927,7 +948,6 @@ let parse_assignment_statement = (p: *parser) => *Node {
 
 	let lhs = parser_parse_expression(p); /* TODO */
 	if lhs == cast(*Node, null) {
-	printf("ANOTHER BNLL\n");
 	    return cast(*Node, null);
 	};	
 	
@@ -937,7 +957,6 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	
 	let rhs = parser_parse_expression(p); /* TODO */
 	if rhs == cast(*Node, null) {
-		printf("NUL EXP\n");
 	    return cast(*Node, null);
 	};
 
@@ -948,6 +967,70 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	(*d).rhs = rhs;
 	let n = Node{};
 	n.type = NODE_ASSIGNMENT_STATEMENT;
+	n.data = cast(*void, d);
+	return create_node(p, n);
+};
+
+extern parse = (*parser) => *Node;
+
+let parser_parse_import_declaration = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_IMPORT) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let expr = parser_parse_primary_expression(p);
+	if expr == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+
+	assert((*expr).type == NODE_PRIMARY_EXPRESSION_STRING);
+
+	let impor_filename = (*cast(*NODE_PRIMARY_EXPRESSION_STRING_DATA, (*expr).data)).value;
+	let current_file = cast(*i8, arena_alloc((*p).arena, sizeof(i8) * 70));
+	strcpy(current_file, (*p).filename);
+
+	/* stdlib. TODO: this is very hacky and won't work if running the compiler binary by itself */
+	if (*impor_filename) == '!' {
+		let buf = cast(*i8, arena_alloc((*p).arena, sizeof(i8) * 70));
+		sprintf(buf, "./std/%s", (impor_filename + cast(*i8, 1)));
+		impor_filename = buf;
+		current_file = ".";
+	};
+
+	let dirpath = dirname(current_file);
+	let dir = open(dirpath, 0);
+	assert(dir != -1);
+
+	let file = openat(dir, impor_filename, 0);
+	assert(file != -1);
+	
+	let file_size = lseek(file, 0, 2);
+	lseek(file, 0, 0);
+	let file_contents = cast(*i8, arena_alloc((*p).arena, file_size + 1));
+
+	let bytes_read = read(file, file_contents, file_size);
+	(*(file_contents + cast(*i8, bytes_read))) = '\0';
+
+	let todo = slice{};
+	todo.data = cast(*void, file_contents);
+	todo.data_len = file_size;
+	let inner_tokenizer = tokenizer_init((*p).arena, todo);
+	let tokens = tokenizer_tokenize(inner_tokenizer);
+
+	let buf2 = cast(*i8, arena_alloc((*p).arena, 90));
+	strcpy(buf2, dirpath);
+	(*(buf2 + cast(*i8, strlen(dirpath)))) = '/';
+	strcpy(buf2 + cast(*i8, strlen(dirpath) + 1), impor_filename);
+	let full_path = realpath(buf2, cast(*i8, null));
+
+	let inner_parser = parser_init(cast(*token, tokens.data), tokens.data_len, (*p).arena, full_path);
+	let ast = parse(inner_parser);
+	
+	let d = cast(*NODE_IMPORT_DECLARATION_DATA , arena_alloc((*p).arena, sizeof(NODE_IMPORT_DECLARATION_DATA)));
+	(*d).filename = impor_filename;
+	(*d).program = ast;
+	let n = Node{};
+	n.type = NODE_IMPORT_DECLARATION;
 	n.data = cast(*void, d);
 	return create_node(p, n);
 };
@@ -1046,6 +1129,14 @@ let parser_parse_statement = (p: *parser) => *Node {
 	};
 
 	let retu = parser_accept_parse(p, parser_parse_return_statement);
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
+	};
+	
+	let retu = parser_accept_parse(p, parser_parse_import_declaration);
 	if retu != cast(*Node, null) {
 		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
 		    return cast(*Node, null);

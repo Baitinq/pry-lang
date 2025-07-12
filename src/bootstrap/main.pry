@@ -1,11 +1,3 @@
-extern fopen = (*i8, *i8) => *i8;
-extern fgets = (*i8, i64, *i8) => void;
-extern feof = (*i8) => bool;
-extern fseek = (*i8, i64, i64) => i64;
-extern ftell = (*i8) => i64;
-extern fread = (*i8, i64, i64, *i8) => i64;
-extern fclose = (*i8) => *i8;
-
 import "!stdlib.pry";
 import "!mem.pry";
 
@@ -55,7 +47,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 	let t = tokenizer_init(alloc, file);
 	let ts = tokenizer_tokenize(t);
 
-	let p = parser_init(cast(*token, ts.data), ts.data_len, alloc);
+	let p = parser_init(cast(*token, ts.data), ts.data_len, alloc, filename);
 	let ast = parse(p);
 
 	let c = codegen_init(alloc);

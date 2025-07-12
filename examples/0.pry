@@ -1,80 +1,12 @@
 /* HELLO! Welcome to the unnamed language */
 
-extern printf = (*i8, varargs) => void;
-extern exit = (i64) => void;
-
-let strcmp = (stra: *i8, strb: *i8) => bool {
-	let i = 0;
-	while i < 10 {
-		printf("I: %d\n", i); /* CONTINUE */
-		let ca = (*(stra + cast(*i8, i)));
-		i = i + 1;
-	};
-
-	return true;
-};
-
-let isdigit = (c: i8) => bool {
-	if c >= '0' {
-		if c <= '9' {
-			return true;
-		};
-	};
-	return false;
-};
-
-let isalpha = (c: i8) => bool {
-	if c >= 'a' {
-		if c <= 'z' {
-			return true;
-		};
-	};
-	if c >= 'A' {
-		if c <= 'Z' {
-			return true;
-		};
-	};
-	return false;
-};
-
-let isalphanum = (c: i8) => bool {
-	if isalpha(c) {
-		return true;
-	};
-	if isdigit(c) {
-		return true;
-	};
-
-	return false;
-};
-
-let iswhitespace = (c: i8) => bool {
-	if c == ' ' {
-		return true;
-	};
-
-	if c >= '\t' {
-		if c <= '\r' {
-			return true;
-		};
-	};
-
-	return false;
-};
-
-let assert = (cond: bool) => void {
-	if !cond {
-		printf("ASSERTION FAILED\n");
-		exit(1);
-	};
-
-	return;
-};
+import "!stdlib.pry";
 
 let main = (argc: i64, argv: *i64) => i64 {
 	printf("%d\n", argc);
 	isdigit('a');
-	strcmp("a", "b");
+	let x = strcmp("a", "a");
+	printf("%d\n", x);
 	
 	return 2;
 };
