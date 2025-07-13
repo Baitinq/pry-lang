@@ -789,6 +789,18 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 
 		return 0;
 	};
+	
+	if (lhs.type == NODE_UNARY_EXPRESSION) {
+		let xd = (*cast(*NODE_UNARY_EXPRESSION_DATA, lhs.data)).expression;
+		let a = codegen_generate_expression_value(c, xd, cast(*i8, null));
+		assert(a != cast(*Variable, null));
+		let variable = codegen_generate_expression_value(c, prhs, cast(*i8, null));
+		assert(variable != cast(*Variable, null));
+		/* TODO: Check type */
+		LLVMBuildStore((*c).builder, (*variable).value, (*a).value);
+
+		return 0;
+	};
 
 	printf("ASSERT 2 %d\n", lhs.type);
 	assert(false);
