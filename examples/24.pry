@@ -42,6 +42,8 @@ X: 0
 Y: (null)
 X: 4
 Y: hi
+X: 0
+Y: bye
 
 Expected return: 0
 

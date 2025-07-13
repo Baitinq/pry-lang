@@ -265,6 +265,7 @@ let LLVMBasicBlockRef = newtype *void;
 
 extern LLVMGetModuleDataLayout = (LLVMModuleRef) => LLVMTargetDataRef;
 extern LLVMConstInt = (LLVMTypeRef, i64, i64) => LLVMValueRef;
+extern LLVMConstNull = (LLVMTypeRef) => LLVMValueRef;
 extern LLVMInt64Type = () => LLVMTypeRef;
 extern LLVMInt32Type = () => LLVMTypeRef;
 extern LLVMInt1Type = () => LLVMTypeRef;

@@ -814,6 +814,12 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	printf("NO TOK\n");
 	    return cast(*Node, null); 
 	};
+	
+	if (*tok).type == TOKEN_NULL {
+	    let n = Node{};
+	    n.type = NODE_PRIMARY_EXPRESSION_NULL;
+	    return create_node(p, n);
+	};
 
 	if (*tok).type == TOKEN_IDENTIFIER {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));

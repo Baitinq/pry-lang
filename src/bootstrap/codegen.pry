@@ -353,9 +353,24 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 };
 
 let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
-	printf("NAME: %s\n", name);
+	printf("NAME %d: \n", (*expression).type);
+	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NULL) {
+		let inner_type_data = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*inner_type_data).name = "void";
+		let inner_type = Node{};
+		inner_type.type = NODE_TYPE_SIMPLE_TYPE;
+		inner_type.data = cast(*void, inner_type_data);
+
+		let node_type_data = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
+		(*node_type_data).type = create_node(c, inner_type);
+		let node_type = Node{};
+		node_type.type = NODE_TYPE_POINTER_TYPE;
+		node_type.data = cast(*void, node_type_data);
+
+		return codegen_generate_literal(c, LLVMConstNull(LLVMPointerType(LLVMInt8Type(), 0)), name, expression, create_node(c, node_type));
+	};
+
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
-		printf("THIS\n");
 		let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
 		
 		printf("X: %d\n", n);
