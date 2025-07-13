@@ -170,6 +170,14 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 			return r;
 		};
 
+		let v = environment_get_variable((*c).environment, simple_type.name);
+		if (v != cast(*Variable, null)) {
+			assert((*v).type != cast(LLVMTypeRef, null));
+			let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
+			*r = (*v).type;
+			return r;
+		};
+
 		printf("NO SIMPLE TYPE %s!\n", simple_type.name);
 		assert(false);
 	};
@@ -782,6 +790,13 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		v.node = expression;
 		v.node_type = simple_type_node;
 		return codegen_create_variable(c, v);
+	};
+	
+	if ((*expression).type == NODE_STRUCT_INSTANCIATION) {
+		let struc_data = *cast(*NODE_STRUCT_INSTANCIATION_DATA, (*expression).data);
+		let v = environment_get_variable((*c).environment, struc_data.typ);
+		assert(v != cast(*Variable, null));
+		return v;
 	};
 
 	printf("ASSERT 1: %d\n", (*expression).type);

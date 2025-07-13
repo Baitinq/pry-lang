@@ -732,6 +732,29 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	return create_node(p, n); 
 };
 
+let parser_parse_struct_instanciation = (p: *parser) => *Node {
+	let typ = parser_accept_token(p, TOKEN_IDENTIFIER);
+	if typ == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	if parser_accept_token(p, TOKEN_LBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_RBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_STRUCT_INSTANCIATION_DATA, arena_alloc((*p).arena, sizeof(NODE_STRUCT_INSTANCIATION_DATA)));
+	(*d).typ = cast(*i8, (*typ).data);
+
+	let n = Node{};
+	n.type = NODE_STRUCT_INSTANCIATION;
+	n.data = cast(*void, d);
+
+	return create_node(p, n); 
+};
+
 /* PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN */
 let parser_parse_primary_expression = (p: *parser) => *Node {
 	let stmt = parser_accept_parse(p, parser_parse_function_definition);
@@ -739,6 +762,10 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 		return stmt;
 	};
 	let stmt = parser_accept_parse(p, parser_parse_struct_definition);
+	if stmt != cast(*Node, null) {
+		return stmt;
+	};
+	let stmt = parser_accept_parse(p, parser_parse_struct_instanciation);
 	if stmt != cast(*Node, null) {
 		return stmt;
 	};
