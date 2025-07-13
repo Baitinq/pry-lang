@@ -417,7 +417,16 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*node_type).type = NODE_TYPE_FUNCTION_TYPE;
 		(*node_type).data = cast(*void, d);
 
-                /* TODO: Needed for recursive functions */
+                /* Needed for recursive functions */
+		if name != cast(*i8, null) {
+			let v = Variable{};
+			v.value = function;
+			v.type = cast(LLVMTypeRef, null);
+			v.stack_level = cast(*i64, null);
+			v.node = expression;
+			v.node_type = node_type;
+			environment_add_variable((*c).environment, name, codegen_create_variable(c, v));
+		};
 
 		let params = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * function_definition.parameters_len));
 		LLVMGetParams(function, params);
