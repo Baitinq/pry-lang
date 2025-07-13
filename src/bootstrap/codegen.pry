@@ -174,8 +174,13 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 	
 	if (*node).type == NODE_TYPE_FUNCTION_TYPE {
 		let function_type = *cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*node).data);
-		let retur_type = codegen_get_llvm_type(c, function_type.retur_type);
+		let f_retur = function_type.retur_type;
+		let retur_type = codegen_get_llvm_type(c, f_retur);
 		assert(retur_type != cast(*LLVMTypeRef, null));
+		if (*f_retur).type == NODE_TYPE_FUNCTION_TYPE {
+			(*retur_type) = LLVMPointerType(*retur_type, 0);
+		};
+
 		let paramtypes = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
 		let paramtypes_len = 0;
 		let is_varargs = 0;
@@ -401,19 +406,32 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			(*(param_types + cast(**Node, i))) = param_type;
 			i = i + 1;
 		};
-
-		let retur_type = codegen_get_llvm_type(c, function_definition.retur_type);
+		
+		let f_ret = function_definition.retur_type;
+		let retur_type = codegen_get_llvm_type(c, f_ret);
 		assert(retur_type != cast(*LLVMTypeRef, null));
-
-		let function_type = LLVMFunctionType(*retur_type, llvm_param_types, i, is_varargs);
-		let n_name = name;
-		if name == cast(*i8, null) {
-			n_name = "unnamed_func";
+		if (*f_ret).type == NODE_TYPE_FUNCTION_TYPE {
+			(*retur_type) = LLVMPointerType(*retur_type, 0);
 		};
-		let function = LLVMAddFunction((*c).llvm_module, n_name, function_type);
+
+		let function = cast(LLVMValueRef, null);
+		if name != cast(*i8, null) {
+			let v = environment_get_variable((*c).environment, name);
+			if (v != cast(*Variable, null)) {
+				function = (*v).value;
+			};
+		};
+		if function == cast(LLVMValueRef, null) {
+			let function_type = LLVMFunctionType(*retur_type, llvm_param_types, i, is_varargs);
+			let n_name = name;
+			if name == cast(*i8, null) {
+				n_name = "unnamed_func";
+			};
+			function = LLVMAddFunction((*c).llvm_module, n_name, function_type);
+		};
+
                 let function_entry = LLVMAppendBasicBlock(function, "entrypoint");
                 LLVMPositionBuilderAtEnd((*c).builder, function_entry);
-
 
 		environment_create_scope((*c).environment);
 		let last_function = (*c).current_function;
