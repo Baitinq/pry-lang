@@ -345,4 +345,6 @@ let LLVMIntSLT = 40;
 let LLVMIntSLE = 41;
 
 extern LLVMStoreSizeOfType = (LLVMTargetDataRef, LLVMTypeRef) => i64;
+extern LLVMStructCreateNamed = (LLVMContextRef, *i8) => LLVMTypeRef;
+extern LLVMStructSetBody = (LLVMTypeRef, *LLVMTypeRef, i64, i64) => void;
 

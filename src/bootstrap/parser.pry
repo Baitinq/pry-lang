@@ -191,7 +191,7 @@ let NODE_TYPE_POINTER_TYPE_DATA = struct {
 };
 
 let NODE_TYPE_STRUCT_TYPE_DATA = struct {
-    fields: *Node,
+    fields: **Node,
     fields_len: i64,
 };
 
@@ -606,7 +606,7 @@ let parser_parse_function_parameters = (p: *parser) => *slice {
 		};
 
 		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
-		(*d).name = cast(*i8, (*ident).data); /* TODO: Typecheck struct access */
+		(*d).name = cast(*i8, (*ident).data);
 		(*d).type = type_annotation;
 		let n = Node{};
 		n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
@@ -620,6 +620,62 @@ let parser_parse_function_parameters = (p: *parser) => *slice {
 	(*s).data = cast(*void, node_list);
 	(*s).data_len = i;
 	return s;
+};
+
+/* StructDefinition ::= "struct" LBRACE StructFields? RBRACE */
+let parser_parse_struct_definition = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_STRUCT) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_LBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let fields = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 20));
+	let i = 0;
+	while true {
+		let field = parser_accept_parse(p, (ip: *parser) => *Node {
+			let ident = parser_accept_token(ip, TOKEN_IDENTIFIER);
+			if ident == cast(*token, null) {
+				return cast(*Node, null);
+			};
+			if parser_accept_token(ip, TOKEN_COLON) == cast(*token, null) {
+				return cast(*Node, null);
+			};
+			let typ_annotation = parser_parse_type(ip);
+			if typ_annotation == cast(*Node, null) {
+				return cast(*Node, null);
+			};
+			printf("STRUCT TYP: %d\n" (*typ_annotation).type);
+			let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*ip).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
+			(*d).name = cast(*i8, (*ident).data);
+			(*d).type = typ_annotation;
+			let n = Node{};
+			n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
+			n.data = cast(*void, d);
+			return create_node(ip, n);
+		});
+		if field == cast(*Node, null) {
+			break;
+		};
+
+		parser_accept_token(p, TOKEN_COMMA);
+
+		(*(fields + cast(**Node, i))) = field;
+		i = i + 1;
+	};
+
+	if parser_accept_token(p, TOKEN_RBRACE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_TYPE_STRUCT_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_STRUCT_TYPE_DATA)));
+	(*d).fields = fields;
+	(*d).fields_len = i;
+	let n = Node{};
+	n.type = NODE_TYPE_STRUCT_TYPE;
+	n.data = cast(*void, d);
+	return create_node(p, n);
 };
 
 /* FunctionDefinition ::= LPAREN FunctionParameters? RPAREN ARROW IDENTIFIER LBRACE Statement* ReturnStatement SEMICOLON RBRACE */
@@ -679,6 +735,10 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 /* PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN */
 let parser_parse_primary_expression = (p: *parser) => *Node {
 	let stmt = parser_accept_parse(p, parser_parse_function_definition);
+	if stmt != cast(*Node, null) {
+		return stmt;
+	};
+	let stmt = parser_accept_parse(p, parser_parse_struct_definition);
 	if stmt != cast(*Node, null) {
 		return stmt;
 	};

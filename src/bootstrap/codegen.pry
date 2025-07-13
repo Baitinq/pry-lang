@@ -739,6 +739,51 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_create_variable(c, v);
 	};
 
+	if ((*expression).type == NODE_TYPE_STRUCT_TYPE) {
+		let struc_data = *cast(*NODE_TYPE_STRUCT_TYPE_DATA, (*expression).data);
+		let dd = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+		(*dd).name = name;
+		(*dd).underlying_type = expression;
+		let n = Node{};
+		n.type = NODE_TYPE_SIMPLE_TYPE;
+		n.data = cast(*void, dd);
+		let simple_type_node = create_node(c, n);
+
+		let struc_type = LLVMStructCreateNamed((*c).llvm_context, name);
+
+		if name != cast(*i8, null) {
+			let v = Variable{};
+			v.value = cast(LLVMValueRef, null);
+			v.type = struc_type;
+			v.stack_level = cast(*i64, null);
+			v.node = expression;
+			v.node_type = simple_type_node;
+			environment_add_variable((*c).environment, name, codegen_create_variable(c, v));
+		};
+
+		let llvm_types = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
+		let i = 0;
+		while i < struc_data.fields_len {
+			let field = *(struc_data.fields + cast(**Node, i));
+			assert((*field).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
+			let t = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*field).data)).type;
+			let lt = codegen_get_llvm_type(c, t);
+			assert(lt != cast(*LLVMTypeRef, null));
+			(*(llvm_types + cast(*LLVMTypeRef, i))) = *lt;
+			i = i + 1;
+		};
+
+		LLVMStructSetBody(struc_type, llvm_types, i, 0);
+
+		let v = Variable{};
+		v.value = cast(LLVMValueRef, null);
+		v.type = struc_type;
+		v.stack_level = cast(*i64, null);
+		v.node = expression;
+		v.node_type = simple_type_node;
+		return codegen_create_variable(c, v);
+	};
+
 	printf("ASSERT 1: %d\n", (*expression).type);
 	assert(false);
 
