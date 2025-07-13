@@ -338,18 +338,33 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER) {
 		let identifier = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*expression).data);
 		let variable = environment_get_variable((*c).environment, identifier.name);
-		if variable == cast(*Variable, null) {
-			return cast(*Variable, null);
-		};
+		assert(variable != cast(*Variable, null));
+		let param_value = (*variable).value;
 		let v_type = (*variable).node_type;
-		/* TODO */
-		assert((*v_type).type != NODE_TYPE_FUNCTION_TYPE);
-		let param_type = codegen_get_llvm_type(c, v_type);
-		assert(param_type != cast(*LLVMTypeRef, null));
-		if (*v_type).type == NODE_TYPE_FUNCTION_TYPE {
-			(*param_type) = LLVMPointerType(*param_type, 0);
+
+		let done = false;
+		if (*v_type).type != NODE_TYPE_FUNCTION_TYPE {
+			let param_type = codegen_get_llvm_type(c, v_type);
+			assert(param_type != cast(*LLVMTypeRef, null));
+			if (*v_type).type == NODE_TYPE_FUNCTION_TYPE {
+				(*param_type) = LLVMPointerType(*param_type, 0);
+			};
+			param_value = LLVMBuildLoad2((*c).builder, *param_type, (*variable).value, "");
+			done = true;
 		};
-		let param_value = LLVMBuildLoad2((*c).builder, *param_type, (*variable).value, "");
+
+		if !done {
+			if (*(*variable).stack_level) != 0 {
+				let param_type = codegen_get_llvm_type(c, v_type);
+				assert(param_type != cast(*LLVMTypeRef, null));
+				if (*v_type).type == NODE_TYPE_FUNCTION_TYPE {
+					(*param_type) = LLVMPointerType(*param_type, 0);
+				};
+				param_value = LLVMBuildLoad2((*c).builder, *param_type, (*variable).value, "");
+				done = true;
+			};
+
+		};
 
 		return codegen_generate_literal(c, param_value, name, expression, (*variable).node_type);
 	};
