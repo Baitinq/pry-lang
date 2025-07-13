@@ -765,6 +765,12 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		if (*variable).value != cast(LLVMValueRef, null) {
 			LLVMBuildStore((*c).builder, (*variable).value, ptr);
 		};
+
+		if (*stmt).is_dereference {
+			let v = environment_get_variable((*c).environment, identifier);
+			assert(v != cast(*Variable, null));
+			ptr = (*v).value;
+		};
 	
 		let new_variable = Variable{};
 
