@@ -321,6 +321,10 @@ extern LLVMBuildICmp = (LLVMBuilderRef, LLVMIntPredicate, LLVMValueRef, LLVMValu
 extern LLVMBuildNeg = (LLVMBuilderRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildSub = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildAdd = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildMul = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildSDiv = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildSRem = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+
 extern LLVMBuildGEP2 = (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, *LLVMValueRef, i64, *i8) => LLVMValueRef;
 extern LLVMAddGlobal = (LLVMModuleRef, LLVMTypeRef, *i8) => LLVMValueRef;
 extern LLVMSetInitializer = (LLVMValueRef, LLVMValueRef) => void;

@@ -1084,12 +1084,14 @@ let parser_parse_function_arguments = (p: *parser) => *slice {
 /* FunctionCallStatement ::= (IDENTIFIER | FunctionDefinition) LPAREN FunctionArguments? RPAREN */
 let parse_function_call_statement = (p: *parser) => *Node {
 	let ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+	let fn_def = parser_accept_parse(p, parser_parse_function_definition);
+
 	if ident == cast(*token, null) {
-		return cast(*Node, null);
+		if fn_def == cast(*Node, null) {
+			return cast(*Node, null);
+		};
 	};
 
-	/* TODO: Function definition call */
-		
 	if parser_accept_token(p, TOKEN_LPAREN) == cast(*token, null) {
 	    return cast(*Node, null);
 	};
@@ -1103,16 +1105,22 @@ let parse_function_call_statement = (p: *parser) => *Node {
 	    return cast(*Node, null);
 	};
 
-	let expression_data = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
-	(*expression_data).name = cast(*i8, (*ident).data);
-	let expression = cast(*Node, arena_alloc((*p).arena, sizeof(Node)));
-	(*expression).type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
-	(*expression).data = cast(*void, expression_data);
-
 	let d = cast(*NODE_FUNCTION_CALL_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_FUNCTION_CALL_STATEMENT_DATA)));
-	(*d).expression = expression;
 	(*d).arguments = cast(**Node, (*arguments).data);
 	(*d).arguments_len = (*arguments).data_len;
+
+	if fn_def != cast(*Node, null) {
+		(*d).expression = fn_def;
+	};
+	if fn_def == cast(*Node, null) {
+		let expression_data = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
+		(*expression_data).name = cast(*i8, (*ident).data);
+		let expression = cast(*Node, arena_alloc((*p).arena, sizeof(Node)));
+		(*expression).type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
+		(*expression).data = cast(*void, expression_data);
+		(*d).expression = expression;
+	};
+
 	let n = Node{};
 	n.type = NODE_FUNCTION_CALL_STATEMENT;
 	n.data = cast(*void, d);

@@ -355,10 +355,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	};
 	
 	if ((*expression).type == NODE_FUNCTION_DEFINITION) {
-		printf("THIS2\n");
-	/* TODO: IMPLEMENT */
-		printf("ASS %d\n", (*expression).type);
-
+                /* Functions should be declared "globally" */
 		let builder_pos = LLVMGetInsertBlock((*c).builder);
 
 		let llvm_param_types = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
@@ -393,8 +390,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let retur_type = codegen_get_llvm_type(c, function_definition.retur_type);
 		assert(retur_type != cast(*LLVMTypeRef, null));
 
-		let function_type = LLVMFunctionType(*retur_type, llvm_param_types, i, 0);
-		let function = LLVMAddFunction((*c).llvm_module, name, function_type);
+		let function_type = LLVMFunctionType(*retur_type, llvm_param_types, i, is_varargs);
+		let n_name = name;
+		if name == cast(*i8, null) {
+			n_name = "unnamed_func";
+		};
+		let function = LLVMAddFunction((*c).llvm_module, n_name, function_type);
                 let function_entry = LLVMAppendBasicBlock(function, "entrypoint");
                 LLVMPositionBuilderAtEnd((*c).builder, function_entry);
 
@@ -416,12 +417,11 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*node_type).type = NODE_TYPE_FUNCTION_TYPE;
 		(*node_type).data = cast(*void, d);
 
-		/* TODO: Recurisve functions */
+                /* TODO: Needed for recursive functions */
 
 		let params = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * function_definition.parameters_len));
 		LLVMGetParams(function, params);
 
-		/* TODO */
 		let parameters_index = 0;
 		while parameters_index < function_definition.parameters_len {
 			let p = (*(params + cast(*LLVMValueRef, parameters_index)));
@@ -561,6 +561,31 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_generate_literal(c, result, name, expression, pnode_type);
 	};
 	
+	if ((*expression).type == NODE_MULTIPLICATIVE_EXPRESSION) {
+		let exp = (*(cast(*NODE_MULTIPLICATIVE_EXPRESSION_DATA, (*expression).data)));
+		let lhs_value = codegen_generate_expression_value(c, exp.lhs, cast(*i8, null));
+		assert(lhs_value != cast(*Variable, null));
+		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
+		assert(rhs_value != cast(*Variable, null));
+
+		/* TODO: Compare types */
+
+		let result = cast(LLVMValueRef, null);
+
+		if exp.typ == MULTIPLICATIVE_EXPRESSION_TYPE_MUL {
+			result = LLVMBuildMul((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+		};
+		if exp.typ == MULTIPLICATIVE_EXPRESSION_TYPE_DIV {
+			result = LLVMBuildSDiv((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+		};
+		if exp.typ == MULTIPLICATIVE_EXPRESSION_TYPE_MOD {
+			result = LLVMBuildSRem((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+		};
+		assert(result != cast(LLVMValueRef, null));
+
+		return codegen_generate_literal(c, result, name, expression, (*lhs_value).node_type);
+	};
+	
 	if ((*expression).type == NODE_UNARY_EXPRESSION) {
 		let exp = (*(cast(*NODE_UNARY_EXPRESSION_DATA, (*expression).data)));
 		let k = codegen_generate_expression_value(c, exp.expression, cast(*i8, null));
@@ -570,7 +595,9 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let typ = (*k).node_type;
 
 		if exp.typ == UNARY_EXPRESSION_TYPE_NOT {
-			/* TODO: assert bool */
+			assert((*typ).type == NODE_TYPE_SIMPLE_TYPE);
+			let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*typ).data);
+			assert(strcmp(simple_type.name, "bool"));
                         r = LLVMBuildICmp((*c).builder, cast(LLVMIntPredicate, LLVMIntEQ), (*k).value, LLVMConstInt(LLVMInt1Type(), 0, 0), "");
 			let node_type = Node{};
 			node_type.type = NODE_TYPE_SIMPLE_TYPE;
@@ -595,7 +622,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		};
 		
 		if exp.typ == UNARY_EXPRESSION_TYPE_STAR {
-			/* TODO: assert ptr */
+			assert((*typ).type == NODE_TYPE_POINTER_TYPE);
 			let n = (*k).node_type;
 			typ = (*cast(*NODE_TYPE_POINTER_TYPE_DATA, (*n).data)).type;
 			let ptr_type = codegen_get_llvm_type(c, typ);
@@ -608,11 +635,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	
 	if ((*expression).type == NODE_TYPE_FUNCTION_TYPE) {
 		let e = *((*c).environment);
-		printf("LLEL\n");
 		assert(e.scope_stack_len == 1);
-		printf("THIS3\n");
 
-		/* TODO: Check if already exists */
+		let existing = environment_get_variable((*c).environment, name);
+		if (existing != cast(*Variable, null)) {
+			return existing;
+		};
 
 		let function_type = codegen_get_llvm_type(c, expression);
 		assert(function_type != cast(*LLVMTypeRef, null));
@@ -767,30 +795,37 @@ let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) => *Variable {
 	assert((*statement).type == NODE_FUNCTION_CALL_STATEMENT);
 	let stmt = cast(*NODE_FUNCTION_CALL_STATEMENT_DATA, (*statement).data);
-	let expression = (*(*stmt).expression);
-	assert(expression.type == NODE_PRIMARY_EXPRESSION_IDENTIFIER); /* TODO: Function definition support */
+	let expression = (*stmt).expression;
 
-	let ident = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, expression.data));
-	let function = environment_get_variable((*c).environment, ident.name);
-	if function == cast(*Variable, null) {
-		printf("NO variable: %s\n", ident.name);
-		assert(false);
-	};
 	let node = statement;
-	if LLVMGetValueKind((*function).value) != LLVMFunctionValueKind {
-		let lt = codegen_get_llvm_type(c, (*function).node_type);
-		assert(lt != cast(*LLVMTypeRef, null));
-		(*function).value = LLVMBuildLoad2((*c).builder, LLVMPointerType(*lt, 0), (*function).value, "");
-		node = (*function).node;
+	let function = cast(*Variable, null);
+
+	if (*expression).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER {
+		let ident = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*expression).data));
+		function = environment_get_variable((*c).environment, ident.name);
+		if function == cast(*Variable, null) {
+			printf("NO variable: %s\n", ident.name);
+			assert(false);
+		};
+
+		if LLVMGetValueKind((*function).value) != LLVMFunctionValueKind {
+			let lt = codegen_get_llvm_type(c, (*function).node_type);
+			assert(lt != cast(*LLVMTypeRef, null));
+			(*function).value = LLVMBuildLoad2((*c).builder, LLVMPointerType(*lt, 0), (*function).value, "");
+			node = (*function).node;
+		};
 	};
+	if (*expression).type == NODE_FUNCTION_DEFINITION {
+		function = codegen_generate_expression_value(c, expression, cast(*i8, null));
+	};
+
+	assert(function != cast(*Variable, null));
 
 	let arguments = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * (*stmt).arguments_len));
 
 	let i = 0;
-	printf("arguments_len: %d\n", (*stmt).arguments_len);
-
 	while i < (*stmt).arguments_len {
-		let argument = (*((*stmt).arguments + cast(**Node, i))); /* TODO */
+		let argument = (*((*stmt).arguments + cast(**Node, i)));
 		let arg = codegen_generate_expression_value(c, argument, cast(*i8, null));
 		assert(arg != cast(*Variable, null));
 		/* TODO: Typecheck */
