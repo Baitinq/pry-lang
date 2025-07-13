@@ -622,6 +622,28 @@ let parser_parse_function_parameters = (p: *parser) => *slice {
 	return s;
 };
 
+/* TypeDefinition ::= "newtype" Type */
+let parser_parse_type_definition = (p: *parser) => *Node {
+	if parser_accept_token(p, TOKEN_TYPE) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let typ = parser_parse_type(p);
+	if typ == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
+	(*d).name = "";
+	(*d).underlying_type = typ;
+
+	let r = Node{};
+	r.type = NODE_TYPE_SIMPLE_TYPE;
+	r.data = cast(*void, d);
+
+	return create_node(p, r);
+};
+
 /* StructDefinition ::= "struct" LBRACE StructFields? RBRACE */
 let parser_parse_struct_definition = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_STRUCT) == cast(*token, null) {
@@ -786,6 +808,10 @@ let parser_parse_field_access = (p: *parser) => *Node {
 /* PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN */
 let parser_parse_primary_expression = (p: *parser) => *Node {
 	let stmt = parser_accept_parse(p, parser_parse_function_definition);
+	if stmt != cast(*Node, null) {
+		return stmt;
+	};
+	let stmt = parser_accept_parse(p, parser_parse_type_definition);
 	if stmt != cast(*Node, null) {
 		return stmt;
 	};
