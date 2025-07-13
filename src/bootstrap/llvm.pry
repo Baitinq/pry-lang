@@ -252,6 +252,7 @@ let LLVMInitializeAllDisassemblers = () => void {
 
 let LLVMBuilderRef = newtype *void;
 let LLVMModuleRef = newtype *void;
+let LLVMTargetDataRef = newtype *void;
 let LLVMTargetMachineRef = newtype *void;
 let LLVMContextRef = newtype *void;
 let LLVMTargetRef = newtype *void;
@@ -262,6 +263,7 @@ let LLVMValueKind = newtype i64;
 let LLVMTypeRef = newtype *void;
 let LLVMBasicBlockRef = newtype *void;
 
+extern LLVMGetModuleDataLayout = (LLVMModuleRef) => LLVMTargetDataRef;
 extern LLVMConstInt = (LLVMTypeRef, i64, i64) => LLVMValueRef;
 extern LLVMInt64Type = () => LLVMTypeRef;
 extern LLVMInt1Type = () => LLVMTypeRef;
@@ -341,3 +343,6 @@ let LLVMIntSGT = 38;
 let LLVMIntSGE = 39;
 let LLVMIntSLT = 40;
 let LLVMIntSLE = 41;
+
+extern LLVMStoreSizeOfType = (LLVMTargetDataRef, LLVMTypeRef) => i64;
+
