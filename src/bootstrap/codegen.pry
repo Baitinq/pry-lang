@@ -1127,6 +1127,18 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 	return codegen_create_variable(c, v);
 };
 
+let codegen_generate_break_statement = (c: *codegen) => i64 {
+	assert((*c).whil_loop_exit != cast(LLVMBasicBlockRef, null));
+	LLVMBuildBr((*c).builder, (*c).whil_loop_exit);
+	return 0;
+};
+
+let codegen_generate_continue_statement = (c: *codegen) => i64 {
+	assert((*c).whil_block != cast(LLVMBasicBlockRef, null));
+	LLVMBuildBr((*c).builder, (*c).whil_block);
+	return 0;
+};
+
 let codegen_generate_if_statement = (c: *codegen, statement: *NODE_IF_STATEMENT_DATA) => *void {
 	let condition_value = codegen_generate_expression_value(c, (*statement).condition, cast(*i8, null));
 	assert(condition_value != cast(*Variable, null));
@@ -1228,6 +1240,14 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 	
 	if stmt.type == NODE_IMPORT_DECLARATION {
 		return codegen_generate_import_declaration(c, cast(*NODE_IMPORT_DECLARATION_DATA, stmt.data));
+	};
+
+	if stmt.type == NODE_CONTINUE_STATEMENT {
+		return codegen_generate_continue_statement(c);
+	};
+
+	if stmt.type == NODE_BREAK_STATEMENT {
+		return codegen_generate_break_statement(c);
 	};
 
 	printf("ASSERT 3 %d\n", stmt.type);

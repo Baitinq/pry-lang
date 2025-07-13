@@ -1389,6 +1389,39 @@ let parser_parse_statement = (p: *parser) => *Node {
 		};
 	    return retu;
 	};
+	
+	/*  Break and continue */
+	let retu = parser_accept_parse(p, (ip: *parser) => *Node {
+		if parser_accept_token(ip, TOKEN_BREAK) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+		
+		let n = Node{};
+		n.type = NODE_BREAK_STATEMENT;
+		return create_node(ip, n);
+	});
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
+	};
+
+	let retu = parser_accept_parse(p, (ip: *parser) => *Node {
+		if parser_accept_token(ip, TOKEN_CONTINUE) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+		
+		let n = Node{};
+		n.type = NODE_CONTINUE_STATEMENT;
+		return create_node(ip, n);
+	});
+	if retu != cast(*Node, null) {
+		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
+		    return cast(*Node, null);
+		};
+	    return retu;
+	};
 
 	printf("None\n");
 	
