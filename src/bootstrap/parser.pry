@@ -732,6 +732,7 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	return create_node(p, n); 
 };
 
+/* StructInstantiation ::= IDENTIFIER LBRACE RBRACE */
 let parser_parse_struct_instanciation = (p: *parser) => *Node {
 	let typ = parser_accept_token(p, TOKEN_IDENTIFIER);
 	if typ == cast(*token, null) {
@@ -750,6 +751,33 @@ let parser_parse_struct_instanciation = (p: *parser) => *Node {
 
 	let n = Node{};
 	n.type = NODE_STRUCT_INSTANCIATION;
+	n.data = cast(*void, d);
+
+	return create_node(p, n); 
+};
+
+extern parser_parse_primary_expression = (*parser) => *Node;
+
+/* FieldAccess ::= PrimaryExpression DOT IDENTIFIER */
+let parser_parse_field_access = (p: *parser) => *Node {
+	let expression = parser_parse_primary_expression(p);
+	if expression == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+	if parser_accept_token(p, TOKEN_DOT) == cast(*token, null) {
+		return cast(*Node, null);
+	};
+	let ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+	if ident == cast(*token, null) {
+		return cast(*Node, null);
+	};
+
+	let d = cast(*NODE_FIELD_ACCESS_DATA, arena_alloc((*p).arena, sizeof(NODE_FIELD_ACCESS_DATA)));
+	(*d).expression = expression;
+	(*d).name = cast(*i8, (*ident).data);
+
+	let n = Node{};
+	n.type = NODE_FIELD_ACCESS;
 	n.data = cast(*void, d);
 
 	return create_node(p, n); 
@@ -950,6 +978,10 @@ let parser_parse_postfix_expression = (p: *parser) => *Node {
 		return ex;
 	};
 	let ex = parser_accept_parse(p, parse_function_call_statement);
+	if ex != cast(*Node, null) {
+		return ex;
+	};
+	let ex = parser_accept_parse(p, parser_parse_field_access);
 	if ex != cast(*Node, null) {
 		return ex;
 	};

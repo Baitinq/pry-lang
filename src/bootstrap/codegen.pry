@@ -805,6 +805,88 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	return cast(*Variable, null);
 };
 
+let StructField = struct {
+	value: LLVMValueRef,
+	type: *Node,
+};
+
+let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructField {
+	let ptr = cast(*Variable, null);
+	if (*node).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER {
+		let identifier = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*node).data);
+		ptr = environment_get_variable((*c).environment, identifier.name);
+	};
+	if (*node).type == NODE_UNARY_EXPRESSION {
+		let xd = (*cast(*NODE_UNARY_EXPRESSION_DATA, (*node).data)).expression;
+		ptr = codegen_generate_expression_value(c, xd, "");
+	};
+
+	assert(ptr != cast(*Variable, null));
+
+	let typ = cast(*Node, null);
+	let ptr_typ = (*ptr).node_type;
+	if (*ptr_typ).type == NODE_TYPE_STRUCT_TYPE {
+		typ = ptr_typ;
+	};
+	if (*ptr_typ).type == NODE_TYPE_POINTER_TYPE {
+		let pt = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*ptr_typ).data);
+		let pt_type = pt.type;
+		assert((*pt_type).type == NODE_TYPE_SIMPLE_TYPE);
+		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*pt_type).data);
+		let v = environment_get_variable((*c).environment, simple_type.name);
+		assert(v != cast(*Variable, null));
+		typ = (*v).node_type;
+	};
+	if (*ptr_typ).type == NODE_TYPE_SIMPLE_TYPE {
+		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*ptr_typ).data);
+		let v = environment_get_variable((*c).environment, simple_type.name);
+		assert(v != cast(*Variable, null));
+		typ = (*v).node_type;
+	};
+
+	assert(typ != cast(*Node, null));
+	assert((*typ).type == NODE_TYPE_SIMPLE_TYPE);
+	let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*typ).data);
+	assert((*simple_type.underlying_type).type == NODE_TYPE_STRUCT_TYPE);
+	let struc_type = *cast(*NODE_TYPE_STRUCT_TYPE_DATA, (*simple_type.underlying_type).data);
+
+	let fieldIndex = cast(*i64, null);
+
+	let i = 0;
+	while i < struc_type.fields_len {
+		let field = *(struc_type.fields + cast(**Node, i));
+		assert((*field).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
+		let field_data = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*field).data);
+		if strcmp(name, field_data.name) {
+			let ii = cast(*i64, arena_alloc((*c).arena, sizeof(i64)));
+			*ii = i;
+			fieldIndex = ii;
+			break;
+		};
+		i = i + 1;
+	};
+
+	assert(fieldIndex != cast(*i64, null));
+
+	let zero = LLVMConstInt(LLVMInt32Type(), 0, 0);
+	let llvmFieldIndex = LLVMConstInt(LLVMInt32Type(), *fieldIndex, 0);
+	let indices = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * 2));
+	(*(indices + cast(*LLVMValueRef, 0))) = zero;
+	(*(indices + cast(*LLVMValueRef, 1))) = llvmFieldIndex;
+
+	let res = cast(*StructField, arena_alloc((*c).arena, sizeof(StructField)));
+
+	let x = codegen_get_llvm_type(c, typ);
+	assert(x != cast(*LLVMTypeRef, null));
+	(*res).value = LLVMBuildGEP2((*c).builder, *x, (*ptr).value, indices, 2, name);
+	let no = *(struc_type.fields + cast(**Node, *fieldIndex));
+	assert((*no).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
+	let no_d = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*no).data);
+	(*res).type = no_d.type;
+	
+	return res;
+};
+
 let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT_STATEMENT_DATA) => i64 {
 	let lhs = *((*stmt).lhs);
 	let prhs = (*stmt).rhs;
@@ -884,6 +966,20 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		/* TODO: Check type */
 		LLVMBuildStore((*c).builder, (*variable).value, (*a).value);
 
+		return 0;
+	};
+	
+	if (lhs.type == NODE_FIELD_ACCESS) {
+		let field_access = (*cast(*NODE_FIELD_ACCESS_DATA, lhs.data));
+		let xd = field_access.expression;
+		let name = field_access.name;
+
+		let x = codegen_get_struct_field(c, xd, name);
+
+		let variable = codegen_generate_expression_value(c, prhs, cast(*i8, null));
+		/* TODO: Typecheck */
+		LLVMBuildStore((*c).builder, (*variable).value, (*x).value);
+		
 		return 0;
 	};
 
