@@ -13,19 +13,9 @@ let HashMap = struct {
 	arena: *arena,
 };
 
+/* TODO: Fix */
 let simple_hash = (key: *i8, bucket_count: i64) => i64 {
-	let hash = 0;
-	let i = 0;
-	while true {
-		let c = *(key + cast(*i8, i));
-		if c == '\0' {
-			return hash % bucket_count;
-		};
-		let x = cast(i64, c);
-		hash = hash + x;
-		i = i + 1;
-	};
-	return hash % bucket_count;
+	return 0;
 };
 
 let hashmap_init = (bucket_count: i64, alloc: *arena) => *HashMap {
