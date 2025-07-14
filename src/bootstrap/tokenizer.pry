@@ -528,7 +528,7 @@ let tokenizer_init = (alloc: *arena, file: slice) => *tokenizer {
 };
 
 let tokenizer_tokenize = (t: *tokenizer) => slice {
-	let tokens = cast(*token, arena_alloc((*t).arena, sizeof(token) * 1000)); /* why does it not care about type here */
+	let tokens = cast(*token, arena_alloc((*t).arena, sizeof(token) * 40000)); /* why does it not care about type here */
 	let tokens_len = 0;
 
 	while true {

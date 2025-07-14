@@ -1430,7 +1430,7 @@ let parser_parse_statement = (p: *parser) => *Node {
 
 /* Program ::= Statement+ */
 let parse_program = (p: *parser) => *Node {
-	let nodes = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 1000));
+	let nodes = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 50000));
 
 	let i = 0;
 	while (*p).offset < (*p).tokens_len {
