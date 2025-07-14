@@ -53,7 +53,7 @@ pub fn build(b: *std.Build) !void {
     // This creates another `std.Build.Step.Compile`, but this one builds an executable
     // rather than a static library.
     const exe = b.addExecutable(.{
-        .name = "interpreter",
+        .name = "pry-lang",
         .root_module = exe_mod,
     });
 
@@ -64,7 +64,7 @@ pub fn build(b: *std.Build) !void {
 
     // This is needed for better lsp errors
     const exe_check = b.addExecutable(.{
-        .name = "interpreter-lsp",
+        .name = "pry-lang-lsp",
         .root_source_file = b.path("src/main.zig"),
         .root_module = exe_mod,
         .optimize = optimize,
