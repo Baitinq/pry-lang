@@ -151,7 +151,8 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 	};
 
 	if (*a).type != (*b).type {
-		printf("Types do not match: %d != %d\n", (*a).type, (*b).type);
+		printf("Types do not match: %d !=", (*a).type);
+		printf("%d\n", (*b).type);
 		return false;
 	};
 
@@ -161,7 +162,8 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 		let simple_type_b = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*b).data);
 		let eql = strcmp(simple_type_a.name, simple_type_b.name);
 		if !eql {
-			printf("Simple types do not match: %s != %s\n", simple_type_a.name, simple_type_b.name);
+			printf("Simple types do not match: %s !=", simple_type_a.name);
+			printf("%s\n", simple_type_b.name);
 		};
 		return eql;
 	};
@@ -1200,6 +1202,11 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 	};
 
 	assert(function != cast(*Variable, null));
+	assert((*function).node_type != cast(*Node, null));
+	let function_type = (*function).node_type;
+	assert((*function_type).type == NODE_TYPE_FUNCTION_TYPE);
+	let function_type_data = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*function_type).data);
+	/* assert((*function_type_data).parameters_len == (*stmt).arguments_len);  TODO: Varargs */
 
 	let arguments = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * (*stmt).arguments_len));
 
@@ -1208,11 +1215,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		let argument = (*((*stmt).arguments + cast(**Node, i)));
 		let arg = codegen_generate_expression_value(c, argument, cast(*i8, null));
 		assert(arg != cast(*Variable, null));
-		assert((*function).node_type != cast(*Node, null));
-		let function_type = (*function).node_type;
-		assert((*function_type).type == NODE_TYPE_FUNCTION_TYPE);
-		let function_type_data = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*function_type).data);
-		let expected_type = *((*function_type_data).parameters + cast(**Node, i));
+		let expected_type = *((*function_type_data).parameters + cast(**Node, i)); /* TODO: If varargs we shouldn't do this */
 
 		assert(compare_types(c, expected_type, (*arg).node_type, false));
 
