@@ -58,6 +58,7 @@ let environment_get_variable = (e: *Environment, name: *i8) => *Variable {
 };
 
 let environment_add_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
+        /* TODO: Dont allow shadowing if value != value or type != type (across things) */
 	let top_scope = *(((*e).scope_stack + cast(**Scope, (*e).scope_stack_len - 1)));
 	hashmap_put((*top_scope).variables, name, cast(*void, variable));
 
@@ -402,7 +403,7 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*pt_type).data);
 		let v = environment_get_variable((*c).environment, simple_type.name);
 		assert(v != cast(*Variable, null));
-		typ = (*v).node_type;
+		typ = (*v).node_type; /* TODO: we shouldnt be able to get fields of pointers, we have to dref first */
 	};
 	if (*ptr_typ).type == NODE_TYPE_SIMPLE_TYPE {
 		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*ptr_typ).data);
@@ -912,7 +913,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let val = codegen_generate_expression_value(c, exp.expression, "");
 		assert(val != cast(*Variable, null));
 		let v = Variable{};
-		v.value = (*val).value;
+		v.value = (*val).value; /* TODO: Do real casting */
 		v.type = cast(LLVMTypeRef, null);
 		v.stack_level = cast(*i64, null);
 		v.node = expression;
@@ -1062,6 +1063,7 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 			assert(v != cast(*Variable, null));
 			ptr = (*v).value;
 			typ = (*v).node_type;
+			/* TODO: Do this in more places! (everywhere get_llvm_type or get_variable?)  Also check types in return and cmp */
 			assert(compare_types(c, typ, (*variable).node_type, (*stmt).is_dereference));
 		};
 

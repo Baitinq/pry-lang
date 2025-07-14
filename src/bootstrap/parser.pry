@@ -436,6 +436,7 @@ let parser_parse_type = (p: *parser) => *Node {
 	let to = parser_consume_token(p);
 	assert(to != cast(*token, null));
 
+	/* TODO: we should only accept specific type identifiers */
 	if (*to).type == TOKEN_IDENTIFIER {
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = cast(*i8, (*to).data);
@@ -1318,6 +1319,7 @@ let parse_function_call_statement = (p: *parser) => *Node {
 
 /* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
 let parser_parse_statement = (p: *parser) => *Node {
+	/* TODO: Can we not deal with cast / sizeof in parser? */
 	let fn_call = parser_accept_parse(p, parser_parse_cast_statement);
 	if fn_call != cast(*Node, null) {
 		if parser_accept_token(p, TOKEN_SEMICOLON) == cast(*token, null) {
