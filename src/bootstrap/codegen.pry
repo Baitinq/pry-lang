@@ -131,6 +131,109 @@ let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
 	return v;
 };
 
+let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => bool {
+	assert((*a).type >= NODE_TYPE_SIMPLE_TYPE);
+	assert((*a).type <= NODE_TYPE_STRUCT_TYPE);
+	assert((*b).type >= NODE_TYPE_SIMPLE_TYPE);
+	assert((*b).type <= NODE_TYPE_STRUCT_TYPE);
+
+	if (*a).type == NODE_TYPE_SIMPLE_TYPE {
+		let simple_type_a = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*a).data);
+		if strcmp(simple_type_a.name, "varargs") {
+			return true;
+		};
+	};
+
+	if is_dereference {
+		assert((*a).type == NODE_TYPE_POINTER_TYPE);
+		let pointer_type_a = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*a).data);
+		a = pointer_type_a.type;
+	};
+
+	if (*a).type != (*b).type {
+		printf("Types do not match: %d != %d\n", (*a).type, (*b).type);
+		return false;
+	};
+
+	if (*a).type == NODE_TYPE_SIMPLE_TYPE {
+		assert((*b).type == NODE_TYPE_SIMPLE_TYPE);
+		let simple_type_a = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*a).data);
+		let simple_type_b = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*b).data);
+		let eql = strcmp(simple_type_a.name, simple_type_b.name);
+		if !eql {
+			printf("Simple types do not match: %s != %s\n", simple_type_a.name, simple_type_b.name);
+		};
+		return eql;
+	};
+
+	if (*a).type == NODE_TYPE_FUNCTION_TYPE {
+		assert((*b).type == NODE_TYPE_FUNCTION_TYPE);
+		let function_type_a = *cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*a).data);
+		let function_type_b = *cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*b).data);
+
+
+		if !compare_types(c, function_type_a.retur_type, function_type_b.retur_type, false) {
+			printf("Function return types do not match\n");
+			return false;
+		};
+
+		if function_type_a.parameters_len != function_type_b.parameters_len {
+			printf("Function parameter lengths do not match\n");
+			return false;
+		};
+
+		let i = 0;
+		while i < function_type_a.parameters_len {
+			let param_a = *(function_type_a.parameters + cast(**Node, i));
+			let param_b = *(function_type_b.parameters + cast(**Node, i));
+			if !compare_types(c, param_a, param_b, false) {
+				printf("Function parameter types do not match\n");
+				return false;
+			};
+			i = i + 1;
+		};
+
+		return true;
+	};
+
+	if (*a).type == NODE_TYPE_POINTER_TYPE {
+		assert((*b).type == NODE_TYPE_POINTER_TYPE);
+		let pointer_type_a = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*a).data);
+		let pointer_type_b = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*b).data);
+		if !compare_types(c, pointer_type_a.type, pointer_type_b.type, false) {
+			printf("Pointer types do not match\n");
+			return false;
+		};
+		return true;
+	};
+
+	if (*a).type == NODE_TYPE_STRUCT_TYPE {
+		assert((*b).type == NODE_TYPE_STRUCT_TYPE);
+		let struc_type_a = *cast(*NODE_TYPE_STRUCT_TYPE_DATA, (*a).data);
+		let struc_type_b = *cast(*NODE_TYPE_STRUCT_TYPE_DATA, (*b).data);
+
+		if struc_type_a.fields_len != struc_type_b.fields_len {
+			printf("Struct field lengths do not match\n");
+			return false;
+		};
+
+		let i = 0;
+		while i < struc_type_a.fields_len {
+			let field_a = *(struc_type_a.fields + cast(**Node, i));
+			let field_b = *(struc_type_b.fields + cast(**Node, i));
+			if !compare_types(c, field_a, field_b, false) {
+				printf("Struct field types do not match\n");
+				return false;
+			};
+			i = i + 1;
+		};
+
+		return true;
+	};
+
+	return false;
+};
+
 let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 	assert((*node).type >= NODE_TYPE_SIMPLE_TYPE);
 	assert((*node).type <= NODE_TYPE_STRUCT_TYPE);
@@ -623,7 +726,8 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
 		assert(rhs_value != cast(*Variable, null));
 
-		/* TODO: compare types */
+		assert(compare_types(c, (*lhs_value).node_type, (*rhs_value).node_type, false));
+
 		let op = -1;
 
 		if exp.typ == EQUALITY_EXPRESSION_TYPE_EQ {
@@ -668,7 +772,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
 		assert(rhs_value != cast(*Variable, null));
 
-		/* TODO: Compare types */
+		assert(compare_types(c, (*lhs_value).node_type, (*rhs_value).node_type, false));
 
 		let result = cast(LLVMValueRef, null);
 		let node_type = Node{};
@@ -711,7 +815,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
 		assert(rhs_value != cast(*Variable, null));
 
-		/* TODO: Compare types */
+		assert(compare_types(c, (*lhs_value).node_type, (*rhs_value).node_type, false));
 
 		let result = cast(LLVMValueRef, null);
 
@@ -956,7 +1060,7 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 			assert(v != cast(*Variable, null));
 			ptr = (*v).value;
 			typ = (*v).node_type;
-			/* TODO: compare types */
+			assert(compare_types(c, typ, (*variable).node_type, (*stmt).is_dereference));
 		};
 
 		if (*stmt).is_dereference {
@@ -1000,7 +1104,7 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		assert(a != cast(*Variable, null));
 		let variable = codegen_generate_expression_value(c, prhs, cast(*i8, null));
 		assert(variable != cast(*Variable, null));
-		/* TODO: Check type */
+		assert(compare_types(c, (*a).node_type, (*variable).node_type, true));
 		LLVMBuildStore((*c).builder, (*variable).value, (*a).value);
 
 		return 0;
@@ -1015,7 +1119,7 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		assert(x != cast(*StructField, null));
 
 		let variable = codegen_generate_expression_value(c, prhs, cast(*i8, null));
-		/* TODO: Typecheck */
+		assert(compare_types(c, (*x).type, (*variable).node_type, (*stmt).is_dereference));
 		LLVMBuildStore((*c).builder, (*variable).value, (*x).value);
 		
 		return 0;
@@ -1037,7 +1141,7 @@ let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEME
 	let val = codegen_generate_expression_value(c, expression, cast(*i8, null));
 	assert(val != cast(*Variable, null));
 
-	/* TODO: Check type */
+	assert(compare_types(c, (*c).current_function_retur_type, (*val).node_type, false));
 
 	LLVMBuildRet((*c).builder, (*val).value);
 
@@ -1104,7 +1208,13 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		let argument = (*((*stmt).arguments + cast(**Node, i)));
 		let arg = codegen_generate_expression_value(c, argument, cast(*i8, null));
 		assert(arg != cast(*Variable, null));
-		/* TODO: Typecheck */
+		assert((*function).node_type != cast(*Node, null));
+		let function_type = (*function).node_type;
+		assert((*function_type).type == NODE_TYPE_FUNCTION_TYPE);
+		let function_type_data = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*function_type).data);
+		let expected_type = *((*function_type_data).parameters + cast(**Node, i));
+
+		assert(compare_types(c, expected_type, (*arg).node_type, false));
 
 		(*(arguments + cast(*LLVMValueRef, i))) = (*arg).value;
 
