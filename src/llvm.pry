@@ -331,6 +331,8 @@ extern LLVMBuildSDiv = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVM
 extern LLVMBuildSRem = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildAnd = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
 extern LLVMBuildOr = (LLVMBuilderRef, LLVMValueRef, LLVMValueRef, *i8) => LLVMValueRef;
+extern LLVMBuildPhi = (LLVMBuilderRef, LLVMTypeRef, *i8) => LLVMValueRef;
+extern LLVMAddIncoming = (LLVMValueRef, *LLVMValueRef, *LLVMBasicBlockRef, i64) => void;
 
 extern LLVMBuildGEP2 = (LLVMBuilderRef, LLVMTypeRef, LLVMValueRef, *LLVMValueRef, i64, *i8) => LLVMValueRef;
 extern LLVMAddGlobal = (LLVMModuleRef, LLVMTypeRef, *i8) => LLVMValueRef;
