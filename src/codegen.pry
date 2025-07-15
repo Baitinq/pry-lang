@@ -722,6 +722,27 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_create_variable(c, v);
 	};
 	
+	if ((*expression).type == NODE_LOGICAL_EXPRESSION) {
+		let exp = (*(cast(*NODE_LOGICAL_EXPRESSION_DATA, (*expression).data)));
+		let lhs_value = codegen_generate_expression_value(c, exp.lhs, cast(*i8, null));
+		assert(lhs_value != cast(*Variable, null));
+		let rhs_value = codegen_generate_expression_value(c, exp.rhs, cast(*i8, null));
+		assert(rhs_value != cast(*Variable, null));
+		
+		assert(compare_types(c, (*lhs_value).node_type, (*rhs_value).node_type, false));
+
+		let result = cast(LLVMValueRef, null);
+		if exp.an {
+			result = LLVMBuildAnd((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+		};
+		if !exp.an {
+			result = LLVMBuildOr((*c).builder, (*lhs_value).value, (*rhs_value).value, "");
+		};
+		assert(result != cast(LLVMValueRef, null));
+
+		return codegen_generate_literal(c, result, name, expression, (*lhs_value).node_type);
+	};
+	
 	if ((*expression).type == NODE_EQUALITY_EXPRESSION) {
 		let exp = (*(cast(*NODE_EQUALITY_EXPRESSION_DATA, (*expression).data)));
 		let lhs_value = codegen_generate_expression_value(c, exp.lhs, cast(*i8, null));

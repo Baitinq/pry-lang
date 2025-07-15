@@ -18,13 +18,15 @@ ReturnStatement ::= RETURN (Expression)?
 
 FunctionArguments ::= Expression ("," Expression)*
 
-Expression ::= EqualityExpression | AdditiveExpression
+Expression ::= LogicalExpression
 
 CastStatement ::= "cast" LPAREN TYPE "," Expression RPAREN
-    
+
 SizeOfStatement ::= "sizeof" LPAREN TYPE RPAREN
 
-EqualityExpression ::= AdditiveExpression ("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression
+LogicalExpression ::= EqualityExpression (("and" | "or") EqualityExpression)*
+
+EqualityExpression ::= AdditiveExpression (("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression)*
 
 AdditiveExpression ::= MultiplicativeExpression (("+" | "-") MultiplicativeExpression)*
 
