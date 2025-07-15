@@ -3,7 +3,7 @@
   <img src="images/logo.svg" width="40" alt="Logo" />
 </h1>
 
-Pry is a simple, statically-typed programming language that compiles to native code via LLVM. It features a minimal C-like syntax with basic functional programming elements.
+Pry is a simple, statically-typed programming language that compiles to native code via LLVM. It features a minimal C-like syntax with basic functional programming elements. Pry is fully self-hosted, meaning the compiler is written in Pry itself and can compile its own source code.
 
 ## Features
 
@@ -19,8 +19,7 @@ Pry is a simple, statically-typed programming language that compiles to native c
 
 ### Prerequisites
 
-- Zig (latest stable version)
-- LLVM development libraries
+- LLVM development libraries (`llvm-config` must be available)
 - A C compiler (gcc/clang) for linking
 
 ### Using with Nix
@@ -30,26 +29,36 @@ If you have Nix with flakes enabled:
 ```bash
 # Enter development shell with all dependencies
 nix develop
-
-# Or run directly
-nix develop -c zig build run -- examples/1.pry
 ```
 
-The flake provides Zig, ZLS (Zig Language Server), LLVM, and debugging tools.
+The flake provides LLVM and debugging tools.
 
-### Building and Running
+### Bootstrapping the Compiler
 
-1. **Compile a Pry program:**
+Pry is now fully self-hosted! The compiler is written in Pry and compiles itself through a multi-stage bootstrap process:
+
+1. **Bootstrap the compiler:**
    ```bash
-   zig build run -- examples/1.pry
+   ./bootstrap.sh
    ```
 
-2. **Link and create executable:**
+   This creates a 3-stage bootstrap:
+   - **Stage 0**: Compiles the initial LLVM IR (`bootstrap/output.ll`) to create the first compiler
+   - **Stage 1**: Uses stage0 to compile the Pry source code (`src/main.pry`)
+   - **Stage 2**: Uses stage1 to recompile itself (verification step)
+   - **Stage 3**: Uses stage2 to recompile itself again (final verification)
+
+2. **Compile a Pry program:**
    ```bash
-   cc output.o -o program
+   ./stage3 examples/1.pry
    ```
 
-3. **Run the program:**
+3. **Link and create executable:**
+   ```bash
+   cc $(llvm-config --libs) bootstrap_output.o -o program
+   ```
+
+4. **Run the program:**
    ```bash
    ./program
    ```
@@ -190,9 +199,9 @@ The `examples/` directory contains test programs showing:
 
 Try running:
 ```bash
-zig build run -- examples/8.pry    # Fibonacci sequence
-zig build run -- examples/1.pry    # Hello world
-zig build run -- examples/20.pry   # Array manipulation
+./stage3 examples/8.pry && cc $(llvm-config --libs) bootstrap_output.o -o fib && ./fib    # Fibonacci sequence
+./stage3 examples/1.pry && cc $(llvm-config --libs) bootstrap_output.o -o hello && ./hello    # Hello world
+./stage3 examples/20.pry && cc $(llvm-config --libs) bootstrap_output.o -o array && ./array   # Array manipulation
 ```
 
 ## Standard Library
@@ -206,20 +215,21 @@ The minimal standard library (`std/stdlib.pry`) provides:
 
 ## Implementation
 
-Pry is currently implemented in Zig with plans for self-hosting:
+Pry is now fully self-hosted! The compiler is written in Pry itself:
 
-- `src/main.zig` - Compiler entry point
-- `src/tokenizer.zig` - Lexical analysis
-- `src/parser.zig` - Syntax analysis and AST generation  
-- `src/codegen.zig` - LLVM IR generation
-- `src/bootstrap/` - Future self-hosted compiler (work in progress)
+- `src/main.pry` - Compiler entry point
+- `src/tokenizer.pry` - Lexical analysis
+- `src/parser.pry` - Syntax analysis and AST generation  
+- `src/codegen.pry` - LLVM IR generation
+- `bootstrap/output.ll` - Initial LLVM IR for bootstrapping
+- `bootstrap.sh` - Multi-stage bootstrap script
 
 The grammar is formally defined in `grammar.ebnf`.
 
 ## Development Status
 
-Pry is an experimental language currently in active development. While functional for basic programs, it's not yet feature-complete.
+Pry is an experimental language that has achieved **full self-hosting**! The compiler successfully compiles itself through a multi-stage bootstrap process. While functional for basic programs, it's still evolving with new features being added.
 
 ---
 
-*Pry is a minimal systems programming language focused on simplicity and clean design.*
+*Pry is a minimal, self-hosted systems programming language focused on simplicity and clean design.*

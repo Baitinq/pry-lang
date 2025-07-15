@@ -1,6 +1,7 @@
 .direnv/
 
 *.o
+*.s
 *.out
 
 zig-out/

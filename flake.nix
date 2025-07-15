@@ -1,16 +1,11 @@
 {
-  description = "Interpreter flake";
+  description = "Pry-lang flake";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    zig.url    = "github:mitchellh/zig-overlay";
-    zls = {
-      url = "github:zigtools/zls";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
   };
 
-  outputs = { self, nixpkgs, zig, zls }: let
+  outputs = { self, nixpkgs }: let
     systems = ["x86_64-darwin" "aarch64-darwin" "x86_64-linux"];
 
     createDevShell = system: let
@@ -21,8 +16,6 @@
       isDarwin = pkgs.stdenv.isDarwin;
     in pkgs.mkShell {
       buildInputs = with pkgs; [
-        zig.packages."${system}".master
-        zls.packages."${system}".default
       ]
       ++ pkgs.lib.optional isDarwin llvmPackages_19.libllvm
       ++ pkgs.lib.optionals (!isDarwin) ([
