@@ -36,7 +36,26 @@ let main = (argc: i64, argv: **i8) => i64 {
 		return 1;
 	};
 
-	let filename = *(argv + cast(**i8, 1));
+	let generate_ir = false;
+	let filename = cast(*i8, null);
+
+	let i = 0;
+	while i < (argc - 1) {
+		i = i + 1;
+		let arg = *(argv + cast(**i8, i));
+
+		if strcmp(arg, "--generate-ir") {
+		    generate_ir = true;
+		    continue;
+		};
+
+		if filename == cast(*i8, null) {
+		    filename = arg;
+		    continue;
+		};
+
+		assert(false);
+	};
 
 	printf("%s\n", filename);
 
@@ -52,7 +71,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	let c = codegen_init(alloc);
 	let res = codegen_generate(c, ast);
-	let res = codegen_compile(c);
+	let res = codegen_compile(c, generate_ir);
 	codegen_deinit(c);
 
 	arena_free(alloc);

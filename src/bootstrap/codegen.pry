@@ -1393,14 +1393,19 @@ let codegen_generate = (c: *codegen, ast: *Node) => i64 {
 	return 0;
 };
 
-let codegen_compile = (c: *codegen) => i64 {
+let codegen_compile = (c: *codegen, dump_ir: bool) => i64 {
         /* Dump module */
 	LLVMDumpModule((*c).llvm_module);
+	let message = cast(**i8, null);
+
+	if dump_ir {
+		LLVMPrintModuleToFile((*c).llvm_module, "output.ll", message);
+		return 0;
+	};
 
 	/* Generate code */
         let triple = LLVMGetDefaultTargetTriple();
         let target_ref = cast(*LLVMTargetRef, arena_alloc((*c).arena, sizeof(*LLVMTargetRef)));
-        let message = cast(**i8, null);
         let result = LLVMGetTargetFromTriple(triple, target_ref, message);
         if result != 0 {
             printf("Target output: %s\n", *message);
