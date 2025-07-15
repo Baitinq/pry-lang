@@ -152,7 +152,7 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 	};
 
 	if (*a).type != (*b).type {
-		printf("Types do not match: %d !=", (*a).type);
+		printf("Types do not match: %d != ", (*a).type);
 		printf("%d\n", (*b).type);
 		return false;
 	};
@@ -163,7 +163,7 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 		let simple_type_b = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*b).data);
 		let eql = strcmp(simple_type_a.name, simple_type_b.name);
 		if !eql {
-			printf("Simple types do not match: %s !=", simple_type_a.name);
+			printf("Simple types do not match: %s != ", simple_type_a.name);
 			printf("%s\n", simple_type_b.name);
 		};
 		return eql;
@@ -456,7 +456,6 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 };
 
 let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *i8) => *Variable {
-	printf("NAME %d: \n", (*expression).type);
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NULL) {
 		let inner_type_data = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*inner_type_data).name = "void";
@@ -717,6 +716,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		/* TODO: Move to defer */
 		(*c).current_function = last_function;
+		(*c).current_function_retur_type = last_function_retur_type;
 		environment_drop_scope((*c).environment);
 
 		return codegen_create_variable(c, v);
