@@ -18,3 +18,6 @@ echo "Building stage 2..."
 echo "Building stage 3..."
 
 ./stage2 src/main.pry && cc $(llvm-config --libs) bootstrap_output.o -o stage3
+
+echo "Regenerating stage 0..."
+./stage3 src/main.pry --generate-ir && mv output.ll bootstrap/output.ll
