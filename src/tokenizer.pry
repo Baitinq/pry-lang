@@ -226,6 +226,9 @@ let tokenizer_consume_until_condition = (t: *tokenizer, condition: (i8) => bool)
 
 		let offset = (*t).offset;
 		if c == '\\' {
+			if offset >= (*t).buf_len {
+				return res;
+			};
 			let next_c = (*((*t).buf + cast(*i8, offset + 1)));
 		
 			let any = false;

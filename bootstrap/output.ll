@@ -3298,7 +3298,7 @@ entrypoint:
   store ptr %6, ptr %res, align 8
   br label %while_block
 
-while_block:                                      ; preds = %merge_block22, %merge_block18, %entrypoint
+while_block:                                      ; preds = %merge_block25, %merge_block21, %entrypoint
   br i1 true, label %inner_block, label %outer_block
 
 inner_block:                                      ; preds = %while_block
@@ -3336,361 +3336,385 @@ merge_block:                                      ; preds = %inner_block
   store i64 %20, ptr %offset4, align 4
   %21 = load i8, ptr %c, align 1
   %22 = icmp eq i8 %21, 92
-  br i1 %22, label %then_block5, label %merge_block20
+  br i1 %22, label %then_block5, label %merge_block23
 
 then_block5:                                      ; preds = %merge_block
-  %23 = load ptr, ptr %t, align 8
-  %buf6 = getelementptr %tokenizer, ptr %23, i32 0, i32 0
-  %24 = load ptr, ptr %buf6, align 8
-  %25 = load i64, ptr %offset4, align 4
-  %26 = add i64 %25, 1
-  %27 = getelementptr i8, ptr %24, i64 %26
-  %28 = load i8, ptr %27, align 1
-  %next_c = alloca i8, align 1
-  store i8 %28, ptr %next_c, align 1
-  %any = alloca i1, align 1
-  store i1 false, ptr %any, align 1
-  %29 = load i8, ptr %next_c, align 1
-  %30 = icmp eq i8 %29, 110
-  br i1 %30, label %then_block7, label %merge_block8
+  %23 = load i64, ptr %offset4, align 4
+  %24 = load ptr, ptr %t, align 8
+  %buf_len6 = getelementptr %tokenizer, ptr %24, i32 0, i32 1
+  %25 = load i64, ptr %buf_len6, align 4
+  %26 = icmp sge i64 %23, %25
+  br i1 %26, label %then_block7, label %merge_block8
 
 then_block7:                                      ; preds = %then_block5
-  %31 = load ptr, ptr %res, align 8
-  %32 = load i64, ptr %offset4, align 4
-  %33 = load i64, ptr %start, align 4
-  %34 = sub i64 %32, %33
-  %35 = getelementptr i8, ptr %31, i64 %34
-  store i8 10, ptr %35, align 1
+  %27 = load ptr, ptr %res, align 8
+  ret ptr %27
+
+merge_block8:                                     ; preds = %then_block5
+  %28 = load ptr, ptr %t, align 8
+  %buf9 = getelementptr %tokenizer, ptr %28, i32 0, i32 0
+  %29 = load ptr, ptr %buf9, align 8
+  %30 = load i64, ptr %offset4, align 4
+  %31 = add i64 %30, 1
+  %32 = getelementptr i8, ptr %29, i64 %31
+  %33 = load i8, ptr %32, align 1
+  %next_c = alloca i8, align 1
+  store i8 %33, ptr %next_c, align 1
+  %any = alloca i1, align 1
+  store i1 false, ptr %any, align 1
+  %34 = load i8, ptr %next_c, align 1
+  %35 = icmp eq i8 %34, 110
+  br i1 %35, label %then_block10, label %merge_block11
+
+then_block10:                                     ; preds = %merge_block8
+  %36 = load ptr, ptr %res, align 8
+  %37 = load i64, ptr %offset4, align 4
+  %38 = load i64, ptr %start, align 4
+  %39 = sub i64 %37, %38
+  %40 = getelementptr i8, ptr %36, i64 %39
+  store i8 10, ptr %40, align 1
   store i1 true, ptr %any, align 1
-  br label %merge_block8
+  br label %merge_block11
 
-merge_block8:                                     ; preds = %then_block5, %then_block7
-  %36 = load i8, ptr %next_c, align 1
-  %37 = icmp eq i8 %36, 116
-  br i1 %37, label %then_block9, label %merge_block10
+merge_block11:                                    ; preds = %merge_block8, %then_block10
+  %41 = load i8, ptr %next_c, align 1
+  %42 = icmp eq i8 %41, 116
+  br i1 %42, label %then_block12, label %merge_block13
 
-then_block9:                                      ; preds = %merge_block8
-  %38 = load ptr, ptr %res, align 8
-  %39 = load i64, ptr %offset4, align 4
-  %40 = load i64, ptr %start, align 4
-  %41 = sub i64 %39, %40
-  %42 = getelementptr i8, ptr %38, i64 %41
-  store i8 9, ptr %42, align 1
+then_block12:                                     ; preds = %merge_block11
+  %43 = load ptr, ptr %res, align 8
+  %44 = load i64, ptr %offset4, align 4
+  %45 = load i64, ptr %start, align 4
+  %46 = sub i64 %44, %45
+  %47 = getelementptr i8, ptr %43, i64 %46
+  store i8 9, ptr %47, align 1
   store i1 true, ptr %any, align 1
-  br label %merge_block10
+  br label %merge_block13
 
-merge_block10:                                    ; preds = %merge_block8, %then_block9
-  %43 = load i8, ptr %next_c, align 1
-  %44 = icmp eq i8 %43, 114
-  br i1 %44, label %then_block11, label %merge_block12
+merge_block13:                                    ; preds = %merge_block11, %then_block12
+  %48 = load i8, ptr %next_c, align 1
+  %49 = icmp eq i8 %48, 114
+  br i1 %49, label %then_block14, label %merge_block15
 
-then_block11:                                     ; preds = %merge_block10
-  %45 = load ptr, ptr %res, align 8
-  %46 = load i64, ptr %offset4, align 4
-  %47 = load i64, ptr %start, align 4
-  %48 = sub i64 %46, %47
-  %49 = getelementptr i8, ptr %45, i64 %48
-  store i8 13, ptr %49, align 1
+then_block14:                                     ; preds = %merge_block13
+  %50 = load ptr, ptr %res, align 8
+  %51 = load i64, ptr %offset4, align 4
+  %52 = load i64, ptr %start, align 4
+  %53 = sub i64 %51, %52
+  %54 = getelementptr i8, ptr %50, i64 %53
+  store i8 13, ptr %54, align 1
   store i1 true, ptr %any, align 1
-  br label %merge_block12
+  br label %merge_block15
 
-merge_block12:                                    ; preds = %merge_block10, %then_block11
-  %50 = load i8, ptr %next_c, align 1
-  %51 = icmp eq i8 %50, 48
-  br i1 %51, label %then_block13, label %merge_block14
+merge_block15:                                    ; preds = %merge_block13, %then_block14
+  %55 = load i8, ptr %next_c, align 1
+  %56 = icmp eq i8 %55, 48
+  br i1 %56, label %then_block16, label %merge_block17
 
-then_block13:                                     ; preds = %merge_block12
-  %52 = load ptr, ptr %res, align 8
-  %53 = load i64, ptr %offset4, align 4
-  %54 = load i64, ptr %start, align 4
-  %55 = sub i64 %53, %54
-  %56 = getelementptr i8, ptr %52, i64 %55
-  store i8 0, ptr %56, align 1
+then_block16:                                     ; preds = %merge_block15
+  %57 = load ptr, ptr %res, align 8
+  %58 = load i64, ptr %offset4, align 4
+  %59 = load i64, ptr %start, align 4
+  %60 = sub i64 %58, %59
+  %61 = getelementptr i8, ptr %57, i64 %60
+  store i8 0, ptr %61, align 1
   store i1 true, ptr %any, align 1
-  br label %merge_block14
+  br label %merge_block17
 
-merge_block14:                                    ; preds = %merge_block12, %then_block13
-  %57 = load i8, ptr %next_c, align 1
-  %58 = icmp eq i8 %57, 92
-  br i1 %58, label %then_block15, label %merge_block16
+merge_block17:                                    ; preds = %merge_block15, %then_block16
+  %62 = load i8, ptr %next_c, align 1
+  %63 = icmp eq i8 %62, 92
+  br i1 %63, label %then_block18, label %merge_block19
 
-then_block15:                                     ; preds = %merge_block14
-  %59 = load ptr, ptr %res, align 8
-  %60 = load i64, ptr %offset4, align 4
-  %61 = load i64, ptr %start, align 4
-  %62 = sub i64 %60, %61
-  %63 = getelementptr i8, ptr %59, i64 %62
-  store i8 92, ptr %63, align 1
+then_block18:                                     ; preds = %merge_block17
+  %64 = load ptr, ptr %res, align 8
+  %65 = load i64, ptr %offset4, align 4
+  %66 = load i64, ptr %start, align 4
+  %67 = sub i64 %65, %66
+  %68 = getelementptr i8, ptr %64, i64 %67
+  store i8 92, ptr %68, align 1
   store i1 true, ptr %any, align 1
-  br label %merge_block16
+  br label %merge_block19
 
-merge_block16:                                    ; preds = %merge_block14, %then_block15
-  %64 = load i1, ptr %any, align 1
-  %65 = icmp eq i1 %64, false
-  br i1 %65, label %then_block17, label %merge_block18
+merge_block19:                                    ; preds = %merge_block17, %then_block18
+  %69 = load i1, ptr %any, align 1
+  %70 = icmp eq i1 %69, false
+  br i1 %70, label %then_block20, label %merge_block21
 
-then_block17:                                     ; preds = %merge_block16
-  %66 = load ptr, ptr %res, align 8
-  %67 = load i64, ptr %offset4, align 4
-  %68 = load i64, ptr %start, align 4
-  %69 = sub i64 %67, %68
-  %70 = getelementptr i8, ptr %66, i64 %69
-  %71 = load i8, ptr %next_c, align 1
-  store i8 %71, ptr %70, align 1
-  br label %merge_block18
-
-merge_block18:                                    ; preds = %merge_block16, %then_block17
+then_block20:                                     ; preds = %merge_block19
+  %71 = load ptr, ptr %res, align 8
   %72 = load i64, ptr %offset4, align 4
-  %73 = add i64 %72, 1
-  store i64 %73, ptr %offset4, align 4
-  %74 = load i64, ptr %offset4, align 4
-  %75 = add i64 %74, 1
-  store i64 %75, ptr %offset4, align 4
-  %76 = load ptr, ptr %t, align 8
-  %offset19 = getelementptr %tokenizer, ptr %76, i32 0, i32 2
+  %73 = load i64, ptr %start, align 4
+  %74 = sub i64 %72, %73
+  %75 = getelementptr i8, ptr %71, i64 %74
+  %76 = load i8, ptr %next_c, align 1
+  store i8 %76, ptr %75, align 1
+  br label %merge_block21
+
+merge_block21:                                    ; preds = %merge_block19, %then_block20
   %77 = load i64, ptr %offset4, align 4
-  store i64 %77, ptr %offset19, align 4
+  %78 = add i64 %77, 1
+  store i64 %78, ptr %offset4, align 4
+  %79 = load i64, ptr %offset4, align 4
+  %80 = add i64 %79, 1
+  store i64 %80, ptr %offset4, align 4
+  %81 = load ptr, ptr %t, align 8
+  %offset22 = getelementptr %tokenizer, ptr %81, i32 0, i32 2
+  %82 = load i64, ptr %offset4, align 4
+  store i64 %82, ptr %offset22, align 4
   br label %while_block
 
-merge_block20:                                    ; preds = %merge_block
-  %78 = load ptr, ptr %condition, align 8
-  %79 = load i8, ptr %c, align 1
-  %80 = call i1 %78(i8 %79)
-  br i1 %80, label %then_block21, label %merge_block22
+merge_block23:                                    ; preds = %merge_block
+  %83 = load ptr, ptr %condition, align 8
+  %84 = load i8, ptr %c, align 1
+  %85 = call i1 %83(i8 %84)
+  br i1 %85, label %then_block24, label %merge_block25
 
-then_block21:                                     ; preds = %merge_block20
-  %81 = load ptr, ptr %res, align 8
-  ret ptr %81
+then_block24:                                     ; preds = %merge_block23
+  %86 = load ptr, ptr %res, align 8
+  ret ptr %86
 
-merge_block22:                                    ; preds = %merge_block20
-  %82 = load ptr, ptr %res, align 8
-  %83 = load i64, ptr %offset4, align 4
-  %84 = load i64, ptr %start, align 4
-  %85 = sub i64 %83, %84
-  %86 = getelementptr i8, ptr %82, i64 %85
-  %87 = load i8, ptr %c, align 1
-  store i8 %87, ptr %86, align 1
-  %88 = load ptr, ptr %res, align 8
-  %89 = load i64, ptr %offset4, align 4
-  %90 = load i64, ptr %start, align 4
-  %91 = sub i64 %89, %90
-  %92 = add i64 %91, 1
-  %93 = getelementptr i8, ptr %88, i64 %92
-  store i8 0, ptr %93, align 1
+merge_block25:                                    ; preds = %merge_block23
+  %87 = load ptr, ptr %res, align 8
+  %88 = load i64, ptr %offset4, align 4
+  %89 = load i64, ptr %start, align 4
+  %90 = sub i64 %88, %89
+  %91 = getelementptr i8, ptr %87, i64 %90
+  %92 = load i8, ptr %c, align 1
+  store i8 %92, ptr %91, align 1
+  %93 = load ptr, ptr %res, align 8
   %94 = load i64, ptr %offset4, align 4
-  %95 = add i64 %94, 1
-  store i64 %95, ptr %offset4, align 4
-  %96 = load ptr, ptr %t, align 8
-  %offset23 = getelementptr %tokenizer, ptr %96, i32 0, i32 2
-  %97 = load i64, ptr %offset4, align 4
-  store i64 %97, ptr %offset23, align 4
+  %95 = load i64, ptr %start, align 4
+  %96 = sub i64 %94, %95
+  %97 = add i64 %96, 1
+  %98 = getelementptr i8, ptr %93, i64 %97
+  store i8 0, ptr %98, align 1
+  %99 = load i64, ptr %offset4, align 4
+  %100 = add i64 %99, 1
+  store i64 %100, ptr %offset4, align 4
+  %101 = load ptr, ptr %t, align 8
+  %offset26 = getelementptr %tokenizer, ptr %101, i32 0, i32 2
+  %102 = load i64, ptr %offset4, align 4
+  store i64 %102, ptr %offset26, align 4
   br label %while_block
 
-entrypoint24:                                     ; No predecessors!
-  %t25 = alloca ptr, align 8
-  store ptr %0, ptr %t25, align 8
-  %condition26 = alloca ptr, align 8
-  store ptr %1, ptr %condition26, align 8
-  %98 = load ptr, ptr %t25, align 8
-  %offset27 = getelementptr %tokenizer.3, ptr %98, i32 0, i32 2
-  %99 = load i64, ptr %offset27, align 4
-  %start28 = alloca i64, align 8
-  store i64 %99, ptr %start28, align 4
-  %100 = load ptr, ptr %t25, align 8
-  %arena29 = getelementptr %tokenizer.3, ptr %100, i32 0, i32 3
-  %101 = load ptr, ptr %arena29, align 8
-  %102 = call ptr @arena_alloc(ptr %101, i64 1000)
-  %res30 = alloca ptr, align 8
-  store ptr %102, ptr %res30, align 8
-  br label %while_block31
+entrypoint27:                                     ; No predecessors!
+  %t28 = alloca ptr, align 8
+  store ptr %0, ptr %t28, align 8
+  %condition29 = alloca ptr, align 8
+  store ptr %1, ptr %condition29, align 8
+  %103 = load ptr, ptr %t28, align 8
+  %offset30 = getelementptr %tokenizer.3, ptr %103, i32 0, i32 2
+  %104 = load i64, ptr %offset30, align 4
+  %start31 = alloca i64, align 8
+  store i64 %104, ptr %start31, align 4
+  %105 = load ptr, ptr %t28, align 8
+  %arena32 = getelementptr %tokenizer.3, ptr %105, i32 0, i32 3
+  %106 = load ptr, ptr %arena32, align 8
+  %107 = call ptr @arena_alloc(ptr %106, i64 1000)
+  %res33 = alloca ptr, align 8
+  store ptr %107, ptr %res33, align 8
+  br label %while_block34
 
-while_block31:                                    ; preds = %merge_block62, %merge_block58, %entrypoint24
-  br i1 true, label %inner_block32, label %outer_block33
+while_block34:                                    ; preds = %merge_block68, %merge_block64, %entrypoint27
+  br i1 true, label %inner_block35, label %outer_block36
 
-inner_block32:                                    ; preds = %while_block31
-  %103 = load ptr, ptr %t25, align 8
-  %offset34 = getelementptr %tokenizer.3, ptr %103, i32 0, i32 2
-  %104 = load i64, ptr %offset34, align 4
-  %105 = load ptr, ptr %t25, align 8
-  %buf_len35 = getelementptr %tokenizer.3, ptr %105, i32 0, i32 1
-  %106 = load i64, ptr %buf_len35, align 4
-  %107 = icmp sge i64 %104, %106
-  br i1 %107, label %then_block36, label %merge_block37
+inner_block35:                                    ; preds = %while_block34
+  %108 = load ptr, ptr %t28, align 8
+  %offset37 = getelementptr %tokenizer.3, ptr %108, i32 0, i32 2
+  %109 = load i64, ptr %offset37, align 4
+  %110 = load ptr, ptr %t28, align 8
+  %buf_len38 = getelementptr %tokenizer.3, ptr %110, i32 0, i32 1
+  %111 = load i64, ptr %buf_len38, align 4
+  %112 = icmp sge i64 %109, %111
+  br i1 %112, label %then_block39, label %merge_block40
 
-outer_block33:                                    ; preds = %while_block31
+outer_block36:                                    ; preds = %while_block34
   ret ptr null
 
-then_block36:                                     ; preds = %inner_block32
-  %108 = load ptr, ptr %res30, align 8
-  ret ptr %108
+then_block39:                                     ; preds = %inner_block35
+  %113 = load ptr, ptr %res33, align 8
+  ret ptr %113
 
-merge_block37:                                    ; preds = %inner_block32
-  %109 = load ptr, ptr %t25, align 8
-  %buf38 = getelementptr %tokenizer.3, ptr %109, i32 0, i32 0
-  %110 = load ptr, ptr %buf38, align 8
-  %111 = load ptr, ptr %t25, align 8
-  %offset39 = getelementptr %tokenizer.3, ptr %111, i32 0, i32 2
-  %112 = load i64, ptr %offset39, align 4
-  %113 = getelementptr i8, ptr %110, i64 %112
-  %114 = load i8, ptr %113, align 1
-  %c40 = alloca i8, align 1
-  store i8 %114, ptr %c40, align 1
-  %115 = load ptr, ptr %t25, align 8
-  %offset41 = getelementptr %tokenizer.3, ptr %115, i32 0, i32 2
-  %116 = load i64, ptr %offset41, align 4
-  %offset42 = alloca i64, align 8
-  store i64 %116, ptr %offset42, align 4
-  %117 = load i8, ptr %c40, align 1
-  %118 = icmp eq i8 %117, 92
-  br i1 %118, label %then_block43, label %merge_block60
+merge_block40:                                    ; preds = %inner_block35
+  %114 = load ptr, ptr %t28, align 8
+  %buf41 = getelementptr %tokenizer.3, ptr %114, i32 0, i32 0
+  %115 = load ptr, ptr %buf41, align 8
+  %116 = load ptr, ptr %t28, align 8
+  %offset42 = getelementptr %tokenizer.3, ptr %116, i32 0, i32 2
+  %117 = load i64, ptr %offset42, align 4
+  %118 = getelementptr i8, ptr %115, i64 %117
+  %119 = load i8, ptr %118, align 1
+  %c43 = alloca i8, align 1
+  store i8 %119, ptr %c43, align 1
+  %120 = load ptr, ptr %t28, align 8
+  %offset44 = getelementptr %tokenizer.3, ptr %120, i32 0, i32 2
+  %121 = load i64, ptr %offset44, align 4
+  %offset45 = alloca i64, align 8
+  store i64 %121, ptr %offset45, align 4
+  %122 = load i8, ptr %c43, align 1
+  %123 = icmp eq i8 %122, 92
+  br i1 %123, label %then_block46, label %merge_block66
 
-then_block43:                                     ; preds = %merge_block37
-  %119 = load ptr, ptr %t25, align 8
-  %buf44 = getelementptr %tokenizer.3, ptr %119, i32 0, i32 0
-  %120 = load ptr, ptr %buf44, align 8
-  %121 = load i64, ptr %offset42, align 4
-  %122 = add i64 %121, 1
-  %123 = getelementptr i8, ptr %120, i64 %122
-  %124 = load i8, ptr %123, align 1
-  %next_c45 = alloca i8, align 1
-  store i8 %124, ptr %next_c45, align 1
-  %any46 = alloca i1, align 1
-  store i1 false, ptr %any46, align 1
-  %125 = load i8, ptr %next_c45, align 1
-  %126 = icmp eq i8 %125, 110
-  br i1 %126, label %then_block47, label %merge_block48
+then_block46:                                     ; preds = %merge_block40
+  %124 = load i64, ptr %offset45, align 4
+  %125 = load ptr, ptr %t28, align 8
+  %buf_len47 = getelementptr %tokenizer.3, ptr %125, i32 0, i32 1
+  %126 = load i64, ptr %buf_len47, align 4
+  %127 = icmp sge i64 %124, %126
+  br i1 %127, label %then_block48, label %merge_block49
 
-then_block47:                                     ; preds = %then_block43
-  %127 = load ptr, ptr %res30, align 8
-  %128 = load i64, ptr %offset42, align 4
-  %129 = load i64, ptr %start28, align 4
-  %130 = sub i64 %128, %129
-  %131 = getelementptr i8, ptr %127, i64 %130
-  store i8 10, ptr %131, align 1
-  store i1 true, ptr %any46, align 1
-  br label %merge_block48
+then_block48:                                     ; preds = %then_block46
+  %128 = load ptr, ptr %res33, align 8
+  ret ptr %128
 
-merge_block48:                                    ; preds = %then_block43, %then_block47
-  %132 = load i8, ptr %next_c45, align 1
-  %133 = icmp eq i8 %132, 116
-  br i1 %133, label %then_block49, label %merge_block50
+merge_block49:                                    ; preds = %then_block46
+  %129 = load ptr, ptr %t28, align 8
+  %buf50 = getelementptr %tokenizer.3, ptr %129, i32 0, i32 0
+  %130 = load ptr, ptr %buf50, align 8
+  %131 = load i64, ptr %offset45, align 4
+  %132 = add i64 %131, 1
+  %133 = getelementptr i8, ptr %130, i64 %132
+  %134 = load i8, ptr %133, align 1
+  %next_c51 = alloca i8, align 1
+  store i8 %134, ptr %next_c51, align 1
+  %any52 = alloca i1, align 1
+  store i1 false, ptr %any52, align 1
+  %135 = load i8, ptr %next_c51, align 1
+  %136 = icmp eq i8 %135, 110
+  br i1 %136, label %then_block53, label %merge_block54
 
-then_block49:                                     ; preds = %merge_block48
-  %134 = load ptr, ptr %res30, align 8
-  %135 = load i64, ptr %offset42, align 4
-  %136 = load i64, ptr %start28, align 4
-  %137 = sub i64 %135, %136
-  %138 = getelementptr i8, ptr %134, i64 %137
-  store i8 9, ptr %138, align 1
-  store i1 true, ptr %any46, align 1
-  br label %merge_block50
-
-merge_block50:                                    ; preds = %merge_block48, %then_block49
-  %139 = load i8, ptr %next_c45, align 1
-  %140 = icmp eq i8 %139, 114
-  br i1 %140, label %then_block51, label %merge_block52
-
-then_block51:                                     ; preds = %merge_block50
-  %141 = load ptr, ptr %res30, align 8
-  %142 = load i64, ptr %offset42, align 4
-  %143 = load i64, ptr %start28, align 4
-  %144 = sub i64 %142, %143
-  %145 = getelementptr i8, ptr %141, i64 %144
-  store i8 13, ptr %145, align 1
-  store i1 true, ptr %any46, align 1
-  br label %merge_block52
-
-merge_block52:                                    ; preds = %merge_block50, %then_block51
-  %146 = load i8, ptr %next_c45, align 1
-  %147 = icmp eq i8 %146, 48
-  br i1 %147, label %then_block53, label %merge_block54
-
-then_block53:                                     ; preds = %merge_block52
-  %148 = load ptr, ptr %res30, align 8
-  %149 = load i64, ptr %offset42, align 4
-  %150 = load i64, ptr %start28, align 4
-  %151 = sub i64 %149, %150
-  %152 = getelementptr i8, ptr %148, i64 %151
-  store i8 0, ptr %152, align 1
-  store i1 true, ptr %any46, align 1
+then_block53:                                     ; preds = %merge_block49
+  %137 = load ptr, ptr %res33, align 8
+  %138 = load i64, ptr %offset45, align 4
+  %139 = load i64, ptr %start31, align 4
+  %140 = sub i64 %138, %139
+  %141 = getelementptr i8, ptr %137, i64 %140
+  store i8 10, ptr %141, align 1
+  store i1 true, ptr %any52, align 1
   br label %merge_block54
 
-merge_block54:                                    ; preds = %merge_block52, %then_block53
-  %153 = load i8, ptr %next_c45, align 1
-  %154 = icmp eq i8 %153, 92
-  br i1 %154, label %then_block55, label %merge_block56
+merge_block54:                                    ; preds = %merge_block49, %then_block53
+  %142 = load i8, ptr %next_c51, align 1
+  %143 = icmp eq i8 %142, 116
+  br i1 %143, label %then_block55, label %merge_block56
 
 then_block55:                                     ; preds = %merge_block54
-  %155 = load ptr, ptr %res30, align 8
-  %156 = load i64, ptr %offset42, align 4
-  %157 = load i64, ptr %start28, align 4
-  %158 = sub i64 %156, %157
-  %159 = getelementptr i8, ptr %155, i64 %158
-  store i8 92, ptr %159, align 1
-  store i1 true, ptr %any46, align 1
+  %144 = load ptr, ptr %res33, align 8
+  %145 = load i64, ptr %offset45, align 4
+  %146 = load i64, ptr %start31, align 4
+  %147 = sub i64 %145, %146
+  %148 = getelementptr i8, ptr %144, i64 %147
+  store i8 9, ptr %148, align 1
+  store i1 true, ptr %any52, align 1
   br label %merge_block56
 
 merge_block56:                                    ; preds = %merge_block54, %then_block55
-  %160 = load i1, ptr %any46, align 1
-  %161 = icmp eq i1 %160, false
-  br i1 %161, label %then_block57, label %merge_block58
+  %149 = load i8, ptr %next_c51, align 1
+  %150 = icmp eq i8 %149, 114
+  br i1 %150, label %then_block57, label %merge_block58
 
 then_block57:                                     ; preds = %merge_block56
-  %162 = load ptr, ptr %res30, align 8
-  %163 = load i64, ptr %offset42, align 4
-  %164 = load i64, ptr %start28, align 4
-  %165 = sub i64 %163, %164
-  %166 = getelementptr i8, ptr %162, i64 %165
-  %167 = load i8, ptr %next_c45, align 1
-  store i8 %167, ptr %166, align 1
+  %151 = load ptr, ptr %res33, align 8
+  %152 = load i64, ptr %offset45, align 4
+  %153 = load i64, ptr %start31, align 4
+  %154 = sub i64 %152, %153
+  %155 = getelementptr i8, ptr %151, i64 %154
+  store i8 13, ptr %155, align 1
+  store i1 true, ptr %any52, align 1
   br label %merge_block58
 
 merge_block58:                                    ; preds = %merge_block56, %then_block57
-  %168 = load i64, ptr %offset42, align 4
-  %169 = add i64 %168, 1
-  store i64 %169, ptr %offset42, align 4
-  %170 = load i64, ptr %offset42, align 4
-  %171 = add i64 %170, 1
-  store i64 %171, ptr %offset42, align 4
-  %172 = load ptr, ptr %t25, align 8
-  %offset59 = getelementptr %tokenizer.3, ptr %172, i32 0, i32 2
-  %173 = load i64, ptr %offset42, align 4
-  store i64 %173, ptr %offset59, align 4
-  br label %while_block31
+  %156 = load i8, ptr %next_c51, align 1
+  %157 = icmp eq i8 %156, 48
+  br i1 %157, label %then_block59, label %merge_block60
 
-merge_block60:                                    ; preds = %merge_block37
-  %174 = load ptr, ptr %condition26, align 8
-  %175 = load i8, ptr %c40, align 1
-  %176 = call i1 %174(i8 %175)
-  br i1 %176, label %then_block61, label %merge_block62
+then_block59:                                     ; preds = %merge_block58
+  %158 = load ptr, ptr %res33, align 8
+  %159 = load i64, ptr %offset45, align 4
+  %160 = load i64, ptr %start31, align 4
+  %161 = sub i64 %159, %160
+  %162 = getelementptr i8, ptr %158, i64 %161
+  store i8 0, ptr %162, align 1
+  store i1 true, ptr %any52, align 1
+  br label %merge_block60
+
+merge_block60:                                    ; preds = %merge_block58, %then_block59
+  %163 = load i8, ptr %next_c51, align 1
+  %164 = icmp eq i8 %163, 92
+  br i1 %164, label %then_block61, label %merge_block62
 
 then_block61:                                     ; preds = %merge_block60
-  %177 = load ptr, ptr %res30, align 8
-  ret ptr %177
+  %165 = load ptr, ptr %res33, align 8
+  %166 = load i64, ptr %offset45, align 4
+  %167 = load i64, ptr %start31, align 4
+  %168 = sub i64 %166, %167
+  %169 = getelementptr i8, ptr %165, i64 %168
+  store i8 92, ptr %169, align 1
+  store i1 true, ptr %any52, align 1
+  br label %merge_block62
 
-merge_block62:                                    ; preds = %merge_block60
-  %178 = load ptr, ptr %res30, align 8
-  %179 = load i64, ptr %offset42, align 4
-  %180 = load i64, ptr %start28, align 4
-  %181 = sub i64 %179, %180
-  %182 = getelementptr i8, ptr %178, i64 %181
-  %183 = load i8, ptr %c40, align 1
-  store i8 %183, ptr %182, align 1
-  %184 = load ptr, ptr %res30, align 8
-  %185 = load i64, ptr %offset42, align 4
-  %186 = load i64, ptr %start28, align 4
-  %187 = sub i64 %185, %186
-  %188 = add i64 %187, 1
-  %189 = getelementptr i8, ptr %184, i64 %188
-  store i8 0, ptr %189, align 1
-  %190 = load i64, ptr %offset42, align 4
-  %191 = add i64 %190, 1
-  store i64 %191, ptr %offset42, align 4
-  %192 = load ptr, ptr %t25, align 8
-  %offset63 = getelementptr %tokenizer.3, ptr %192, i32 0, i32 2
-  %193 = load i64, ptr %offset42, align 4
-  store i64 %193, ptr %offset63, align 4
-  br label %while_block31
+merge_block62:                                    ; preds = %merge_block60, %then_block61
+  %170 = load i1, ptr %any52, align 1
+  %171 = icmp eq i1 %170, false
+  br i1 %171, label %then_block63, label %merge_block64
+
+then_block63:                                     ; preds = %merge_block62
+  %172 = load ptr, ptr %res33, align 8
+  %173 = load i64, ptr %offset45, align 4
+  %174 = load i64, ptr %start31, align 4
+  %175 = sub i64 %173, %174
+  %176 = getelementptr i8, ptr %172, i64 %175
+  %177 = load i8, ptr %next_c51, align 1
+  store i8 %177, ptr %176, align 1
+  br label %merge_block64
+
+merge_block64:                                    ; preds = %merge_block62, %then_block63
+  %178 = load i64, ptr %offset45, align 4
+  %179 = add i64 %178, 1
+  store i64 %179, ptr %offset45, align 4
+  %180 = load i64, ptr %offset45, align 4
+  %181 = add i64 %180, 1
+  store i64 %181, ptr %offset45, align 4
+  %182 = load ptr, ptr %t28, align 8
+  %offset65 = getelementptr %tokenizer.3, ptr %182, i32 0, i32 2
+  %183 = load i64, ptr %offset45, align 4
+  store i64 %183, ptr %offset65, align 4
+  br label %while_block34
+
+merge_block66:                                    ; preds = %merge_block40
+  %184 = load ptr, ptr %condition29, align 8
+  %185 = load i8, ptr %c43, align 1
+  %186 = call i1 %184(i8 %185)
+  br i1 %186, label %then_block67, label %merge_block68
+
+then_block67:                                     ; preds = %merge_block66
+  %187 = load ptr, ptr %res33, align 8
+  ret ptr %187
+
+merge_block68:                                    ; preds = %merge_block66
+  %188 = load ptr, ptr %res33, align 8
+  %189 = load i64, ptr %offset45, align 4
+  %190 = load i64, ptr %start31, align 4
+  %191 = sub i64 %189, %190
+  %192 = getelementptr i8, ptr %188, i64 %191
+  %193 = load i8, ptr %c43, align 1
+  store i8 %193, ptr %192, align 1
+  %194 = load ptr, ptr %res33, align 8
+  %195 = load i64, ptr %offset45, align 4
+  %196 = load i64, ptr %start31, align 4
+  %197 = sub i64 %195, %196
+  %198 = add i64 %197, 1
+  %199 = getelementptr i8, ptr %194, i64 %198
+  store i8 0, ptr %199, align 1
+  %200 = load i64, ptr %offset45, align 4
+  %201 = add i64 %200, 1
+  store i64 %201, ptr %offset45, align 4
+  %202 = load ptr, ptr %t28, align 8
+  %offset69 = getelementptr %tokenizer.3, ptr %202, i32 0, i32 2
+  %203 = load i64, ptr %offset45, align 4
+  store i64 %203, ptr %offset69, align 4
+  br label %while_block34
 }
 
 define ptr @tokenizer_accept_int_type(ptr %0) {
