@@ -7412,71 +7412,97 @@ inner_block:                                      ; preds = %while_block
   br i1 %31, label %then_block11, label %merge_block12
 
 outer_block:                                      ; preds = %then_block11, %while_block
-  %32 = load ptr, ptr %p, align 8
-  %33 = load i64, ptr @TOKEN_RBRACE.39, align 4
-  %34 = call ptr @parser_accept_token(ptr %32, i64 %33)
-  %35 = icmp eq ptr %34, null
-  br i1 %35, label %then_block13, label %merge_block14
+  %32 = load i64, ptr %i, align 4
+  %33 = icmp eq i64 %32, 0
+  br i1 %33, label %then_block13, label %merge_block14
 
 then_block11:                                     ; preds = %inner_block
   br label %outer_block
 
 merge_block12:                                    ; preds = %inner_block
-  %36 = load ptr, ptr %statements, align 8
-  %37 = load i64, ptr %i, align 4
-  %38 = getelementptr ptr, ptr %36, i64 %37
-  %39 = load ptr, ptr %n, align 8
-  store ptr %39, ptr %38, align 8
-  %40 = load i64, ptr %i, align 4
-  %41 = add i64 %40, 1
-  store i64 %41, ptr %i, align 4
+  %34 = load ptr, ptr %statements, align 8
+  %35 = load i64, ptr %i, align 4
+  %36 = getelementptr ptr, ptr %34, i64 %35
+  %37 = load ptr, ptr %n, align 8
+  store ptr %37, ptr %36, align 8
+  %38 = load i64, ptr %i, align 4
+  %39 = add i64 %38, 1
+  store i64 %39, ptr %i, align 4
   br label %while_block
 
 then_block13:                                     ; preds = %outer_block
   ret ptr null
 
 merge_block14:                                    ; preds = %outer_block
-  %42 = load ptr, ptr %p, align 8
-  %arena15 = getelementptr %parser, ptr %42, i32 0, i32 3
-  %43 = load ptr, ptr %arena15, align 8
-  %44 = call ptr @arena_alloc(ptr %43, i64 40)
+  %40 = load ptr, ptr %statements, align 8
+  %41 = load i64, ptr %i, align 4
+  %42 = sub i64 %41, 1
+  %43 = getelementptr ptr, ptr %40, i64 %42
+  %44 = load ptr, ptr %43, align 8
+  %last_stmt = alloca ptr, align 8
+  store ptr %44, ptr %last_stmt, align 8
+  %45 = load ptr, ptr %last_stmt, align 8
+  %type = getelementptr %Node, ptr %45, i32 0, i32 0
+  %46 = load i64, ptr %type, align 4
+  %47 = load i64, ptr @NODE_RETURN_STATEMENT, align 4
+  %48 = icmp ne i64 %46, %47
+  br i1 %48, label %then_block15, label %merge_block16
+
+then_block15:                                     ; preds = %merge_block14
+  ret ptr null
+
+merge_block16:                                    ; preds = %merge_block14
+  %49 = load ptr, ptr %p, align 8
+  %50 = load i64, ptr @TOKEN_RBRACE.39, align 4
+  %51 = call ptr @parser_accept_token(ptr %49, i64 %50)
+  %52 = icmp eq ptr %51, null
+  br i1 %52, label %then_block17, label %merge_block18
+
+then_block17:                                     ; preds = %merge_block16
+  ret ptr null
+
+merge_block18:                                    ; preds = %merge_block16
+  %53 = load ptr, ptr %p, align 8
+  %arena19 = getelementptr %parser, ptr %53, i32 0, i32 3
+  %54 = load ptr, ptr %arena19, align 8
+  %55 = call ptr @arena_alloc(ptr %54, i64 40)
   %d = alloca ptr, align 8
-  store ptr %44, ptr %d, align 8
-  %45 = load ptr, ptr %d, align 8
-  %statements16 = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %45, i32 0, i32 0
-  %46 = load ptr, ptr %statements, align 8
-  store ptr %46, ptr %statements16, align 8
-  %47 = load ptr, ptr %d, align 8
-  %statements_len = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %47, i32 0, i32 1
-  %48 = load i64, ptr %i, align 4
-  store i64 %48, ptr %statements_len, align 4
-  %49 = load ptr, ptr %d, align 8
-  %parameters = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %49, i32 0, i32 2
-  %50 = load ptr, ptr %params, align 8
-  %data = getelementptr %slice, ptr %50, i32 0, i32 0
-  %51 = load ptr, ptr %data, align 8
-  store ptr %51, ptr %parameters, align 8
-  %52 = load ptr, ptr %d, align 8
-  %parameters_len = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %52, i32 0, i32 3
-  %53 = load ptr, ptr %params, align 8
-  %data_len = getelementptr %slice, ptr %53, i32 0, i32 1
-  %54 = load i64, ptr %data_len, align 4
-  store i64 %54, ptr %parameters_len, align 4
-  %55 = load ptr, ptr %d, align 8
-  %retur_type17 = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %55, i32 0, i32 4
-  %56 = load ptr, ptr %retur_type, align 8
-  store ptr %56, ptr %retur_type17, align 8
-  %n18 = alloca %Node, align 8
-  %type = getelementptr %Node, ptr %n18, i32 0, i32 0
-  %57 = load i64, ptr @NODE_FUNCTION_DEFINITION, align 4
-  store i64 %57, ptr %type, align 4
-  %data19 = getelementptr %Node, ptr %n18, i32 0, i32 1
+  store ptr %55, ptr %d, align 8
+  %56 = load ptr, ptr %d, align 8
+  %statements20 = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %56, i32 0, i32 0
+  %57 = load ptr, ptr %statements, align 8
+  store ptr %57, ptr %statements20, align 8
   %58 = load ptr, ptr %d, align 8
-  store ptr %58, ptr %data19, align 8
-  %59 = load ptr, ptr %p, align 8
-  %60 = load %Node, ptr %n18, align 8
-  %61 = call ptr @create_node(ptr %59, %Node %60)
-  ret ptr %61
+  %statements_len = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %58, i32 0, i32 1
+  %59 = load i64, ptr %i, align 4
+  store i64 %59, ptr %statements_len, align 4
+  %60 = load ptr, ptr %d, align 8
+  %parameters = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %60, i32 0, i32 2
+  %61 = load ptr, ptr %params, align 8
+  %data = getelementptr %slice, ptr %61, i32 0, i32 0
+  %62 = load ptr, ptr %data, align 8
+  store ptr %62, ptr %parameters, align 8
+  %63 = load ptr, ptr %d, align 8
+  %parameters_len = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %63, i32 0, i32 3
+  %64 = load ptr, ptr %params, align 8
+  %data_len = getelementptr %slice, ptr %64, i32 0, i32 1
+  %65 = load i64, ptr %data_len, align 4
+  store i64 %65, ptr %parameters_len, align 4
+  %66 = load ptr, ptr %d, align 8
+  %retur_type21 = getelementptr %NODE_FUNCTION_DEFINITION_DATA, ptr %66, i32 0, i32 4
+  %67 = load ptr, ptr %retur_type, align 8
+  store ptr %67, ptr %retur_type21, align 8
+  %n22 = alloca %Node, align 8
+  %type23 = getelementptr %Node, ptr %n22, i32 0, i32 0
+  %68 = load i64, ptr @NODE_FUNCTION_DEFINITION, align 4
+  store i64 %68, ptr %type23, align 4
+  %data24 = getelementptr %Node, ptr %n22, i32 0, i32 1
+  %69 = load ptr, ptr %d, align 8
+  store ptr %69, ptr %data24, align 8
+  %70 = load ptr, ptr %p, align 8
+  %71 = load %Node, ptr %n22, align 8
+  %72 = call ptr @create_node(ptr %70, %Node %71)
+  ret ptr %72
 }
 
 define ptr @parser_parse_struct_instanciation(ptr %0) {

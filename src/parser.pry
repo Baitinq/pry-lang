@@ -742,6 +742,14 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 		i = i + 1;
 	};
 
+	/* Validate that function has at least one statement and ends with return */
+	if i == 0 {
+		return cast(*Node, null);
+	};
+	let last_stmt = *(statements + cast(**Node, i - 1));
+	if (*last_stmt).type != NODE_RETURN_STATEMENT {
+		return cast(*Node, null);
+	};
 
 	if parser_accept_token(p, TOKEN_RBRACE) == cast(*token, null) {
 		return cast(*Node, null);
