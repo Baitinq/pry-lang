@@ -133,10 +133,8 @@ let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
 };
 
 let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => bool {
-	assert((*a).type >= NODE_TYPE_SIMPLE_TYPE);
-	assert((*a).type <= NODE_TYPE_STRUCT_TYPE);
-	assert((*b).type >= NODE_TYPE_SIMPLE_TYPE);
-	assert((*b).type <= NODE_TYPE_STRUCT_TYPE);
+	assert((*a).type >= NODE_TYPE_SIMPLE_TYPE and (*a).type <= NODE_TYPE_STRUCT_TYPE);
+	assert((*b).type >= NODE_TYPE_SIMPLE_TYPE and (*b).type <= NODE_TYPE_STRUCT_TYPE);
 
 	if (*a).type == NODE_TYPE_SIMPLE_TYPE {
 		let simple_type_a = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*a).data);
@@ -238,8 +236,7 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 };
 
 let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
-	assert((*node).type >= NODE_TYPE_SIMPLE_TYPE);
-	assert((*node).type <= NODE_TYPE_STRUCT_TYPE);
+	assert((*node).type >= NODE_TYPE_SIMPLE_TYPE and (*node).type <= NODE_TYPE_STRUCT_TYPE);
 	
 	if (*node).type == NODE_TYPE_SIMPLE_TYPE {
 		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*node).data);

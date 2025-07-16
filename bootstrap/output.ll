@@ -10143,33 +10143,45 @@ entrypoint:
   %5 = load i64, ptr %type, align 4
   %6 = load i64, ptr @NODE_TYPE_SIMPLE_TYPE, align 4
   %7 = icmp sge i64 %5, %6
-  call void @assert(i1 %7)
+  br i1 %7, label %and_rhs, label %and_merge
+
+and_rhs:                                          ; preds = %entrypoint
   %8 = load ptr, ptr %a, align 8
   %type1 = getelementptr %Node, ptr %8, i32 0, i32 0
   %9 = load i64, ptr %type1, align 4
   %10 = load i64, ptr @NODE_TYPE_STRUCT_TYPE, align 4
   %11 = icmp sle i64 %9, %10
-  call void @assert(i1 %11)
+  br label %and_merge
+
+and_merge:                                        ; preds = %and_rhs, %entrypoint
+  %and_result = phi i1 [ false, %entrypoint ], [ %11, %and_rhs ]
+  call void @assert(i1 %and_result)
   %12 = load ptr, ptr %b, align 8
-  %type2 = getelementptr %Node, ptr %12, i32 0, i32 0
-  %13 = load i64, ptr %type2, align 4
+  %type4 = getelementptr %Node, ptr %12, i32 0, i32 0
+  %13 = load i64, ptr %type4, align 4
   %14 = load i64, ptr @NODE_TYPE_SIMPLE_TYPE, align 4
   %15 = icmp sge i64 %13, %14
-  call void @assert(i1 %15)
+  br i1 %15, label %and_rhs2, label %and_merge3
+
+and_rhs2:                                         ; preds = %and_merge
   %16 = load ptr, ptr %b, align 8
-  %type3 = getelementptr %Node, ptr %16, i32 0, i32 0
-  %17 = load i64, ptr %type3, align 4
+  %type5 = getelementptr %Node, ptr %16, i32 0, i32 0
+  %17 = load i64, ptr %type5, align 4
   %18 = load i64, ptr @NODE_TYPE_STRUCT_TYPE, align 4
   %19 = icmp sle i64 %17, %18
-  call void @assert(i1 %19)
+  br label %and_merge3
+
+and_merge3:                                       ; preds = %and_rhs2, %and_merge
+  %and_result6 = phi i1 [ false, %and_merge ], [ %19, %and_rhs2 ]
+  call void @assert(i1 %and_result6)
   %20 = load ptr, ptr %a, align 8
-  %type4 = getelementptr %Node, ptr %20, i32 0, i32 0
-  %21 = load i64, ptr %type4, align 4
+  %type7 = getelementptr %Node, ptr %20, i32 0, i32 0
+  %21 = load i64, ptr %type7, align 4
   %22 = load i64, ptr @NODE_TYPE_SIMPLE_TYPE, align 4
   %23 = icmp eq i64 %21, %22
-  br i1 %23, label %then_block, label %merge_block6
+  br i1 %23, label %then_block, label %merge_block9
 
-then_block:                                       ; preds = %entrypoint
+then_block:                                       ; preds = %and_merge3
   %24 = load ptr, ptr %a, align 8
   %data = getelementptr %Node, ptr %24, i32 0, i32 1
   %25 = load ptr, ptr %data, align 8
@@ -10179,169 +10191,169 @@ then_block:                                       ; preds = %entrypoint
   %name = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a, i32 0, i32 0
   %27 = load ptr, ptr %name, align 8
   %28 = call i1 @strcmp(ptr %27, ptr @178)
-  br i1 %28, label %then_block5, label %merge_block
+  br i1 %28, label %then_block8, label %merge_block
 
-then_block5:                                      ; preds = %then_block
+then_block8:                                      ; preds = %then_block
   ret i1 true
 
 merge_block:                                      ; preds = %then_block
-  br label %merge_block6
+  br label %merge_block9
 
-merge_block6:                                     ; preds = %entrypoint, %merge_block
+merge_block9:                                     ; preds = %and_merge3, %merge_block
   %29 = load i1, ptr %is_dereference, align 1
-  br i1 %29, label %then_block7, label %merge_block11
+  br i1 %29, label %then_block10, label %merge_block14
 
-then_block7:                                      ; preds = %merge_block6
+then_block10:                                     ; preds = %merge_block9
   %30 = load ptr, ptr %a, align 8
-  %type8 = getelementptr %Node, ptr %30, i32 0, i32 0
-  %31 = load i64, ptr %type8, align 4
+  %type11 = getelementptr %Node, ptr %30, i32 0, i32 0
+  %31 = load i64, ptr %type11, align 4
   %32 = load i64, ptr @NODE_TYPE_POINTER_TYPE, align 4
   %33 = icmp eq i64 %31, %32
   call void @assert(i1 %33)
   %34 = load ptr, ptr %a, align 8
-  %data9 = getelementptr %Node, ptr %34, i32 0, i32 1
-  %35 = load ptr, ptr %data9, align 8
+  %data12 = getelementptr %Node, ptr %34, i32 0, i32 1
+  %35 = load ptr, ptr %data12, align 8
   %36 = load %NODE_TYPE_POINTER_TYPE_DATA, ptr %35, align 8
   %pointer_type_a = alloca %NODE_TYPE_POINTER_TYPE_DATA, align 8
   store %NODE_TYPE_POINTER_TYPE_DATA %36, ptr %pointer_type_a, align 8
-  %type10 = getelementptr %NODE_TYPE_POINTER_TYPE_DATA, ptr %pointer_type_a, i32 0, i32 0
-  %37 = load ptr, ptr %type10, align 8
+  %type13 = getelementptr %NODE_TYPE_POINTER_TYPE_DATA, ptr %pointer_type_a, i32 0, i32 0
+  %37 = load ptr, ptr %type13, align 8
   store ptr %37, ptr %a, align 8
-  br label %merge_block11
+  br label %merge_block14
 
-merge_block11:                                    ; preds = %merge_block6, %then_block7
+merge_block14:                                    ; preds = %merge_block9, %then_block10
   %38 = load ptr, ptr %a, align 8
-  %type12 = getelementptr %Node, ptr %38, i32 0, i32 0
-  %39 = load i64, ptr %type12, align 4
+  %type15 = getelementptr %Node, ptr %38, i32 0, i32 0
+  %39 = load i64, ptr %type15, align 4
   %40 = load ptr, ptr %b, align 8
-  %type13 = getelementptr %Node, ptr %40, i32 0, i32 0
-  %41 = load i64, ptr %type13, align 4
+  %type16 = getelementptr %Node, ptr %40, i32 0, i32 0
+  %41 = load i64, ptr %type16, align 4
   %42 = icmp ne i64 %39, %41
-  br i1 %42, label %then_block14, label %merge_block17
+  br i1 %42, label %then_block17, label %merge_block20
 
-then_block14:                                     ; preds = %merge_block11
+then_block17:                                     ; preds = %merge_block14
   %43 = load ptr, ptr %a, align 8
-  %type15 = getelementptr %Node, ptr %43, i32 0, i32 0
-  %44 = load i64, ptr %type15, align 4
+  %type18 = getelementptr %Node, ptr %43, i32 0, i32 0
+  %44 = load i64, ptr %type18, align 4
   call void (ptr, ...) @printf(ptr @179, i64 %44)
   %45 = load ptr, ptr %b, align 8
-  %type16 = getelementptr %Node, ptr %45, i32 0, i32 0
-  %46 = load i64, ptr %type16, align 4
+  %type19 = getelementptr %Node, ptr %45, i32 0, i32 0
+  %46 = load i64, ptr %type19, align 4
   call void (ptr, ...) @printf(ptr @180, i64 %46)
   ret i1 false
 
-merge_block17:                                    ; preds = %merge_block11
+merge_block20:                                    ; preds = %merge_block14
   %47 = load ptr, ptr %a, align 8
-  %type18 = getelementptr %Node, ptr %47, i32 0, i32 0
-  %48 = load i64, ptr %type18, align 4
+  %type21 = getelementptr %Node, ptr %47, i32 0, i32 0
+  %48 = load i64, ptr %type21, align 4
   %49 = load i64, ptr @NODE_TYPE_SIMPLE_TYPE, align 4
   %50 = icmp eq i64 %48, %49
-  br i1 %50, label %then_block19, label %merge_block30
+  br i1 %50, label %then_block22, label %merge_block33
 
-then_block19:                                     ; preds = %merge_block17
+then_block22:                                     ; preds = %merge_block20
   %51 = load ptr, ptr %b, align 8
-  %type20 = getelementptr %Node, ptr %51, i32 0, i32 0
-  %52 = load i64, ptr %type20, align 4
+  %type23 = getelementptr %Node, ptr %51, i32 0, i32 0
+  %52 = load i64, ptr %type23, align 4
   %53 = load i64, ptr @NODE_TYPE_SIMPLE_TYPE, align 4
   %54 = icmp eq i64 %52, %53
   call void @assert(i1 %54)
   %55 = load ptr, ptr %a, align 8
-  %data21 = getelementptr %Node, ptr %55, i32 0, i32 1
-  %56 = load ptr, ptr %data21, align 8
+  %data24 = getelementptr %Node, ptr %55, i32 0, i32 1
+  %56 = load ptr, ptr %data24, align 8
   %57 = load %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %56, align 8
-  %simple_type_a22 = alloca %NODE_TYPE_SIMPLE_TYPE_DATA, align 8
-  store %NODE_TYPE_SIMPLE_TYPE_DATA %57, ptr %simple_type_a22, align 8
+  %simple_type_a25 = alloca %NODE_TYPE_SIMPLE_TYPE_DATA, align 8
+  store %NODE_TYPE_SIMPLE_TYPE_DATA %57, ptr %simple_type_a25, align 8
   %58 = load ptr, ptr %b, align 8
-  %data23 = getelementptr %Node, ptr %58, i32 0, i32 1
-  %59 = load ptr, ptr %data23, align 8
+  %data26 = getelementptr %Node, ptr %58, i32 0, i32 1
+  %59 = load ptr, ptr %data26, align 8
   %60 = load %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %59, align 8
   %simple_type_b = alloca %NODE_TYPE_SIMPLE_TYPE_DATA, align 8
   store %NODE_TYPE_SIMPLE_TYPE_DATA %60, ptr %simple_type_b, align 8
-  %name24 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a22, i32 0, i32 0
-  %61 = load ptr, ptr %name24, align 8
-  %name25 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_b, i32 0, i32 0
-  %62 = load ptr, ptr %name25, align 8
+  %name27 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a25, i32 0, i32 0
+  %61 = load ptr, ptr %name27, align 8
+  %name28 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_b, i32 0, i32 0
+  %62 = load ptr, ptr %name28, align 8
   %63 = call i1 @strcmp(ptr %61, ptr %62)
   %eql = alloca i1, align 1
   store i1 %63, ptr %eql, align 1
   %64 = load i1, ptr %eql, align 1
   %65 = icmp eq i1 %64, false
-  br i1 %65, label %then_block26, label %merge_block29
+  br i1 %65, label %then_block29, label %merge_block32
 
-then_block26:                                     ; preds = %then_block19
-  %name27 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a22, i32 0, i32 0
-  %66 = load ptr, ptr %name27, align 8
+then_block29:                                     ; preds = %then_block22
+  %name30 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a25, i32 0, i32 0
+  %66 = load ptr, ptr %name30, align 8
   call void (ptr, ...) @printf(ptr @181, ptr %66)
-  %name28 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_b, i32 0, i32 0
-  %67 = load ptr, ptr %name28, align 8
+  %name31 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_b, i32 0, i32 0
+  %67 = load ptr, ptr %name31, align 8
   call void (ptr, ...) @printf(ptr @182, ptr %67)
-  br label %merge_block29
+  br label %merge_block32
 
-merge_block29:                                    ; preds = %then_block19, %then_block26
+merge_block32:                                    ; preds = %then_block22, %then_block29
   %68 = load i1, ptr %eql, align 1
   ret i1 %68
 
-merge_block30:                                    ; preds = %merge_block17
+merge_block33:                                    ; preds = %merge_block20
   %69 = load ptr, ptr %a, align 8
-  %type31 = getelementptr %Node, ptr %69, i32 0, i32 0
-  %70 = load i64, ptr %type31, align 4
+  %type34 = getelementptr %Node, ptr %69, i32 0, i32 0
+  %70 = load i64, ptr %type34, align 4
   %71 = load i64, ptr @NODE_TYPE_FUNCTION_TYPE, align 4
   %72 = icmp eq i64 %70, %71
-  br i1 %72, label %then_block32, label %merge_block46
+  br i1 %72, label %then_block35, label %merge_block49
 
-then_block32:                                     ; preds = %merge_block30
+then_block35:                                     ; preds = %merge_block33
   %73 = load ptr, ptr %b, align 8
-  %type33 = getelementptr %Node, ptr %73, i32 0, i32 0
-  %74 = load i64, ptr %type33, align 4
+  %type36 = getelementptr %Node, ptr %73, i32 0, i32 0
+  %74 = load i64, ptr %type36, align 4
   %75 = load i64, ptr @NODE_TYPE_FUNCTION_TYPE, align 4
   %76 = icmp eq i64 %74, %75
   call void @assert(i1 %76)
   %77 = load ptr, ptr %a, align 8
-  %data34 = getelementptr %Node, ptr %77, i32 0, i32 1
-  %78 = load ptr, ptr %data34, align 8
+  %data37 = getelementptr %Node, ptr %77, i32 0, i32 1
+  %78 = load ptr, ptr %data37, align 8
   %79 = load %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %78, align 8
   %function_type_a = alloca %NODE_TYPE_FUNCTION_TYPE_DATA, align 8
   store %NODE_TYPE_FUNCTION_TYPE_DATA %79, ptr %function_type_a, align 8
   %80 = load ptr, ptr %b, align 8
-  %data35 = getelementptr %Node, ptr %80, i32 0, i32 1
-  %81 = load ptr, ptr %data35, align 8
+  %data38 = getelementptr %Node, ptr %80, i32 0, i32 1
+  %81 = load ptr, ptr %data38, align 8
   %82 = load %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %81, align 8
   %function_type_b = alloca %NODE_TYPE_FUNCTION_TYPE_DATA, align 8
   store %NODE_TYPE_FUNCTION_TYPE_DATA %82, ptr %function_type_b, align 8
   %83 = load ptr, ptr %c, align 8
   %retur_type = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_a, i32 0, i32 2
   %84 = load ptr, ptr %retur_type, align 8
-  %retur_type36 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_b, i32 0, i32 2
-  %85 = load ptr, ptr %retur_type36, align 8
+  %retur_type39 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_b, i32 0, i32 2
+  %85 = load ptr, ptr %retur_type39, align 8
   %86 = call i1 @compare_types(ptr %83, ptr %84, ptr %85, i1 false)
   %87 = icmp eq i1 %86, false
-  br i1 %87, label %then_block37, label %merge_block38
+  br i1 %87, label %then_block40, label %merge_block41
 
-then_block37:                                     ; preds = %then_block32
+then_block40:                                     ; preds = %then_block35
   call void (ptr, ...) @printf(ptr @183)
   ret i1 false
 
-merge_block38:                                    ; preds = %then_block32
+merge_block41:                                    ; preds = %then_block35
   %parameters_len = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_a, i32 0, i32 1
   %88 = load i64, ptr %parameters_len, align 4
-  %parameters_len39 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_b, i32 0, i32 1
-  %89 = load i64, ptr %parameters_len39, align 4
+  %parameters_len42 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_b, i32 0, i32 1
+  %89 = load i64, ptr %parameters_len42, align 4
   %90 = icmp ne i64 %88, %89
-  br i1 %90, label %then_block40, label %merge_block41
+  br i1 %90, label %then_block43, label %merge_block44
 
-then_block40:                                     ; preds = %merge_block38
+then_block43:                                     ; preds = %merge_block41
   call void (ptr, ...) @printf(ptr @184)
   ret i1 false
 
-merge_block41:                                    ; preds = %merge_block38
+merge_block44:                                    ; preds = %merge_block41
   %i = alloca i64, align 8
   store i64 0, ptr %i, align 4
   br label %while_block
 
-while_block:                                      ; preds = %merge_block45, %merge_block41
+while_block:                                      ; preds = %merge_block48, %merge_block44
   %91 = load i64, ptr %i, align 4
-  %parameters_len42 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_a, i32 0, i32 1
-  %92 = load i64, ptr %parameters_len42, align 4
+  %parameters_len45 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_a, i32 0, i32 1
+  %92 = load i64, ptr %parameters_len45, align 4
   %93 = icmp slt i64 %91, %92
   br i1 %93, label %inner_block, label %outer_block
 
@@ -10353,8 +10365,8 @@ inner_block:                                      ; preds = %while_block
   %97 = load ptr, ptr %96, align 8
   %param_a = alloca ptr, align 8
   store ptr %97, ptr %param_a, align 8
-  %parameters43 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_b, i32 0, i32 0
-  %98 = load ptr, ptr %parameters43, align 8
+  %parameters46 = getelementptr %NODE_TYPE_FUNCTION_TYPE_DATA, ptr %function_type_b, i32 0, i32 0
+  %98 = load ptr, ptr %parameters46, align 8
   %99 = load i64, ptr %i, align 4
   %100 = getelementptr ptr, ptr %98, i64 %99
   %101 = load ptr, ptr %100, align 8
@@ -10365,125 +10377,125 @@ inner_block:                                      ; preds = %while_block
   %104 = load ptr, ptr %param_b, align 8
   %105 = call i1 @compare_types(ptr %102, ptr %103, ptr %104, i1 false)
   %106 = icmp eq i1 %105, false
-  br i1 %106, label %then_block44, label %merge_block45
+  br i1 %106, label %then_block47, label %merge_block48
 
 outer_block:                                      ; preds = %while_block
   ret i1 true
 
-then_block44:                                     ; preds = %inner_block
+then_block47:                                     ; preds = %inner_block
   call void (ptr, ...) @printf(ptr @185)
   ret i1 false
 
-merge_block45:                                    ; preds = %inner_block
+merge_block48:                                    ; preds = %inner_block
   %107 = load i64, ptr %i, align 4
   %108 = add i64 %107, 1
   store i64 %108, ptr %i, align 4
   br label %while_block
 
-merge_block46:                                    ; preds = %merge_block30
+merge_block49:                                    ; preds = %merge_block33
   %109 = load ptr, ptr %a, align 8
-  %type47 = getelementptr %Node, ptr %109, i32 0, i32 0
-  %110 = load i64, ptr %type47, align 4
+  %type50 = getelementptr %Node, ptr %109, i32 0, i32 0
+  %110 = load i64, ptr %type50, align 4
   %111 = load i64, ptr @NODE_TYPE_POINTER_TYPE, align 4
   %112 = icmp eq i64 %110, %111
-  br i1 %112, label %then_block48, label %merge_block57
+  br i1 %112, label %then_block51, label %merge_block60
 
-then_block48:                                     ; preds = %merge_block46
+then_block51:                                     ; preds = %merge_block49
   %113 = load ptr, ptr %b, align 8
-  %type49 = getelementptr %Node, ptr %113, i32 0, i32 0
-  %114 = load i64, ptr %type49, align 4
+  %type52 = getelementptr %Node, ptr %113, i32 0, i32 0
+  %114 = load i64, ptr %type52, align 4
   %115 = load i64, ptr @NODE_TYPE_POINTER_TYPE, align 4
   %116 = icmp eq i64 %114, %115
   call void @assert(i1 %116)
   %117 = load ptr, ptr %a, align 8
-  %data50 = getelementptr %Node, ptr %117, i32 0, i32 1
-  %118 = load ptr, ptr %data50, align 8
+  %data53 = getelementptr %Node, ptr %117, i32 0, i32 1
+  %118 = load ptr, ptr %data53, align 8
   %119 = load %NODE_TYPE_POINTER_TYPE_DATA, ptr %118, align 8
-  %pointer_type_a51 = alloca %NODE_TYPE_POINTER_TYPE_DATA, align 8
-  store %NODE_TYPE_POINTER_TYPE_DATA %119, ptr %pointer_type_a51, align 8
+  %pointer_type_a54 = alloca %NODE_TYPE_POINTER_TYPE_DATA, align 8
+  store %NODE_TYPE_POINTER_TYPE_DATA %119, ptr %pointer_type_a54, align 8
   %120 = load ptr, ptr %b, align 8
-  %data52 = getelementptr %Node, ptr %120, i32 0, i32 1
-  %121 = load ptr, ptr %data52, align 8
+  %data55 = getelementptr %Node, ptr %120, i32 0, i32 1
+  %121 = load ptr, ptr %data55, align 8
   %122 = load %NODE_TYPE_POINTER_TYPE_DATA, ptr %121, align 8
   %pointer_type_b = alloca %NODE_TYPE_POINTER_TYPE_DATA, align 8
   store %NODE_TYPE_POINTER_TYPE_DATA %122, ptr %pointer_type_b, align 8
   %123 = load ptr, ptr %c, align 8
-  %type53 = getelementptr %NODE_TYPE_POINTER_TYPE_DATA, ptr %pointer_type_a51, i32 0, i32 0
-  %124 = load ptr, ptr %type53, align 8
-  %type54 = getelementptr %NODE_TYPE_POINTER_TYPE_DATA, ptr %pointer_type_b, i32 0, i32 0
-  %125 = load ptr, ptr %type54, align 8
+  %type56 = getelementptr %NODE_TYPE_POINTER_TYPE_DATA, ptr %pointer_type_a54, i32 0, i32 0
+  %124 = load ptr, ptr %type56, align 8
+  %type57 = getelementptr %NODE_TYPE_POINTER_TYPE_DATA, ptr %pointer_type_b, i32 0, i32 0
+  %125 = load ptr, ptr %type57, align 8
   %126 = call i1 @compare_types(ptr %123, ptr %124, ptr %125, i1 false)
   %127 = icmp eq i1 %126, false
-  br i1 %127, label %then_block55, label %merge_block56
+  br i1 %127, label %then_block58, label %merge_block59
 
-then_block55:                                     ; preds = %then_block48
+then_block58:                                     ; preds = %then_block51
   call void (ptr, ...) @printf(ptr @186)
   ret i1 false
 
-merge_block56:                                    ; preds = %then_block48
+merge_block59:                                    ; preds = %then_block51
   ret i1 true
 
-merge_block57:                                    ; preds = %merge_block46
+merge_block60:                                    ; preds = %merge_block49
   %128 = load ptr, ptr %a, align 8
-  %type58 = getelementptr %Node, ptr %128, i32 0, i32 0
-  %129 = load i64, ptr %type58, align 4
+  %type61 = getelementptr %Node, ptr %128, i32 0, i32 0
+  %129 = load i64, ptr %type61, align 4
   %130 = load i64, ptr @NODE_TYPE_STRUCT_TYPE, align 4
   %131 = icmp eq i64 %129, %130
-  br i1 %131, label %then_block59, label %merge_block74
+  br i1 %131, label %then_block62, label %merge_block77
 
-then_block59:                                     ; preds = %merge_block57
+then_block62:                                     ; preds = %merge_block60
   %132 = load ptr, ptr %b, align 8
-  %type60 = getelementptr %Node, ptr %132, i32 0, i32 0
-  %133 = load i64, ptr %type60, align 4
+  %type63 = getelementptr %Node, ptr %132, i32 0, i32 0
+  %133 = load i64, ptr %type63, align 4
   %134 = load i64, ptr @NODE_TYPE_STRUCT_TYPE, align 4
   %135 = icmp eq i64 %133, %134
   call void @assert(i1 %135)
   %136 = load ptr, ptr %a, align 8
-  %data61 = getelementptr %Node, ptr %136, i32 0, i32 1
-  %137 = load ptr, ptr %data61, align 8
+  %data64 = getelementptr %Node, ptr %136, i32 0, i32 1
+  %137 = load ptr, ptr %data64, align 8
   %138 = load %NODE_TYPE_STRUCT_TYPE_DATA, ptr %137, align 8
   %struc_type_a = alloca %NODE_TYPE_STRUCT_TYPE_DATA, align 8
   store %NODE_TYPE_STRUCT_TYPE_DATA %138, ptr %struc_type_a, align 8
   %139 = load ptr, ptr %b, align 8
-  %data62 = getelementptr %Node, ptr %139, i32 0, i32 1
-  %140 = load ptr, ptr %data62, align 8
+  %data65 = getelementptr %Node, ptr %139, i32 0, i32 1
+  %140 = load ptr, ptr %data65, align 8
   %141 = load %NODE_TYPE_STRUCT_TYPE_DATA, ptr %140, align 8
   %struc_type_b = alloca %NODE_TYPE_STRUCT_TYPE_DATA, align 8
   store %NODE_TYPE_STRUCT_TYPE_DATA %141, ptr %struc_type_b, align 8
   %fields_len = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_a, i32 0, i32 1
   %142 = load i64, ptr %fields_len, align 4
-  %fields_len63 = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_b, i32 0, i32 1
-  %143 = load i64, ptr %fields_len63, align 4
+  %fields_len66 = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_b, i32 0, i32 1
+  %143 = load i64, ptr %fields_len66, align 4
   %144 = icmp ne i64 %142, %143
-  br i1 %144, label %then_block64, label %merge_block65
+  br i1 %144, label %then_block67, label %merge_block68
 
-then_block64:                                     ; preds = %then_block59
+then_block67:                                     ; preds = %then_block62
   call void (ptr, ...) @printf(ptr @187)
   ret i1 false
 
-merge_block65:                                    ; preds = %then_block59
-  %i66 = alloca i64, align 8
-  store i64 0, ptr %i66, align 4
-  br label %while_block67
+merge_block68:                                    ; preds = %then_block62
+  %i69 = alloca i64, align 8
+  store i64 0, ptr %i69, align 4
+  br label %while_block70
 
-while_block67:                                    ; preds = %merge_block73, %merge_block65
-  %145 = load i64, ptr %i66, align 4
-  %fields_len68 = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_a, i32 0, i32 1
-  %146 = load i64, ptr %fields_len68, align 4
+while_block70:                                    ; preds = %merge_block76, %merge_block68
+  %145 = load i64, ptr %i69, align 4
+  %fields_len71 = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_a, i32 0, i32 1
+  %146 = load i64, ptr %fields_len71, align 4
   %147 = icmp slt i64 %145, %146
-  br i1 %147, label %inner_block69, label %outer_block70
+  br i1 %147, label %inner_block72, label %outer_block73
 
-inner_block69:                                    ; preds = %while_block67
+inner_block72:                                    ; preds = %while_block70
   %fields = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_a, i32 0, i32 0
   %148 = load ptr, ptr %fields, align 8
-  %149 = load i64, ptr %i66, align 4
+  %149 = load i64, ptr %i69, align 4
   %150 = getelementptr ptr, ptr %148, i64 %149
   %151 = load ptr, ptr %150, align 8
   %field_a = alloca ptr, align 8
   store ptr %151, ptr %field_a, align 8
-  %fields71 = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_b, i32 0, i32 0
-  %152 = load ptr, ptr %fields71, align 8
-  %153 = load i64, ptr %i66, align 4
+  %fields74 = getelementptr %NODE_TYPE_STRUCT_TYPE_DATA, ptr %struc_type_b, i32 0, i32 0
+  %152 = load ptr, ptr %fields74, align 8
+  %153 = load i64, ptr %i69, align 4
   %154 = getelementptr ptr, ptr %152, i64 %153
   %155 = load ptr, ptr %154, align 8
   %field_b = alloca ptr, align 8
@@ -10493,22 +10505,22 @@ inner_block69:                                    ; preds = %while_block67
   %158 = load ptr, ptr %field_b, align 8
   %159 = call i1 @compare_types(ptr %156, ptr %157, ptr %158, i1 false)
   %160 = icmp eq i1 %159, false
-  br i1 %160, label %then_block72, label %merge_block73
+  br i1 %160, label %then_block75, label %merge_block76
 
-outer_block70:                                    ; preds = %while_block67
+outer_block73:                                    ; preds = %while_block70
   ret i1 true
 
-then_block72:                                     ; preds = %inner_block69
+then_block75:                                     ; preds = %inner_block72
   call void (ptr, ...) @printf(ptr @188)
   ret i1 false
 
-merge_block73:                                    ; preds = %inner_block69
-  %161 = load i64, ptr %i66, align 4
+merge_block76:                                    ; preds = %inner_block72
+  %161 = load i64, ptr %i69, align 4
   %162 = add i64 %161, 1
-  store i64 %162, ptr %i66, align 4
-  br label %while_block67
+  store i64 %162, ptr %i69, align 4
+  br label %while_block70
 
-merge_block74:                                    ; preds = %merge_block57
+merge_block77:                                    ; preds = %merge_block60
   ret i1 false
 }
 
@@ -10523,13 +10535,19 @@ entrypoint:
   %3 = load i64, ptr %type, align 4
   %4 = load i64, ptr @NODE_TYPE_SIMPLE_TYPE, align 4
   %5 = icmp sge i64 %3, %4
-  call void @assert(i1 %5)
+  br i1 %5, label %and_rhs, label %and_merge
+
+and_rhs:                                          ; preds = %entrypoint
   %6 = load ptr, ptr %node, align 8
   %type1 = getelementptr %Node, ptr %6, i32 0, i32 0
   %7 = load i64, ptr %type1, align 4
   %8 = load i64, ptr @NODE_TYPE_STRUCT_TYPE, align 4
   %9 = icmp sle i64 %7, %8
-  call void @assert(i1 %9)
+  br label %and_merge
+
+and_merge:                                        ; preds = %and_rhs, %entrypoint
+  %and_result = phi i1 [ false, %entrypoint ], [ %9, %and_rhs ]
+  call void @assert(i1 %and_result)
   %10 = load ptr, ptr %node, align 8
   %type2 = getelementptr %Node, ptr %10, i32 0, i32 0
   %11 = load i64, ptr %type2, align 4
@@ -10537,7 +10555,7 @@ entrypoint:
   %13 = icmp eq i64 %11, %12
   br i1 %13, label %then_block, label %merge_block32
 
-then_block:                                       ; preds = %entrypoint
+then_block:                                       ; preds = %and_merge
   %14 = load ptr, ptr %node, align 8
   %data = getelementptr %Node, ptr %14, i32 0, i32 1
   %15 = load ptr, ptr %data, align 8
@@ -10679,7 +10697,7 @@ merge_block30:                                    ; preds = %merge_block23
   call void @assert(i1 false)
   br label %merge_block32
 
-merge_block32:                                    ; preds = %entrypoint, %merge_block30
+merge_block32:                                    ; preds = %and_merge, %merge_block30
   %75 = load ptr, ptr %node, align 8
   %type33 = getelementptr %Node, ptr %75, i32 0, i32 0
   %76 = load i64, ptr %type33, align 4
