@@ -19,7 +19,7 @@ Pry is a simple, statically-typed programming language that compiles to native c
 
 ### Prerequisites
 
-- LLVM development libraries (`llvm-config` must be available)
+- LLVM development libraries
 - A C compiler (gcc/clang) for linking
 
 ### Using with Nix
@@ -55,7 +55,7 @@ Pry is now fully self-hosted! The compiler is written in Pry and compiles itself
 
 3. **Link and create executable:**
    ```bash
-   cc $(llvm-config --libs) bootstrap_output.o -o program
+   cc bootstrap_output.o -o program
    ```
 
 4. **Run the program:**
@@ -68,7 +68,7 @@ Pry is now fully self-hosted! The compiler is written in Pry and compiles itself
 ### Basic Syntax
 
 ```pry
-// Hello World
+/* Hello World */
 import "!stdlib.pry";
 
 let main = () => i64 {
@@ -80,9 +80,9 @@ let main = () => i64 {
 ### Variables and Types
 
 ```pry
-let x = 42;           // i64 integer
-let name = "Alice";   // String literal (*i8)
-let flag = true;      // Boolean
+let x = 42;           /* i64 integer */
+let name = "Alice";   /* String literal (*i8) */
+let flag = true;      /* Boolean */
 ```
 
 **Built-in types:**
@@ -94,12 +94,12 @@ let flag = true;      // Boolean
 ### Functions
 
 ```pry
-// Function with explicit parameter types
+/* Function with explicit parameter types */
 let add = (a: i64, b: i64) => i64 {
     return a + b;
 };
 
-// Recursive function
+/* Recursive function */
 let fib = (n: i64) => i64 {
     if n == 0 {
         return 0;
@@ -114,12 +114,12 @@ let fib = (n: i64) => i64 {
 ### Control Flow
 
 ```pry
-// If statements (no else yet)
+/* If statements (no else yet) */
 if condition {
     // statements
 };
 
-// While loops
+/* While loops */
 let i = 0;
 while i < 10 {
     printf("%d\n", i);
@@ -130,15 +130,15 @@ while i < 10 {
 ### Structs
 
 ```pry
-// Define a struct type
+/* Define a struct type */
 let Point = struct {
     x: i64,
     y: i64
 };
 
 let main = () => i64 {
-    let p = Point{};  // Empty initialization
-    p.x = 10;         // Field assignment
+    let p = Point{};  /* Empty initialization */
+    p.x = 10;         /* Field assignment */
     p.y = 20;
     return 0;
 };
@@ -147,7 +147,7 @@ let main = () => i64 {
 ### Memory Management
 
 ```pry
-// Use C library functions for memory management
+/* Use C library functions for memory management */
 extern malloc = (i64) => *void;
 extern free = (*void) => void;
 
@@ -162,8 +162,7 @@ let main = () => i64 {
 ### C Interoperability
 
 ```pry
-// Declare external C functions
-extern printf = (*i8, varargs) => void;
+/* Declare external C functions */
 extern putchar = (i64) => i64;
 
 let main = () => i64 {
@@ -178,14 +177,12 @@ let main = () => i64 {
 
 Pry is a work-in-progress language with several limitations:
 
-- No `else` clauses for if statements
-- No `for` loops (only `while`)
+- Very basic type system
+- Limited error handling
 - No arrays (use pointers and manual indexing)
 - No string manipulation beyond C functions
 - No generics or templates
 - No pattern matching
-- Limited error handling
-- Basic type system
 
 ## Examples
 
@@ -199,9 +196,9 @@ The `examples/` directory contains test programs showing:
 
 Try running:
 ```bash
-./stage3 examples/8.pry && cc $(llvm-config --libs) bootstrap_output.o -o fib && ./fib    # Fibonacci sequence
-./stage3 examples/1.pry && cc $(llvm-config --libs) bootstrap_output.o -o hello && ./hello    # Hello world
-./stage3 examples/20.pry && cc $(llvm-config --libs) bootstrap_output.o -o array && ./array   # Array manipulation
+./stage3 examples/8.pry && cc bootstrap_output.o -o fib && ./fib    # Fibonacci sequence
+./stage3 examples/1.pry && cc bootstrap_output.o -o hello && ./hello    # Hello world
+./stage3 examples/20.pry && cc bootstrap_output.o -o array && ./array   # Array manipulation
 ```
 
 ## Standard Library
