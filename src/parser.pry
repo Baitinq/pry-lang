@@ -1260,7 +1260,8 @@ let parser_parse_import_declaration = (p: *parser) => *Node {
 	strcpy(buf2, dirpath);
 	(*(buf2 + cast(*i8, strlen(dirpath)))) = '/';
 	strcpy(buf2 + cast(*i8, strlen(dirpath) + 1), impor_filename);
-	let full_path = realpath(buf2, cast(*i8, null));
+	let full_path = cast(*i8, arena_alloc((*p).arena, 250));
+	realpath(buf2, full_path);
 
 	let inner_parser = parser_init(cast(*token, tokens.data), tokens.data_len, (*p).arena, full_path);
 	let ast = parse(inner_parser);

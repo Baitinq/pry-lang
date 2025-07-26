@@ -8922,50 +8922,55 @@ merge_block5:                                     ; preds = %merge_block2, %then
   %82 = getelementptr i8, ptr %78, i64 %81
   %83 = load ptr, ptr %impor_filename, align 8
   %84 = call ptr @strcpy(ptr %82, ptr %83)
-  %85 = load ptr, ptr %buf2, align 8
-  %86 = call ptr @realpath(ptr %85, ptr null)
+  %85 = load ptr, ptr %p, align 8
+  %arena10 = getelementptr %parser, ptr %85, i32 0, i32 3
+  %86 = load ptr, ptr %arena10, align 8
+  %87 = call ptr @arena_alloc(ptr %86, i64 250)
   %full_path = alloca ptr, align 8
-  store ptr %86, ptr %full_path, align 8
-  %data10 = getelementptr %slice, ptr %tokens, i32 0, i32 0
-  %87 = load ptr, ptr %data10, align 8
-  %data_len11 = getelementptr %slice, ptr %tokens, i32 0, i32 1
-  %88 = load i64, ptr %data_len11, align 4
-  %89 = load ptr, ptr %p, align 8
-  %arena12 = getelementptr %parser, ptr %89, i32 0, i32 3
-  %90 = load ptr, ptr %arena12, align 8
-  %91 = load ptr, ptr %full_path, align 8
-  %92 = call ptr @parser_init(ptr %87, i64 %88, ptr %90, ptr %91)
+  store ptr %87, ptr %full_path, align 8
+  %88 = load ptr, ptr %buf2, align 8
+  %89 = load ptr, ptr %full_path, align 8
+  %90 = call ptr @realpath(ptr %88, ptr %89)
+  %data11 = getelementptr %slice, ptr %tokens, i32 0, i32 0
+  %91 = load ptr, ptr %data11, align 8
+  %data_len12 = getelementptr %slice, ptr %tokens, i32 0, i32 1
+  %92 = load i64, ptr %data_len12, align 4
+  %93 = load ptr, ptr %p, align 8
+  %arena13 = getelementptr %parser, ptr %93, i32 0, i32 3
+  %94 = load ptr, ptr %arena13, align 8
+  %95 = load ptr, ptr %full_path, align 8
+  %96 = call ptr @parser_init(ptr %91, i64 %92, ptr %94, ptr %95)
   %inner_parser = alloca ptr, align 8
-  store ptr %92, ptr %inner_parser, align 8
-  %93 = load ptr, ptr %inner_parser, align 8
-  %94 = call ptr @parse(ptr %93)
+  store ptr %96, ptr %inner_parser, align 8
+  %97 = load ptr, ptr %inner_parser, align 8
+  %98 = call ptr @parse(ptr %97)
   %ast = alloca ptr, align 8
-  store ptr %94, ptr %ast, align 8
-  %95 = load ptr, ptr %p, align 8
-  %arena13 = getelementptr %parser, ptr %95, i32 0, i32 3
-  %96 = load ptr, ptr %arena13, align 8
-  %97 = call ptr @arena_alloc(ptr %96, i64 16)
+  store ptr %98, ptr %ast, align 8
+  %99 = load ptr, ptr %p, align 8
+  %arena14 = getelementptr %parser, ptr %99, i32 0, i32 3
+  %100 = load ptr, ptr %arena14, align 8
+  %101 = call ptr @arena_alloc(ptr %100, i64 16)
   %d = alloca ptr, align 8
-  store ptr %97, ptr %d, align 8
-  %98 = load ptr, ptr %d, align 8
-  %filename14 = getelementptr %NODE_IMPORT_DECLARATION_DATA, ptr %98, i32 0, i32 0
-  %99 = load ptr, ptr %impor_filename, align 8
-  store ptr %99, ptr %filename14, align 8
-  %100 = load ptr, ptr %d, align 8
-  %program = getelementptr %NODE_IMPORT_DECLARATION_DATA, ptr %100, i32 0, i32 1
-  %101 = load ptr, ptr %ast, align 8
-  store ptr %101, ptr %program, align 8
+  store ptr %101, ptr %d, align 8
+  %102 = load ptr, ptr %d, align 8
+  %filename15 = getelementptr %NODE_IMPORT_DECLARATION_DATA, ptr %102, i32 0, i32 0
+  %103 = load ptr, ptr %impor_filename, align 8
+  store ptr %103, ptr %filename15, align 8
+  %104 = load ptr, ptr %d, align 8
+  %program = getelementptr %NODE_IMPORT_DECLARATION_DATA, ptr %104, i32 0, i32 1
+  %105 = load ptr, ptr %ast, align 8
+  store ptr %105, ptr %program, align 8
   %n = alloca %Node, align 8
-  %type15 = getelementptr %Node, ptr %n, i32 0, i32 0
-  %102 = load i64, ptr @NODE_IMPORT_DECLARATION, align 4
-  store i64 %102, ptr %type15, align 4
-  %data16 = getelementptr %Node, ptr %n, i32 0, i32 1
-  %103 = load ptr, ptr %d, align 8
-  store ptr %103, ptr %data16, align 8
-  %104 = load ptr, ptr %p, align 8
-  %105 = load %Node, ptr %n, align 8
-  %106 = call ptr @create_node(ptr %104, %Node %105)
-  ret ptr %106
+  %type16 = getelementptr %Node, ptr %n, i32 0, i32 0
+  %106 = load i64, ptr @NODE_IMPORT_DECLARATION, align 4
+  store i64 %106, ptr %type16, align 4
+  %data17 = getelementptr %Node, ptr %n, i32 0, i32 1
+  %107 = load ptr, ptr %d, align 8
+  store ptr %107, ptr %data17, align 8
+  %108 = load ptr, ptr %p, align 8
+  %109 = load %Node, ptr %n, align 8
+  %110 = call ptr @create_node(ptr %108, %Node %109)
+  ret ptr %110
 }
 
 define ptr @parser_parse_function_arguments(ptr %0) {
