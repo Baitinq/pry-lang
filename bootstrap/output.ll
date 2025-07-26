@@ -1,10 +1,10 @@
 ; ModuleID = 'module'
 source_filename = "module"
 
-%arena = type { ptr, i64 }
-%arena.0 = type { ptr, i64 }
-%arena.1 = type { ptr, i64 }
-%arena.4 = type { ptr, i64 }
+%arena = type { ptr, i64, i64 }
+%arena.0 = type { ptr, i64, i64 }
+%arena.1 = type { ptr, i64, i64 }
+%arena.4 = type { ptr, i64, i64 }
 %token = type { i64, ptr }
 %token.2 = type { i64, ptr }
 %tokenizer = type { ptr, i64, i64, ptr }
@@ -1949,7 +1949,7 @@ define ptr @arena_init(i64 %0) {
 entrypoint:
   %size = alloca i64, align 8
   store i64 %0, ptr %size, align 4
-  %1 = call ptr @calloc(i64 1, i64 16)
+  %1 = call ptr @calloc(i64 1, i64 24)
   %a = alloca ptr, align 8
   store ptr %1, ptr %a, align 8
   %2 = load ptr, ptr %a, align 8
@@ -1961,58 +1961,74 @@ entrypoint:
   %offset = getelementptr %arena, ptr %5, i32 0, i32 1
   store i64 0, ptr %offset, align 4
   %6 = load ptr, ptr %a, align 8
-  ret ptr %6
+  %size1 = getelementptr %arena, ptr %6, i32 0, i32 2
+  %7 = load i64, ptr %size, align 4
+  store i64 %7, ptr %size1, align 4
+  %8 = load ptr, ptr %a, align 8
+  ret ptr %8
 
-entrypoint1:                                      ; No predecessors!
-  %size2 = alloca i64, align 8
-  store i64 %0, ptr %size2, align 4
-  %7 = call ptr @calloc(i64 1, i64 16)
-  %a3 = alloca ptr, align 8
-  store ptr %7, ptr %a3, align 8
-  %8 = load ptr, ptr %a3, align 8
-  %buf4 = getelementptr %arena.0, ptr %8, i32 0, i32 0
-  %9 = load i64, ptr %size2, align 4
-  %10 = call ptr @calloc(i64 1, i64 %9)
-  store ptr %10, ptr %buf4, align 8
-  %11 = load ptr, ptr %a3, align 8
-  %offset5 = getelementptr %arena.0, ptr %11, i32 0, i32 1
-  store i64 0, ptr %offset5, align 4
-  %12 = load ptr, ptr %a3, align 8
-  ret ptr %12
+entrypoint2:                                      ; No predecessors!
+  %size3 = alloca i64, align 8
+  store i64 %0, ptr %size3, align 4
+  %9 = call ptr @calloc(i64 1, i64 24)
+  %a4 = alloca ptr, align 8
+  store ptr %9, ptr %a4, align 8
+  %10 = load ptr, ptr %a4, align 8
+  %buf5 = getelementptr %arena.0, ptr %10, i32 0, i32 0
+  %11 = load i64, ptr %size3, align 4
+  %12 = call ptr @calloc(i64 1, i64 %11)
+  store ptr %12, ptr %buf5, align 8
+  %13 = load ptr, ptr %a4, align 8
+  %offset6 = getelementptr %arena.0, ptr %13, i32 0, i32 1
+  store i64 0, ptr %offset6, align 4
+  %14 = load ptr, ptr %a4, align 8
+  %size7 = getelementptr %arena.0, ptr %14, i32 0, i32 2
+  %15 = load i64, ptr %size3, align 4
+  store i64 %15, ptr %size7, align 4
+  %16 = load ptr, ptr %a4, align 8
+  ret ptr %16
 
-entrypoint6:                                      ; No predecessors!
-  %size7 = alloca i64, align 8
-  store i64 %0, ptr %size7, align 4
-  %13 = call ptr @calloc(i64 1, i64 16)
-  %a8 = alloca ptr, align 8
-  store ptr %13, ptr %a8, align 8
-  %14 = load ptr, ptr %a8, align 8
-  %buf9 = getelementptr %arena.1, ptr %14, i32 0, i32 0
-  %15 = load i64, ptr %size7, align 4
-  %16 = call ptr @calloc(i64 1, i64 %15)
-  store ptr %16, ptr %buf9, align 8
-  %17 = load ptr, ptr %a8, align 8
-  %offset10 = getelementptr %arena.1, ptr %17, i32 0, i32 1
-  store i64 0, ptr %offset10, align 4
-  %18 = load ptr, ptr %a8, align 8
-  ret ptr %18
-
-entrypoint11:                                     ; No predecessors!
-  %size12 = alloca i64, align 8
-  store i64 %0, ptr %size12, align 4
-  %19 = call ptr @calloc(i64 1, i64 16)
-  %a13 = alloca ptr, align 8
-  store ptr %19, ptr %a13, align 8
-  %20 = load ptr, ptr %a13, align 8
-  %buf14 = getelementptr %arena.4, ptr %20, i32 0, i32 0
-  %21 = load i64, ptr %size12, align 4
-  %22 = call ptr @calloc(i64 1, i64 %21)
-  store ptr %22, ptr %buf14, align 8
-  %23 = load ptr, ptr %a13, align 8
-  %offset15 = getelementptr %arena.4, ptr %23, i32 0, i32 1
-  store i64 0, ptr %offset15, align 4
-  %24 = load ptr, ptr %a13, align 8
+entrypoint8:                                      ; No predecessors!
+  %size9 = alloca i64, align 8
+  store i64 %0, ptr %size9, align 4
+  %17 = call ptr @calloc(i64 1, i64 24)
+  %a10 = alloca ptr, align 8
+  store ptr %17, ptr %a10, align 8
+  %18 = load ptr, ptr %a10, align 8
+  %buf11 = getelementptr %arena.1, ptr %18, i32 0, i32 0
+  %19 = load i64, ptr %size9, align 4
+  %20 = call ptr @calloc(i64 1, i64 %19)
+  store ptr %20, ptr %buf11, align 8
+  %21 = load ptr, ptr %a10, align 8
+  %offset12 = getelementptr %arena.1, ptr %21, i32 0, i32 1
+  store i64 0, ptr %offset12, align 4
+  %22 = load ptr, ptr %a10, align 8
+  %size13 = getelementptr %arena.1, ptr %22, i32 0, i32 2
+  %23 = load i64, ptr %size9, align 4
+  store i64 %23, ptr %size13, align 4
+  %24 = load ptr, ptr %a10, align 8
   ret ptr %24
+
+entrypoint14:                                     ; No predecessors!
+  %size15 = alloca i64, align 8
+  store i64 %0, ptr %size15, align 4
+  %25 = call ptr @calloc(i64 1, i64 24)
+  %a16 = alloca ptr, align 8
+  store ptr %25, ptr %a16, align 8
+  %26 = load ptr, ptr %a16, align 8
+  %buf17 = getelementptr %arena.4, ptr %26, i32 0, i32 0
+  %27 = load i64, ptr %size15, align 4
+  %28 = call ptr @calloc(i64 1, i64 %27)
+  store ptr %28, ptr %buf17, align 8
+  %29 = load ptr, ptr %a16, align 8
+  %offset18 = getelementptr %arena.4, ptr %29, i32 0, i32 1
+  store i64 0, ptr %offset18, align 4
+  %30 = load ptr, ptr %a16, align 8
+  %size19 = getelementptr %arena.4, ptr %30, i32 0, i32 2
+  %31 = load i64, ptr %size15, align 4
+  store i64 %31, ptr %size19, align 4
+  %32 = load ptr, ptr %a16, align 8
+  ret ptr %32
 }
 
 define void @arena_free(ptr %0) {
@@ -2070,97 +2086,137 @@ entrypoint:
   %2 = load ptr, ptr %a, align 8
   %offset = getelementptr %arena, ptr %2, i32 0, i32 1
   %3 = load i64, ptr %offset, align 4
-  %old_offset = alloca i64, align 8
-  store i64 %3, ptr %old_offset, align 4
-  %4 = load ptr, ptr %a, align 8
-  %offset1 = getelementptr %arena, ptr %4, i32 0, i32 1
-  %5 = load ptr, ptr %a, align 8
-  %offset2 = getelementptr %arena, ptr %5, i32 0, i32 1
-  %6 = load i64, ptr %offset2, align 4
-  %7 = load i64, ptr %size, align 4
-  %8 = add i64 %6, %7
-  store i64 %8, ptr %offset1, align 4
+  %4 = load i64, ptr %size, align 4
+  %5 = add i64 %3, %4
+  %6 = load ptr, ptr %a, align 8
+  %size1 = getelementptr %arena, ptr %6, i32 0, i32 2
+  %7 = load i64, ptr %size1, align 4
+  %8 = icmp slt i64 %5, %7
+  call void @assert(i1 %8)
   %9 = load ptr, ptr %a, align 8
-  %buf = getelementptr %arena, ptr %9, i32 0, i32 0
-  %10 = load ptr, ptr %buf, align 8
-  %11 = load i64, ptr %old_offset, align 4
-  %12 = getelementptr i8, ptr %10, i64 %11
-  ret ptr %12
+  %offset2 = getelementptr %arena, ptr %9, i32 0, i32 1
+  %10 = load i64, ptr %offset2, align 4
+  %old_offset = alloca i64, align 8
+  store i64 %10, ptr %old_offset, align 4
+  %11 = load ptr, ptr %a, align 8
+  %offset3 = getelementptr %arena, ptr %11, i32 0, i32 1
+  %12 = load ptr, ptr %a, align 8
+  %offset4 = getelementptr %arena, ptr %12, i32 0, i32 1
+  %13 = load i64, ptr %offset4, align 4
+  %14 = load i64, ptr %size, align 4
+  %15 = add i64 %13, %14
+  store i64 %15, ptr %offset3, align 4
+  %16 = load ptr, ptr %a, align 8
+  %buf = getelementptr %arena, ptr %16, i32 0, i32 0
+  %17 = load ptr, ptr %buf, align 8
+  %18 = load i64, ptr %old_offset, align 4
+  %19 = getelementptr i8, ptr %17, i64 %18
+  ret ptr %19
 
-entrypoint3:                                      ; No predecessors!
-  %a4 = alloca ptr, align 8
-  store ptr %0, ptr %a4, align 8
-  %size5 = alloca i64, align 8
-  store i64 %1, ptr %size5, align 4
-  %13 = load ptr, ptr %a4, align 8
-  %offset6 = getelementptr %arena.0, ptr %13, i32 0, i32 1
-  %14 = load i64, ptr %offset6, align 4
-  %old_offset7 = alloca i64, align 8
-  store i64 %14, ptr %old_offset7, align 4
-  %15 = load ptr, ptr %a4, align 8
-  %offset8 = getelementptr %arena.0, ptr %15, i32 0, i32 1
-  %16 = load ptr, ptr %a4, align 8
-  %offset9 = getelementptr %arena.0, ptr %16, i32 0, i32 1
-  %17 = load i64, ptr %offset9, align 4
-  %18 = load i64, ptr %size5, align 4
-  %19 = add i64 %17, %18
-  store i64 %19, ptr %offset8, align 4
-  %20 = load ptr, ptr %a4, align 8
-  %buf10 = getelementptr %arena.0, ptr %20, i32 0, i32 0
-  %21 = load ptr, ptr %buf10, align 8
-  %22 = load i64, ptr %old_offset7, align 4
-  %23 = getelementptr i8, ptr %21, i64 %22
-  ret ptr %23
+entrypoint5:                                      ; No predecessors!
+  %a6 = alloca ptr, align 8
+  store ptr %0, ptr %a6, align 8
+  %size7 = alloca i64, align 8
+  store i64 %1, ptr %size7, align 4
+  %20 = load ptr, ptr %a6, align 8
+  %offset8 = getelementptr %arena.0, ptr %20, i32 0, i32 1
+  %21 = load i64, ptr %offset8, align 4
+  %22 = load i64, ptr %size7, align 4
+  %23 = add i64 %21, %22
+  %24 = load ptr, ptr %a6, align 8
+  %size9 = getelementptr %arena.0, ptr %24, i32 0, i32 2
+  %25 = load i64, ptr %size9, align 4
+  %26 = icmp slt i64 %23, %25
+  call void @assert(i1 %26)
+  %27 = load ptr, ptr %a6, align 8
+  %offset10 = getelementptr %arena.0, ptr %27, i32 0, i32 1
+  %28 = load i64, ptr %offset10, align 4
+  %old_offset11 = alloca i64, align 8
+  store i64 %28, ptr %old_offset11, align 4
+  %29 = load ptr, ptr %a6, align 8
+  %offset12 = getelementptr %arena.0, ptr %29, i32 0, i32 1
+  %30 = load ptr, ptr %a6, align 8
+  %offset13 = getelementptr %arena.0, ptr %30, i32 0, i32 1
+  %31 = load i64, ptr %offset13, align 4
+  %32 = load i64, ptr %size7, align 4
+  %33 = add i64 %31, %32
+  store i64 %33, ptr %offset12, align 4
+  %34 = load ptr, ptr %a6, align 8
+  %buf14 = getelementptr %arena.0, ptr %34, i32 0, i32 0
+  %35 = load ptr, ptr %buf14, align 8
+  %36 = load i64, ptr %old_offset11, align 4
+  %37 = getelementptr i8, ptr %35, i64 %36
+  ret ptr %37
 
-entrypoint11:                                     ; No predecessors!
-  %a12 = alloca ptr, align 8
-  store ptr %0, ptr %a12, align 8
-  %size13 = alloca i64, align 8
-  store i64 %1, ptr %size13, align 4
-  %24 = load ptr, ptr %a12, align 8
-  %offset14 = getelementptr %arena.1, ptr %24, i32 0, i32 1
-  %25 = load i64, ptr %offset14, align 4
-  %old_offset15 = alloca i64, align 8
-  store i64 %25, ptr %old_offset15, align 4
-  %26 = load ptr, ptr %a12, align 8
-  %offset16 = getelementptr %arena.1, ptr %26, i32 0, i32 1
-  %27 = load ptr, ptr %a12, align 8
-  %offset17 = getelementptr %arena.1, ptr %27, i32 0, i32 1
-  %28 = load i64, ptr %offset17, align 4
-  %29 = load i64, ptr %size13, align 4
-  %30 = add i64 %28, %29
-  store i64 %30, ptr %offset16, align 4
-  %31 = load ptr, ptr %a12, align 8
-  %buf18 = getelementptr %arena.1, ptr %31, i32 0, i32 0
-  %32 = load ptr, ptr %buf18, align 8
-  %33 = load i64, ptr %old_offset15, align 4
-  %34 = getelementptr i8, ptr %32, i64 %33
-  ret ptr %34
-
-entrypoint19:                                     ; No predecessors!
-  %a20 = alloca ptr, align 8
-  store ptr %0, ptr %a20, align 8
-  %size21 = alloca i64, align 8
-  store i64 %1, ptr %size21, align 4
-  %35 = load ptr, ptr %a20, align 8
-  %offset22 = getelementptr %arena.4, ptr %35, i32 0, i32 1
-  %36 = load i64, ptr %offset22, align 4
-  %old_offset23 = alloca i64, align 8
-  store i64 %36, ptr %old_offset23, align 4
-  %37 = load ptr, ptr %a20, align 8
-  %offset24 = getelementptr %arena.4, ptr %37, i32 0, i32 1
-  %38 = load ptr, ptr %a20, align 8
-  %offset25 = getelementptr %arena.4, ptr %38, i32 0, i32 1
-  %39 = load i64, ptr %offset25, align 4
-  %40 = load i64, ptr %size21, align 4
+entrypoint15:                                     ; No predecessors!
+  %a16 = alloca ptr, align 8
+  store ptr %0, ptr %a16, align 8
+  %size17 = alloca i64, align 8
+  store i64 %1, ptr %size17, align 4
+  %38 = load ptr, ptr %a16, align 8
+  %offset18 = getelementptr %arena.1, ptr %38, i32 0, i32 1
+  %39 = load i64, ptr %offset18, align 4
+  %40 = load i64, ptr %size17, align 4
   %41 = add i64 %39, %40
-  store i64 %41, ptr %offset24, align 4
-  %42 = load ptr, ptr %a20, align 8
-  %buf26 = getelementptr %arena.4, ptr %42, i32 0, i32 0
-  %43 = load ptr, ptr %buf26, align 8
-  %44 = load i64, ptr %old_offset23, align 4
-  %45 = getelementptr i8, ptr %43, i64 %44
-  ret ptr %45
+  %42 = load ptr, ptr %a16, align 8
+  %size19 = getelementptr %arena.1, ptr %42, i32 0, i32 2
+  %43 = load i64, ptr %size19, align 4
+  %44 = icmp slt i64 %41, %43
+  call void @assert(i1 %44)
+  %45 = load ptr, ptr %a16, align 8
+  %offset20 = getelementptr %arena.1, ptr %45, i32 0, i32 1
+  %46 = load i64, ptr %offset20, align 4
+  %old_offset21 = alloca i64, align 8
+  store i64 %46, ptr %old_offset21, align 4
+  %47 = load ptr, ptr %a16, align 8
+  %offset22 = getelementptr %arena.1, ptr %47, i32 0, i32 1
+  %48 = load ptr, ptr %a16, align 8
+  %offset23 = getelementptr %arena.1, ptr %48, i32 0, i32 1
+  %49 = load i64, ptr %offset23, align 4
+  %50 = load i64, ptr %size17, align 4
+  %51 = add i64 %49, %50
+  store i64 %51, ptr %offset22, align 4
+  %52 = load ptr, ptr %a16, align 8
+  %buf24 = getelementptr %arena.1, ptr %52, i32 0, i32 0
+  %53 = load ptr, ptr %buf24, align 8
+  %54 = load i64, ptr %old_offset21, align 4
+  %55 = getelementptr i8, ptr %53, i64 %54
+  ret ptr %55
+
+entrypoint25:                                     ; No predecessors!
+  %a26 = alloca ptr, align 8
+  store ptr %0, ptr %a26, align 8
+  %size27 = alloca i64, align 8
+  store i64 %1, ptr %size27, align 4
+  %56 = load ptr, ptr %a26, align 8
+  %offset28 = getelementptr %arena.4, ptr %56, i32 0, i32 1
+  %57 = load i64, ptr %offset28, align 4
+  %58 = load i64, ptr %size27, align 4
+  %59 = add i64 %57, %58
+  %60 = load ptr, ptr %a26, align 8
+  %size29 = getelementptr %arena.4, ptr %60, i32 0, i32 2
+  %61 = load i64, ptr %size29, align 4
+  %62 = icmp slt i64 %59, %61
+  call void @assert(i1 %62)
+  %63 = load ptr, ptr %a26, align 8
+  %offset30 = getelementptr %arena.4, ptr %63, i32 0, i32 1
+  %64 = load i64, ptr %offset30, align 4
+  %old_offset31 = alloca i64, align 8
+  store i64 %64, ptr %old_offset31, align 4
+  %65 = load ptr, ptr %a26, align 8
+  %offset32 = getelementptr %arena.4, ptr %65, i32 0, i32 1
+  %66 = load ptr, ptr %a26, align 8
+  %offset33 = getelementptr %arena.4, ptr %66, i32 0, i32 1
+  %67 = load i64, ptr %offset33, align 4
+  %68 = load i64, ptr %size27, align 4
+  %69 = add i64 %67, %68
+  store i64 %69, ptr %offset32, align 4
+  %70 = load ptr, ptr %a26, align 8
+  %buf34 = getelementptr %arena.4, ptr %70, i32 0, i32 0
+  %71 = load ptr, ptr %buf34, align 8
+  %72 = load i64, ptr %old_offset31, align 4
+  %73 = getelementptr i8, ptr %71, i64 %72
+  ret ptr %73
 }
 
 declare i64 @strlen(ptr)

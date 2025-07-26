@@ -7,12 +7,14 @@ import "!stdlib.pry";
 let arena = struct {
 	buf: *void,
 	offset: i64,
+	size: i64,
 };
 
 let arena_init = (size: i64) => *arena {
 	let a = cast(*arena, calloc(1, sizeof(arena)));
 	(*a).buf = calloc(1, size);
 	(*a).offset = 0;
+	(*a).size = size;
 	return a;
 };
 
@@ -23,6 +25,7 @@ let arena_free = (a: *arena) => void {
 };
 
 let arena_alloc = (a: *arena, size: i64) => *void {
+	assert((*a).offset + size < (*a).size);
 	let old_offset = (*a).offset;
 	(*a).offset = (*a).offset + size;
 	return cast(*void, cast(*i8, (*a).buf) + cast(*i8, old_offset));
