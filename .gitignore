@@ -3,6 +3,7 @@
 *.o
 *.s
 *.out
+stage*
 
 zig-out/
 .zig-cache/
