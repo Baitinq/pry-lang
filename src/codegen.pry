@@ -20,69 +20,6 @@ let Environment = struct {
 	arena: *arena,
 };
 
-let environment_create_scope = (e: *Environment) => void {
-	let scope = cast(*Scope, arena_alloc((*e).arena, sizeof(Scope)));
-	(*scope).variables = hashmap_init(16, (*e).arena);
-	(*((*e).scope_stack + cast(**Scope, (*e).scope_stack_len))) = scope;
-	(*e).scope_stack_len = (*e).scope_stack_len + 1;
-
-	return;
-};
-
-let environment_drop_scope = (e: *Environment) => void {
-	(*e).scope_stack_len = (*e).scope_stack_len - 1;
-
-	return;
-};
-
-let environment_get_variable = (e: *Environment, name: *i8) => *Variable {
-	let i = (*e).scope_stack_len;
-	let variable = cast(*Variable, null);
-
-	while i > 0 {
-		i = i - 1;
-		let scope = *(((*e).scope_stack + cast(**Scope, i)));
-		assert(scope != cast(*Scope, null));
-		let v = cast(*Variable, hashmap_get((*scope).variables, name));
-		if v != cast(*Variable, null) {
-			if variable == cast(*Variable, null) {
-				variable = v;
-			};
-			let stack_level = cast(*i64, arena_alloc((*e).arena, sizeof(i64)));
-			(*stack_level) = i;
-			(*variable).stack_level = stack_level;
-		};
-	};
-
-	return variable;
-};
-
-let environment_add_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
-        /* TODO: Dont allow shadowing if value != value or type != type (across things) */
-	let top_scope = *(((*e).scope_stack + cast(**Scope, (*e).scope_stack_len - 1)));
-	hashmap_put((*top_scope).variables, name, cast(*void, variable));
-
-	return;
-};
-
-let environment_set_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
-	let existing = environment_get_variable(e, name);
-	(*existing) = (*variable);
-
-	return;
-};
-
-let environment_init = (alloc: *arena) => *Environment {
-	let e = cast(*Environment, arena_alloc(alloc, sizeof(Environment)));
-	(*e).scope_stack = cast(**Scope, arena_alloc(alloc, sizeof(*Scope) * 40));
-	(*e).scope_stack_len = 0;
-	(*e).arena = alloc;
-
-	environment_create_scope(e);
-
-	return e;
-};
-
 let codegen = struct {
 	llvm_module: LLVMModuleRef,
 	llvm_context: LLVMContextRef,
@@ -95,41 +32,6 @@ let codegen = struct {
 	current_function: LLVMValueRef,
 	current_function_retur_type: *Node,
 	llvm_target_data: LLVMTargetDataRef,
-};
-
-let codegen_init = (alloc: *arena) => *codegen {
-	LLVMInitializeAllTargetInfos();
-	LLVMInitializeAllTargetMCs();
-	LLVMInitializeAllTargets();
-	LLVMInitializeAllAsmPrinters();
-	LLVMInitializeAllAsmParsers();
-
-	let module = LLVMModuleCreateWithName("module");
-        let context = LLVMGetGlobalContext();
-        let builder = LLVMCreateBuilder();
-	
-	let c = cast(*codegen, arena_alloc(alloc, sizeof(codegen)));
-	
-	(*c).llvm_module = module;
-	(*c).llvm_target_data = LLVMGetModuleDataLayout(module);
-	(*c).llvm_context = context;
-	(*c).builder = builder;
-	(*c).arena = alloc;
-	(*c).environment = environment_init(alloc);
-
-	return c;
-};
-
-let create_node = (c: *codegen, n: Node) => *Node {
-	let res = cast(*Node, arena_alloc((*c).arena, sizeof(Node)));
-	*res = n;
-	return res;
-};
-
-let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
-	let v = cast(*Variable, arena_alloc((*c).arena, sizeof(Variable)));
-	*v = variable;
-	return v;
 };
 
 let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => bool {
@@ -235,6 +137,107 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 	return false;
 };
 
+let environment_create_scope = (e: *Environment) => void {
+	let scope = cast(*Scope, arena_alloc((*e).arena, sizeof(Scope)));
+	(*scope).variables = hashmap_init(16, (*e).arena);
+	(*((*e).scope_stack + cast(**Scope, (*e).scope_stack_len))) = scope;
+	(*e).scope_stack_len = (*e).scope_stack_len + 1;
+
+	return;
+};
+
+let environment_drop_scope = (e: *Environment) => void {
+	(*e).scope_stack_len = (*e).scope_stack_len - 1;
+
+	return;
+};
+
+let environment_get_variable = (e: *Environment, name: *i8) => *Variable {
+	let i = (*e).scope_stack_len;
+	let variable = cast(*Variable, null);
+
+	while i > 0 {
+		i = i - 1;
+		let scope = *(((*e).scope_stack + cast(**Scope, i)));
+		assert(scope != cast(*Scope, null));
+		let v = cast(*Variable, hashmap_get((*scope).variables, name));
+		if v != cast(*Variable, null) {
+			if variable == cast(*Variable, null) {
+				variable = v;
+			};
+			let stack_level = cast(*i64, arena_alloc((*e).arena, sizeof(i64)));
+			(*stack_level) = i;
+			(*variable).stack_level = stack_level;
+		};
+	};
+
+	return variable;
+};
+
+let environment_add_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
+	let existing = environment_get_variable(e, name);
+	if existing != cast(*Variable, null) {
+		assert(compare_types(cast(*codegen, null), (*existing).node_type, (*variable).node_type, false));
+	};
+	let top_scope = *(((*e).scope_stack + cast(**Scope, (*e).scope_stack_len - 1)));
+	hashmap_put((*top_scope).variables, name, cast(*void, variable));
+
+	return;
+};
+
+let environment_set_variable = (e: *Environment, name: *i8, variable: *Variable) => void {
+	let existing = environment_get_variable(e, name);
+	(*existing) = (*variable);
+
+	return;
+};
+
+let environment_init = (alloc: *arena) => *Environment {
+	let e = cast(*Environment, arena_alloc(alloc, sizeof(Environment)));
+	(*e).scope_stack = cast(**Scope, arena_alloc(alloc, sizeof(*Scope) * 40));
+	(*e).scope_stack_len = 0;
+	(*e).arena = alloc;
+
+	environment_create_scope(e);
+
+	return e;
+};
+
+let codegen_init = (alloc: *arena) => *codegen {
+	LLVMInitializeAllTargetInfos();
+	LLVMInitializeAllTargetMCs();
+	LLVMInitializeAllTargets();
+	LLVMInitializeAllAsmPrinters();
+	LLVMInitializeAllAsmParsers();
+
+	let module = LLVMModuleCreateWithName("module");
+        let context = LLVMGetGlobalContext();
+        let builder = LLVMCreateBuilder();
+	
+	let c = cast(*codegen, arena_alloc(alloc, sizeof(codegen)));
+	
+	(*c).llvm_module = module;
+	(*c).llvm_target_data = LLVMGetModuleDataLayout(module);
+	(*c).llvm_context = context;
+	(*c).builder = builder;
+	(*c).arena = alloc;
+	(*c).environment = environment_init(alloc);
+
+	return c;
+};
+
+let codegen_create_node = (c: *codegen, n: Node) => *Node {
+	let res = cast(*Node, arena_alloc((*c).arena, sizeof(Node)));
+	*res = n;
+	return res;
+};
+
+let codegen_create_variable = (c: *codegen, variable: Variable) => *Variable {
+	let v = cast(*Variable, arena_alloc((*c).arena, sizeof(Variable)));
+	*v = variable;
+	return v;
+};
+
 let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 	assert((*node).type >= NODE_TYPE_SIMPLE_TYPE and (*node).type <= NODE_TYPE_STRUCT_TYPE);
 	
@@ -318,9 +321,9 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 
 			i = i + 1;
 		};
-		let function_type = LLVMFunctionType(*retur_type, paramtypes, paramtypes_len, is_varargs);
+		let llvm_function_type = LLVMFunctionType(*retur_type, paramtypes, paramtypes_len, is_varargs);
 		let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
-		*r = function_type;
+		*r = llvm_function_type;
 		return r;
 	};
 
@@ -461,12 +464,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		inner_type.data = cast(*void, inner_type_data);
 
 		let node_type_data = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
-		(*node_type_data).type = create_node(c, inner_type);
+		(*node_type_data).type = codegen_create_node(c, inner_type);
 		let node_type = Node{};
 		node_type.type = NODE_TYPE_POINTER_TYPE;
 		node_type.data = cast(*void, node_type_data);
 
-		return codegen_generate_literal(c, LLVMConstNull(LLVMPointerType(LLVMInt8Type(), 0)), name, expression, create_node(c, node_type));
+		return codegen_generate_literal(c, LLVMConstNull(LLVMPointerType(LLVMInt8Type(), 0)), name, expression, codegen_create_node(c, node_type));
 	};
 
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
@@ -480,7 +483,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*d).underlying_type = cast(*Node, null);
 		node_type.data = cast(*void, d);
 		
-		return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, create_node(c, node_type));
+		return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_BOOLEAN) {
@@ -499,7 +502,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			int_value = 1;
 		};
 		
-		return codegen_generate_literal(c, LLVMConstInt(LLVMInt1Type(), int_value, 0), name, expression, create_node(c, node_type));
+		return codegen_generate_literal(c, LLVMConstInt(LLVMInt1Type(), int_value, 0), name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_CHAR) {
@@ -513,7 +516,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*d).underlying_type = cast(*Node, null);
 		node_type.data = cast(*void, d);
 		
-		return codegen_generate_literal(c, LLVMConstInt(LLVMInt8Type(), cast(i64, ch), 0), name, expression, create_node(c, node_type));
+		return codegen_generate_literal(c, LLVMConstInt(LLVMInt8Type(), cast(i64, ch), 0), name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_STRING) {
@@ -528,7 +531,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		inner_type.data = cast(*void, inner_type_data);
 
 		let node_type_data = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
-		(*node_type_data).type = create_node(c, inner_type);
+		(*node_type_data).type = codegen_create_node(c, inner_type);
 		let node_type = Node{};
 		node_type.type = NODE_TYPE_POINTER_TYPE;
 		node_type.data = cast(*void, node_type_data);
@@ -538,7 +541,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		v.type = cast(LLVMTypeRef, null);
 		v.stack_level = cast(*i64, null);
 		v.node = expression;
-		v.node_type = create_node(c, node_type);
+		v.node_type = codegen_create_node(c, node_type);
 
 		return codegen_create_variable(c, v);
 	};
@@ -649,7 +652,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*d).parameters_len = i;
 		(*d).retur_type = function_definition.retur_type;
 		let n = Node{};
-		let node_type = create_node(c, n);
+		let node_type = codegen_create_node(c, n);
 		(*node_type).type = NODE_TYPE_FUNCTION_TYPE;
 		(*node_type).data = cast(*void, d);
 
@@ -762,9 +765,9 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			LLVMAddIncoming(phi, fals_val, current_block, 1);
 			LLVMAddIncoming(phi, rhs_val, rhs_end_block, 1);
 
-			return codegen_generate_literal(c, phi, name, expression, create_node(c, node_type));
+			return codegen_generate_literal(c, phi, name, expression, codegen_create_node(c, node_type));
 		};
-		if !exp.an {
+		if !exp.an { /*TODO: Understand this */
 			let rhs_block = LLVMAppendBasicBlock((*c).current_function, "or_rhs");
 			let merge_block = LLVMAppendBasicBlock((*c).current_function, "or_merge");
 
@@ -796,7 +799,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			LLVMAddIncoming(phi, tru_val, current_block, 1);
 			LLVMAddIncoming(phi, rhs_val, rhs_end_block, 1);
 
-			return codegen_generate_literal(c, phi, name, expression, create_node(c, node_type));
+			return codegen_generate_literal(c, phi, name, expression, codegen_create_node(c, node_type));
 		};
 
 		assert(false);
@@ -847,7 +850,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*d).underlying_type = cast(*Node, null);
 		node_type.data = cast(*void, d);
 
-		return codegen_generate_literal(c, cmp, name, expression, create_node(c, node_type));
+		return codegen_generate_literal(c, cmp, name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_ADDITIVE_EXPRESSION) {
@@ -868,7 +871,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*d).underlying_type = cast(*Node, null);
 		node_type.data = cast(*void, d);
 
-		let pnode_type = create_node(c, node_type);
+		let pnode_type = codegen_create_node(c, node_type);
 
 		if exp.addition {
 			let nt = (*lhs_value).node_type;
@@ -938,7 +941,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			(*d).name = "bool";
 			(*d).underlying_type = cast(*Node, null);
 			node_type.data = cast(*void, d);
-			typ = create_node(c, node_type);
+			typ = codegen_create_node(c, node_type);
 		};
 		
 		if exp.typ == UNARY_EXPRESSION_TYPE_MINUS {
@@ -950,7 +953,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			(*d).name = "i64";
 			(*d).underlying_type = cast(*Node, null);
 			node_type.data = cast(*void, d);
-			typ = create_node(c, node_type);
+			typ = codegen_create_node(c, node_type);
 		};
 		
 		if exp.typ == UNARY_EXPRESSION_TYPE_STAR {
@@ -1023,7 +1026,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		v.type = cast(LLVMTypeRef, null);
 		v.stack_level = cast(*i64, null);
 		v.node = expression;
-		v.node_type = create_node(c, node_type);
+		v.node_type = codegen_create_node(c, node_type);
 		return codegen_create_variable(c, v);
 	};
 
@@ -1035,7 +1038,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let n = Node{};
 		n.type = NODE_TYPE_SIMPLE_TYPE;
 		n.data = cast(*void, dd);
-		let simple_type_node = create_node(c, n);
+		let simple_type_node = codegen_create_node(c, n);
 
 		let struc_type = LLVMStructCreateNamed((*c).llvm_context, name);
 
@@ -1308,10 +1311,10 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		i = i + 1;
 	};
 
-	let function_type = codegen_get_llvm_type(c, (*function).node_type);
-	assert(function_type != cast(*LLVMTypeRef, null));
+	let llvm_function_type = codegen_get_llvm_type(c, (*function).node_type);
+	assert(llvm_function_type != cast(*LLVMTypeRef, null));
 
-	let res = LLVMBuildCall2((*c).builder, *function_type, (*function).value, arguments, i, "");
+	let res = LLVMBuildCall2((*c).builder, *llvm_function_type, (*function).value, arguments, i, "");
 
 	let function_return_type = get_function_return_type(c, (*function).node_type);
 
@@ -1347,6 +1350,8 @@ let codegen_generate_if_statement = (c: *codegen, statement: *NODE_IF_STATEMENT_
 	let then_block = LLVMAppendBasicBlock((*c).current_function, "then_block");
 	LLVMPositionBuilderAtEnd((*c).builder, then_block);
 
+	environment_create_scope((*c).environment);
+
 	let i = 0;
 	while i < (*statement).statements_len {
 		let stmt = (*((*statement).statements + cast(**Node, i)));
@@ -1354,6 +1359,8 @@ let codegen_generate_if_statement = (c: *codegen, statement: *NODE_IF_STATEMENT_
 		assert(res == 0);
 		i = i + 1;
 	};
+	
+	environment_drop_scope((*c).environment);
 
 	let merge_block = LLVMAppendBasicBlock((*c).current_function, "merge_block");
 	let last_instr = LLVMGetLastInstruction(LLVMGetInsertBlock((*c).builder));
@@ -1386,6 +1393,9 @@ let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STAT
 	(*c).whil_block = whil_block;
 	
 	LLVMPositionBuilderAtEnd((*c).builder, inner_block);
+
+	environment_create_scope((*c).environment);
+
 	let i = 0;
 	while i < (*statement).statements_len {
 		let stmt = (*((*statement).statements + cast(**Node, i)));
@@ -1393,6 +1403,8 @@ let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STAT
 		assert(res == 0);
 		i = i + 1;
 	};
+	
+	environment_drop_scope((*c).environment);
 	
 	LLVMBuildBr((*c).builder, whil_block);
 	LLVMPositionBuilderAtEnd((*c).builder, outer_block);
