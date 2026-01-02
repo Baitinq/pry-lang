@@ -164,12 +164,8 @@ source_filename = "module"
 @77 = private unnamed_addr constant [2 x i8] c">\00", align 1
 @78 = private unnamed_addr constant [2 x i8] c".\00", align 1
 @79 = private unnamed_addr constant [40 x i8] c"Error at line %d: Unexpected character\0A\00", align 1
-@80 = private unnamed_addr constant [15 x i8] c"File size: %d\0A\00", align 1
-@81 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
-@82 = private unnamed_addr constant [15 x i8] c"Add token: %d\0A\00", align 1
-@83 = private unnamed_addr constant [18 x i8] c"PRINT TOKENS: %d\0A\00", align 1
-@84 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
-@85 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
+@80 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
+@81 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
 @TOKEN_IMPORT.4 = global i64 1
 @TOKEN_LET.5 = global i64 2
 @TOKEN_EXTERN.6 = global i64 3
@@ -206,86 +202,82 @@ source_filename = "module"
 @TOKEN_RPAREN.37 = global i64 31
 @TOKEN_LBRACE.38 = global i64 32
 @TOKEN_RBRACE.39 = global i64 33
-@86 = private unnamed_addr constant [8 x i8] c"Import\0A\00", align 1
-@87 = private unnamed_addr constant [5 x i8] c"Let\0A\00", align 1
-@88 = private unnamed_addr constant [8 x i8] c"Extern\0A\00", align 1
-@89 = private unnamed_addr constant [4 x i8] c"If\0A\00", align 1
-@90 = private unnamed_addr constant [7 x i8] c"While\0A\00", align 1
-@91 = private unnamed_addr constant [8 x i8] c"Return\0A\00", align 1
-@92 = private unnamed_addr constant [7 x i8] c"Break\0A\00", align 1
-@93 = private unnamed_addr constant [10 x i8] c"Continue\0A\00", align 1
-@94 = private unnamed_addr constant [7 x i8] c"Arrow\0A\00", align 1
-@95 = private unnamed_addr constant [8 x i8] c"Struct\0A\00", align 1
-@96 = private unnamed_addr constant [6 x i8] c"Type\0A\00", align 1
-@97 = private unnamed_addr constant [5 x i8] c"And\0A\00", align 1
-@98 = private unnamed_addr constant [4 x i8] c"Or\0A\00", align 1
-@99 = private unnamed_addr constant [16 x i8] c"Identifier: %s\0A\00", align 1
-@100 = private unnamed_addr constant [12 x i8] c"Number: %d\0A\00", align 1
-@101 = private unnamed_addr constant [13 x i8] c"Boolean: %d\0A\00", align 1
-@102 = private unnamed_addr constant [6 x i8] c"Null\0A\00", align 1
-@103 = private unnamed_addr constant [10 x i8] c"Char: %c\0A\00", align 1
-@104 = private unnamed_addr constant [12 x i8] c"String: %s\0A\00", align 1
-@105 = private unnamed_addr constant [8 x i8] c"Equals\0A\00", align 1
-@106 = private unnamed_addr constant [6 x i8] c"Plus\0A\00", align 1
-@107 = private unnamed_addr constant [7 x i8] c"Minus\0A\00", align 1
-@108 = private unnamed_addr constant [5 x i8] c"Mul\0A\00", align 1
-@109 = private unnamed_addr constant [5 x i8] c"Div\0A\00", align 1
-@110 = private unnamed_addr constant [5 x i8] c"Mod\0A\00", align 1
-@111 = private unnamed_addr constant [6 x i8] c"Bang\0A\00", align 1
-@112 = private unnamed_addr constant [6 x i8] c"Less\0A\00", align 1
-@113 = private unnamed_addr constant [9 x i8] c"Greater\0A\00", align 1
-@114 = private unnamed_addr constant [5 x i8] c"Dot\0A\00", align 1
-@115 = private unnamed_addr constant [11 x i8] c"Semicolon\0A\00", align 1
-@116 = private unnamed_addr constant [7 x i8] c"Comma\0A\00", align 1
-@117 = private unnamed_addr constant [7 x i8] c"Colon\0A\00", align 1
-@118 = private unnamed_addr constant [8 x i8] c"LParen\0A\00", align 1
-@119 = private unnamed_addr constant [8 x i8] c"RParen\0A\00", align 1
-@120 = private unnamed_addr constant [8 x i8] c"LBrace\0A\00", align 1
-@121 = private unnamed_addr constant [8 x i8] c"RBrace\0A\00", align 1
-@122 = private unnamed_addr constant [2 x i8] c"'\00", align 1
-@123 = private unnamed_addr constant [2 x i8] c"'\00", align 1
-@124 = private unnamed_addr constant [2 x i8] c"\22\00", align 1
-@125 = private unnamed_addr constant [2 x i8] c"\22\00", align 1
-@126 = private unnamed_addr constant [3 x i8] c"/*\00", align 1
-@127 = private unnamed_addr constant [3 x i8] c"*/\00", align 1
-@128 = private unnamed_addr constant [7 x i8] c"import\00", align 1
-@129 = private unnamed_addr constant [4 x i8] c"let\00", align 1
-@130 = private unnamed_addr constant [7 x i8] c"extern\00", align 1
-@131 = private unnamed_addr constant [3 x i8] c"if\00", align 1
-@132 = private unnamed_addr constant [6 x i8] c"while\00", align 1
-@133 = private unnamed_addr constant [7 x i8] c"return\00", align 1
-@134 = private unnamed_addr constant [6 x i8] c"break\00", align 1
-@135 = private unnamed_addr constant [9 x i8] c"continue\00", align 1
-@136 = private unnamed_addr constant [5 x i8] c"true\00", align 1
-@137 = private unnamed_addr constant [6 x i8] c"false\00", align 1
-@138 = private unnamed_addr constant [5 x i8] c"null\00", align 1
-@139 = private unnamed_addr constant [7 x i8] c"struct\00", align 1
-@140 = private unnamed_addr constant [8 x i8] c"newtype\00", align 1
-@141 = private unnamed_addr constant [4 x i8] c"and\00", align 1
-@142 = private unnamed_addr constant [3 x i8] c"or\00", align 1
-@143 = private unnamed_addr constant [3 x i8] c"=>\00", align 1
-@144 = private unnamed_addr constant [2 x i8] c";\00", align 1
-@145 = private unnamed_addr constant [2 x i8] c",\00", align 1
-@146 = private unnamed_addr constant [2 x i8] c":\00", align 1
-@147 = private unnamed_addr constant [2 x i8] c"(\00", align 1
-@148 = private unnamed_addr constant [2 x i8] c")\00", align 1
-@149 = private unnamed_addr constant [2 x i8] c"{\00", align 1
-@150 = private unnamed_addr constant [2 x i8] c"}\00", align 1
-@151 = private unnamed_addr constant [2 x i8] c"=\00", align 1
-@152 = private unnamed_addr constant [2 x i8] c"+\00", align 1
-@153 = private unnamed_addr constant [2 x i8] c"-\00", align 1
-@154 = private unnamed_addr constant [2 x i8] c"*\00", align 1
-@155 = private unnamed_addr constant [2 x i8] c"/\00", align 1
-@156 = private unnamed_addr constant [2 x i8] c"%\00", align 1
-@157 = private unnamed_addr constant [2 x i8] c"!\00", align 1
-@158 = private unnamed_addr constant [2 x i8] c"<\00", align 1
-@159 = private unnamed_addr constant [2 x i8] c">\00", align 1
-@160 = private unnamed_addr constant [2 x i8] c".\00", align 1
-@161 = private unnamed_addr constant [40 x i8] c"Error at line %d: Unexpected character\0A\00", align 1
-@162 = private unnamed_addr constant [15 x i8] c"File size: %d\0A\00", align 1
-@163 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
-@164 = private unnamed_addr constant [15 x i8] c"Add token: %d\0A\00", align 1
-@165 = private unnamed_addr constant [18 x i8] c"PRINT TOKENS: %d\0A\00", align 1
+@82 = private unnamed_addr constant [8 x i8] c"Import\0A\00", align 1
+@83 = private unnamed_addr constant [5 x i8] c"Let\0A\00", align 1
+@84 = private unnamed_addr constant [8 x i8] c"Extern\0A\00", align 1
+@85 = private unnamed_addr constant [4 x i8] c"If\0A\00", align 1
+@86 = private unnamed_addr constant [7 x i8] c"While\0A\00", align 1
+@87 = private unnamed_addr constant [8 x i8] c"Return\0A\00", align 1
+@88 = private unnamed_addr constant [7 x i8] c"Break\0A\00", align 1
+@89 = private unnamed_addr constant [10 x i8] c"Continue\0A\00", align 1
+@90 = private unnamed_addr constant [7 x i8] c"Arrow\0A\00", align 1
+@91 = private unnamed_addr constant [8 x i8] c"Struct\0A\00", align 1
+@92 = private unnamed_addr constant [6 x i8] c"Type\0A\00", align 1
+@93 = private unnamed_addr constant [5 x i8] c"And\0A\00", align 1
+@94 = private unnamed_addr constant [4 x i8] c"Or\0A\00", align 1
+@95 = private unnamed_addr constant [16 x i8] c"Identifier: %s\0A\00", align 1
+@96 = private unnamed_addr constant [12 x i8] c"Number: %d\0A\00", align 1
+@97 = private unnamed_addr constant [13 x i8] c"Boolean: %d\0A\00", align 1
+@98 = private unnamed_addr constant [6 x i8] c"Null\0A\00", align 1
+@99 = private unnamed_addr constant [10 x i8] c"Char: %c\0A\00", align 1
+@100 = private unnamed_addr constant [12 x i8] c"String: %s\0A\00", align 1
+@101 = private unnamed_addr constant [8 x i8] c"Equals\0A\00", align 1
+@102 = private unnamed_addr constant [6 x i8] c"Plus\0A\00", align 1
+@103 = private unnamed_addr constant [7 x i8] c"Minus\0A\00", align 1
+@104 = private unnamed_addr constant [5 x i8] c"Mul\0A\00", align 1
+@105 = private unnamed_addr constant [5 x i8] c"Div\0A\00", align 1
+@106 = private unnamed_addr constant [5 x i8] c"Mod\0A\00", align 1
+@107 = private unnamed_addr constant [6 x i8] c"Bang\0A\00", align 1
+@108 = private unnamed_addr constant [6 x i8] c"Less\0A\00", align 1
+@109 = private unnamed_addr constant [9 x i8] c"Greater\0A\00", align 1
+@110 = private unnamed_addr constant [5 x i8] c"Dot\0A\00", align 1
+@111 = private unnamed_addr constant [11 x i8] c"Semicolon\0A\00", align 1
+@112 = private unnamed_addr constant [7 x i8] c"Comma\0A\00", align 1
+@113 = private unnamed_addr constant [7 x i8] c"Colon\0A\00", align 1
+@114 = private unnamed_addr constant [8 x i8] c"LParen\0A\00", align 1
+@115 = private unnamed_addr constant [8 x i8] c"RParen\0A\00", align 1
+@116 = private unnamed_addr constant [8 x i8] c"LBrace\0A\00", align 1
+@117 = private unnamed_addr constant [8 x i8] c"RBrace\0A\00", align 1
+@118 = private unnamed_addr constant [2 x i8] c"'\00", align 1
+@119 = private unnamed_addr constant [2 x i8] c"'\00", align 1
+@120 = private unnamed_addr constant [2 x i8] c"\22\00", align 1
+@121 = private unnamed_addr constant [2 x i8] c"\22\00", align 1
+@122 = private unnamed_addr constant [3 x i8] c"/*\00", align 1
+@123 = private unnamed_addr constant [3 x i8] c"*/\00", align 1
+@124 = private unnamed_addr constant [7 x i8] c"import\00", align 1
+@125 = private unnamed_addr constant [4 x i8] c"let\00", align 1
+@126 = private unnamed_addr constant [7 x i8] c"extern\00", align 1
+@127 = private unnamed_addr constant [3 x i8] c"if\00", align 1
+@128 = private unnamed_addr constant [6 x i8] c"while\00", align 1
+@129 = private unnamed_addr constant [7 x i8] c"return\00", align 1
+@130 = private unnamed_addr constant [6 x i8] c"break\00", align 1
+@131 = private unnamed_addr constant [9 x i8] c"continue\00", align 1
+@132 = private unnamed_addr constant [5 x i8] c"true\00", align 1
+@133 = private unnamed_addr constant [6 x i8] c"false\00", align 1
+@134 = private unnamed_addr constant [5 x i8] c"null\00", align 1
+@135 = private unnamed_addr constant [7 x i8] c"struct\00", align 1
+@136 = private unnamed_addr constant [8 x i8] c"newtype\00", align 1
+@137 = private unnamed_addr constant [4 x i8] c"and\00", align 1
+@138 = private unnamed_addr constant [3 x i8] c"or\00", align 1
+@139 = private unnamed_addr constant [3 x i8] c"=>\00", align 1
+@140 = private unnamed_addr constant [2 x i8] c";\00", align 1
+@141 = private unnamed_addr constant [2 x i8] c",\00", align 1
+@142 = private unnamed_addr constant [2 x i8] c":\00", align 1
+@143 = private unnamed_addr constant [2 x i8] c"(\00", align 1
+@144 = private unnamed_addr constant [2 x i8] c")\00", align 1
+@145 = private unnamed_addr constant [2 x i8] c"{\00", align 1
+@146 = private unnamed_addr constant [2 x i8] c"}\00", align 1
+@147 = private unnamed_addr constant [2 x i8] c"=\00", align 1
+@148 = private unnamed_addr constant [2 x i8] c"+\00", align 1
+@149 = private unnamed_addr constant [2 x i8] c"-\00", align 1
+@150 = private unnamed_addr constant [2 x i8] c"*\00", align 1
+@151 = private unnamed_addr constant [2 x i8] c"/\00", align 1
+@152 = private unnamed_addr constant [2 x i8] c"%\00", align 1
+@153 = private unnamed_addr constant [2 x i8] c"!\00", align 1
+@154 = private unnamed_addr constant [2 x i8] c"<\00", align 1
+@155 = private unnamed_addr constant [2 x i8] c">\00", align 1
+@156 = private unnamed_addr constant [2 x i8] c".\00", align 1
+@157 = private unnamed_addr constant [40 x i8] c"Error at line %d: Unexpected character\0A\00", align 1
 @NODE_PROGRAM = global i64 1
 @NODE_STATEMENT = global i64 2
 @NODE_ASSIGNMENT_STATEMENT = global i64 3
@@ -331,26 +323,25 @@ source_filename = "module"
 @RELATIONAL_EXPRESSION_TYPE_LE = global i64 1
 @RELATIONAL_EXPRESSION_TYPE_LT = global i64 2
 @RELATIONAL_EXPRESSION_TYPE_GT = global i64 3
-@166 = private unnamed_addr constant [5 x i8] c"cast\00", align 1
-@167 = private unnamed_addr constant [7 x i8] c"sizeof\00", align 1
-@168 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@169 = private unnamed_addr constant [16 x i8] c"STRUCT TYP: %d\0A\00", align 1
-@170 = private unnamed_addr constant [43 x i8] c"Error at line %d: Unexpected end of input\0A\00", align 1
-@171 = private unnamed_addr constant [48 x i8] c"Error at line %d: Import path must be a string\0A\00", align 1
-@172 = private unnamed_addr constant [9 x i8] c"./std/%s\00", align 1
-@173 = private unnamed_addr constant [2 x i8] c".\00", align 1
-@174 = private unnamed_addr constant [52 x i8] c"Error at line %d: Cannot open directory for import\0A\00", align 1
-@175 = private unnamed_addr constant [45 x i8] c"Error at line %d: Cannot open imported file\0A\00", align 1
-@176 = private unnamed_addr constant [36 x i8] c"Error at line %d: Unexpected token\0A\00", align 1
-@177 = private unnamed_addr constant [45 x i8] c"Error at line %d: Failed to parse statement\0A\00", align 1
-@178 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
-@179 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
+@158 = private unnamed_addr constant [5 x i8] c"cast\00", align 1
+@159 = private unnamed_addr constant [7 x i8] c"sizeof\00", align 1
+@160 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@161 = private unnamed_addr constant [43 x i8] c"Error at line %d: Unexpected end of input\0A\00", align 1
+@162 = private unnamed_addr constant [48 x i8] c"Error at line %d: Import path must be a string\0A\00", align 1
+@163 = private unnamed_addr constant [9 x i8] c"./std/%s\00", align 1
+@164 = private unnamed_addr constant [2 x i8] c".\00", align 1
+@165 = private unnamed_addr constant [52 x i8] c"Error at line %d: Cannot open directory for import\0A\00", align 1
+@166 = private unnamed_addr constant [45 x i8] c"Error at line %d: Cannot open imported file\0A\00", align 1
+@167 = private unnamed_addr constant [52 x i8] c"Error at line %d: expected ';' at end of statement\0A\00", align 1
+@168 = private unnamed_addr constant [45 x i8] c"Error at line %d: Failed to parse statement\0A\00", align 1
+@169 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
+@170 = private unnamed_addr constant [18 x i8] c"ASSERTION FAILED\0A\00", align 1
 @LLVMCodeGenLevelDefault = global i64 2
 @LLVMRelocDefault = global i64 0
 @LLVMCodeModelDefault = global i64 0
 @LLVMAbortProcessAction = global i64 0
 @LLVMObjectFile = global i64 1
-@180 = global i64 5
+@171 = global i64 5
 @LLVMIntEQ = global i64 32
 @LLVMIntNE = global i64 33
 @LLVMIntUGT = global i64 34
@@ -361,99 +352,98 @@ source_filename = "module"
 @LLVMIntSGE = global i64 39
 @LLVMIntSLT = global i64 40
 @LLVMIntSLE = global i64 41
-@181 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
-@182 = private unnamed_addr constant [27 x i8] c"Types do not match: %d != \00", align 1
-@183 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-@184 = private unnamed_addr constant [34 x i8] c"Simple types do not match: %s != \00", align 1
-@185 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
-@186 = private unnamed_addr constant [36 x i8] c"Function return types do not match\0A\00", align 1
-@187 = private unnamed_addr constant [41 x i8] c"Function parameter lengths do not match\0A\00", align 1
-@188 = private unnamed_addr constant [39 x i8] c"Function parameter types do not match\0A\00", align 1
+@172 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
+@173 = private unnamed_addr constant [27 x i8] c"Types do not match: %d != \00", align 1
+@174 = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
+@175 = private unnamed_addr constant [34 x i8] c"Simple types do not match: %s != \00", align 1
+@176 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
+@177 = private unnamed_addr constant [36 x i8] c"Function return types do not match\0A\00", align 1
+@178 = private unnamed_addr constant [41 x i8] c"Function parameter lengths do not match\0A\00", align 1
+@179 = private unnamed_addr constant [39 x i8] c"Function parameter types do not match\0A\00", align 1
+@180 = private unnamed_addr constant [5 x i8] c"void\00", align 1
+@181 = private unnamed_addr constant [5 x i8] c"void\00", align 1
+@182 = private unnamed_addr constant [28 x i8] c"Pointer types do not match\0A\00", align 1
+@183 = private unnamed_addr constant [35 x i8] c"Struct field lengths do not match\0A\00", align 1
+@184 = private unnamed_addr constant [33 x i8] c"Struct field types do not match\0A\00", align 1
+@185 = private unnamed_addr constant [7 x i8] c"module\00", align 1
+@186 = private unnamed_addr constant [3 x i8] c"i8\00", align 1
+@187 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
+@188 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
 @189 = private unnamed_addr constant [5 x i8] c"void\00", align 1
-@190 = private unnamed_addr constant [5 x i8] c"void\00", align 1
-@191 = private unnamed_addr constant [28 x i8] c"Pointer types do not match\0A\00", align 1
-@192 = private unnamed_addr constant [35 x i8] c"Struct field lengths do not match\0A\00", align 1
-@193 = private unnamed_addr constant [33 x i8] c"Struct field types do not match\0A\00", align 1
-@194 = private unnamed_addr constant [7 x i8] c"module\00", align 1
-@195 = private unnamed_addr constant [3 x i8] c"i8\00", align 1
-@196 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
-@197 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@190 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
+@191 = private unnamed_addr constant [32 x i8] c"Error at line %d: Unknown type\0A\00", align 1
+@192 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
+@193 = private unnamed_addr constant [41 x i8] c"Error at line %d: Cannot determine type\0A\00", align 1
+@194 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@195 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@196 = private unnamed_addr constant [45 x i8] c"Error at line %d: Field not found in struct\0A\00", align 1
+@197 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @198 = private unnamed_addr constant [5 x i8] c"void\00", align 1
-@199 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
-@200 = private unnamed_addr constant [32 x i8] c"Error at line %d: Unknown type\0A\00", align 1
-@201 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
-@202 = private unnamed_addr constant [41 x i8] c"Error at line %d: Cannot determine type\0A\00", align 1
-@203 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@199 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
+@200 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@201 = private unnamed_addr constant [3 x i8] c"i8\00", align 1
+@202 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@203 = private unnamed_addr constant [3 x i8] c"i8\00", align 1
 @204 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@205 = private unnamed_addr constant [45 x i8] c"Error at line %d: Field not found in struct\0A\00", align 1
-@206 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@207 = private unnamed_addr constant [5 x i8] c"void\00", align 1
-@208 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
+@205 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@206 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
+@207 = private unnamed_addr constant [13 x i8] c"unnamed_func\00", align 1
+@208 = private unnamed_addr constant [11 x i8] c"entrypoint\00", align 1
 @209 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
-@210 = private unnamed_addr constant [3 x i8] c"i8\00", align 1
-@211 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@212 = private unnamed_addr constant [3 x i8] c"i8\00", align 1
-@213 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@214 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@215 = private unnamed_addr constant [8 x i8] c"varargs\00", align 1
-@216 = private unnamed_addr constant [13 x i8] c"unnamed_func\00", align 1
-@217 = private unnamed_addr constant [11 x i8] c"entrypoint\00", align 1
+@210 = private unnamed_addr constant [8 x i8] c"and_rhs\00", align 1
+@211 = private unnamed_addr constant [10 x i8] c"and_merge\00", align 1
+@212 = private unnamed_addr constant [11 x i8] c"and_result\00", align 1
+@213 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@214 = private unnamed_addr constant [7 x i8] c"or_rhs\00", align 1
+@215 = private unnamed_addr constant [9 x i8] c"or_merge\00", align 1
+@216 = private unnamed_addr constant [10 x i8] c"or_result\00", align 1
+@217 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @218 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
-@219 = private unnamed_addr constant [8 x i8] c"and_rhs\00", align 1
-@220 = private unnamed_addr constant [10 x i8] c"and_merge\00", align 1
-@221 = private unnamed_addr constant [11 x i8] c"and_result\00", align 1
-@222 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
-@223 = private unnamed_addr constant [7 x i8] c"or_rhs\00", align 1
-@224 = private unnamed_addr constant [9 x i8] c"or_merge\00", align 1
-@225 = private unnamed_addr constant [10 x i8] c"or_result\00", align 1
+@219 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@220 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@221 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
+@222 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@223 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@224 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@225 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @226 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@227 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
-@228 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@229 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
-@230 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
+@227 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@228 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@229 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@230 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
 @231 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@232 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@232 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
 @233 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @234 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@235 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@235 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
 @236 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@237 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@237 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @238 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@239 = private unnamed_addr constant [5 x i8] c"bool\00", align 1
+@239 = private unnamed_addr constant [47 x i8] c"Error at line %d: Unsupported expression type\0A\00", align 1
 @240 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@241 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
-@242 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@243 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@244 = private unnamed_addr constant [4 x i8] c"i64\00", align 1
+@241 = private unnamed_addr constant [49 x i8] c"Error at line %d: Unsupported assignment target\0A\00", align 1
+@242 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined variable\0A\00", align 1
+@243 = private unnamed_addr constant [57 x i8] c"Error at line %d: Cannot determine function return type\0A\00", align 1
+@244 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined function\0A\00", align 1
 @245 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @246 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@247 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@248 = private unnamed_addr constant [47 x i8] c"Error at line %d: Unsupported expression type\0A\00", align 1
-@249 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@250 = private unnamed_addr constant [49 x i8] c"Error at line %d: Unsupported assignment target\0A\00", align 1
-@251 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined variable\0A\00", align 1
-@252 = private unnamed_addr constant [57 x i8] c"Error at line %d: Cannot determine function return type\0A\00", align 1
-@253 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined function\0A\00", align 1
-@254 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@247 = private unnamed_addr constant [11 x i8] c"then_block\00", align 1
+@248 = private unnamed_addr constant [12 x i8] c"merge_block\00", align 1
+@249 = private unnamed_addr constant [12 x i8] c"while_block\00", align 1
+@250 = private unnamed_addr constant [12 x i8] c"inner_block\00", align 1
+@251 = private unnamed_addr constant [12 x i8] c"outer_block\00", align 1
+@252 = private unnamed_addr constant [46 x i8] c"Error at line %d: Unsupported statement type\0A\00", align 1
+@253 = private unnamed_addr constant [10 x i8] c"output.ll\00", align 1
+@254 = private unnamed_addr constant [19 x i8] c"Target output: %s\0A\00", align 1
 @255 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@256 = private unnamed_addr constant [11 x i8] c"then_block\00", align 1
-@257 = private unnamed_addr constant [12 x i8] c"merge_block\00", align 1
-@258 = private unnamed_addr constant [12 x i8] c"while_block\00", align 1
-@259 = private unnamed_addr constant [12 x i8] c"inner_block\00", align 1
-@260 = private unnamed_addr constant [12 x i8] c"outer_block\00", align 1
-@261 = private unnamed_addr constant [46 x i8] c"Error at line %d: Unsupported statement type\0A\00", align 1
-@262 = private unnamed_addr constant [10 x i8] c"output.ll\00", align 1
-@263 = private unnamed_addr constant [19 x i8] c"Target output: %s\0A\00", align 1
-@264 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@265 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@266 = private unnamed_addr constant [25 x i8] c"Verification output: %s\0A\00", align 1
-@267 = private unnamed_addr constant [19 x i8] c"bootstrap_output.o\00", align 1
-@268 = private unnamed_addr constant [27 x i8] c"Object file generated: %s\0A\00", align 1
-@269 = private unnamed_addr constant [2 x i8] c"r\00", align 1
-@270 = private unnamed_addr constant [16 x i8] c"Need filename!\0A\00", align 1
-@271 = private unnamed_addr constant [14 x i8] c"--generate-ir\00", align 1
-@272 = private unnamed_addr constant [33 x i8] c"Error: Unexpected argument '%s'\0A\00", align 1
-@273 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
+@256 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@257 = private unnamed_addr constant [25 x i8] c"Verification output: %s\0A\00", align 1
+@258 = private unnamed_addr constant [19 x i8] c"bootstrap_output.o\00", align 1
+@259 = private unnamed_addr constant [27 x i8] c"Object file generated: %s\0A\00", align 1
+@260 = private unnamed_addr constant [2 x i8] c"r\00", align 1
+@261 = private unnamed_addr constant [16 x i8] c"Need filename!\0A\00", align 1
+@262 = private unnamed_addr constant [14 x i8] c"--generate-ir\00", align 1
+@263 = private unnamed_addr constant [33 x i8] c"Error: Unexpected argument '%s'\0A\00", align 1
 
 declare void @printf(ptr, ...)
 
@@ -1906,7 +1896,7 @@ entrypoint13:                                     ; No predecessors!
   br i1 %10, label %then_block15, label %merge_block16
 
 then_block15:                                     ; preds = %entrypoint13
-  call void (ptr, ...) @printf(ptr @84)
+  call void (ptr, ...) @printf(ptr @80)
   call void @exit(i64 1)
   br label %merge_block16
 
@@ -1921,7 +1911,7 @@ entrypoint17:                                     ; No predecessors!
   br i1 %12, label %then_block19, label %merge_block20
 
 then_block19:                                     ; preds = %entrypoint17
-  call void (ptr, ...) @printf(ptr @85)
+  call void (ptr, ...) @printf(ptr @81)
   call void @exit(i64 1)
   br label %merge_block20
 
@@ -1936,7 +1926,7 @@ entrypoint21:                                     ; No predecessors!
   br i1 %14, label %then_block23, label %merge_block24
 
 then_block23:                                     ; preds = %entrypoint21
-  call void (ptr, ...) @printf(ptr @178)
+  call void (ptr, ...) @printf(ptr @169)
   call void @exit(i64 1)
   br label %merge_block24
 
@@ -1951,7 +1941,7 @@ entrypoint25:                                     ; No predecessors!
   br i1 %16, label %then_block27, label %merge_block28
 
 then_block27:                                     ; preds = %entrypoint25
-  call void (ptr, ...) @printf(ptr @179)
+  call void (ptr, ...) @printf(ptr @170)
   call void @exit(i64 1)
   br label %merge_block28
 
@@ -2719,7 +2709,7 @@ outer_block116:                                   ; preds = %while_block114
   ret i64 0
 
 then_block119:                                    ; preds = %inner_block115
-  call void (ptr, ...) @printf(ptr @86)
+  call void (ptr, ...) @printf(ptr @82)
   br label %merge_block120
 
 merge_block120:                                   ; preds = %inner_block115, %then_block119
@@ -2730,7 +2720,7 @@ merge_block120:                                   ; preds = %inner_block115, %th
   br i1 %139, label %then_block122, label %merge_block123
 
 then_block122:                                    ; preds = %merge_block120
-  call void (ptr, ...) @printf(ptr @87)
+  call void (ptr, ...) @printf(ptr @83)
   br label %merge_block123
 
 merge_block123:                                   ; preds = %merge_block120, %then_block122
@@ -2741,7 +2731,7 @@ merge_block123:                                   ; preds = %merge_block120, %th
   br i1 %142, label %then_block125, label %merge_block126
 
 then_block125:                                    ; preds = %merge_block123
-  call void (ptr, ...) @printf(ptr @88)
+  call void (ptr, ...) @printf(ptr @84)
   br label %merge_block126
 
 merge_block126:                                   ; preds = %merge_block123, %then_block125
@@ -2752,7 +2742,7 @@ merge_block126:                                   ; preds = %merge_block123, %th
   br i1 %145, label %then_block128, label %merge_block129
 
 then_block128:                                    ; preds = %merge_block126
-  call void (ptr, ...) @printf(ptr @89)
+  call void (ptr, ...) @printf(ptr @85)
   br label %merge_block129
 
 merge_block129:                                   ; preds = %merge_block126, %then_block128
@@ -2763,7 +2753,7 @@ merge_block129:                                   ; preds = %merge_block126, %th
   br i1 %148, label %then_block131, label %merge_block132
 
 then_block131:                                    ; preds = %merge_block129
-  call void (ptr, ...) @printf(ptr @90)
+  call void (ptr, ...) @printf(ptr @86)
   br label %merge_block132
 
 merge_block132:                                   ; preds = %merge_block129, %then_block131
@@ -2774,7 +2764,7 @@ merge_block132:                                   ; preds = %merge_block129, %th
   br i1 %151, label %then_block134, label %merge_block135
 
 then_block134:                                    ; preds = %merge_block132
-  call void (ptr, ...) @printf(ptr @91)
+  call void (ptr, ...) @printf(ptr @87)
   br label %merge_block135
 
 merge_block135:                                   ; preds = %merge_block132, %then_block134
@@ -2785,7 +2775,7 @@ merge_block135:                                   ; preds = %merge_block132, %th
   br i1 %154, label %then_block137, label %merge_block138
 
 then_block137:                                    ; preds = %merge_block135
-  call void (ptr, ...) @printf(ptr @92)
+  call void (ptr, ...) @printf(ptr @88)
   br label %merge_block138
 
 merge_block138:                                   ; preds = %merge_block135, %then_block137
@@ -2796,7 +2786,7 @@ merge_block138:                                   ; preds = %merge_block135, %th
   br i1 %157, label %then_block140, label %merge_block141
 
 then_block140:                                    ; preds = %merge_block138
-  call void (ptr, ...) @printf(ptr @93)
+  call void (ptr, ...) @printf(ptr @89)
   br label %merge_block141
 
 merge_block141:                                   ; preds = %merge_block138, %then_block140
@@ -2807,7 +2797,7 @@ merge_block141:                                   ; preds = %merge_block138, %th
   br i1 %160, label %then_block143, label %merge_block144
 
 then_block143:                                    ; preds = %merge_block141
-  call void (ptr, ...) @printf(ptr @94)
+  call void (ptr, ...) @printf(ptr @90)
   br label %merge_block144
 
 merge_block144:                                   ; preds = %merge_block141, %then_block143
@@ -2818,7 +2808,7 @@ merge_block144:                                   ; preds = %merge_block141, %th
   br i1 %163, label %then_block146, label %merge_block147
 
 then_block146:                                    ; preds = %merge_block144
-  call void (ptr, ...) @printf(ptr @95)
+  call void (ptr, ...) @printf(ptr @91)
   br label %merge_block147
 
 merge_block147:                                   ; preds = %merge_block144, %then_block146
@@ -2829,7 +2819,7 @@ merge_block147:                                   ; preds = %merge_block144, %th
   br i1 %166, label %then_block149, label %merge_block150
 
 then_block149:                                    ; preds = %merge_block147
-  call void (ptr, ...) @printf(ptr @96)
+  call void (ptr, ...) @printf(ptr @92)
   br label %merge_block150
 
 merge_block150:                                   ; preds = %merge_block147, %then_block149
@@ -2840,7 +2830,7 @@ merge_block150:                                   ; preds = %merge_block147, %th
   br i1 %169, label %then_block152, label %merge_block153
 
 then_block152:                                    ; preds = %merge_block150
-  call void (ptr, ...) @printf(ptr @97)
+  call void (ptr, ...) @printf(ptr @93)
   br label %merge_block153
 
 merge_block153:                                   ; preds = %merge_block150, %then_block152
@@ -2851,7 +2841,7 @@ merge_block153:                                   ; preds = %merge_block150, %th
   br i1 %172, label %then_block155, label %merge_block156
 
 then_block155:                                    ; preds = %merge_block153
-  call void (ptr, ...) @printf(ptr @98)
+  call void (ptr, ...) @printf(ptr @94)
   br label %merge_block156
 
 merge_block156:                                   ; preds = %merge_block153, %then_block155
@@ -2864,7 +2854,7 @@ merge_block156:                                   ; preds = %merge_block153, %th
 then_block158:                                    ; preds = %merge_block156
   %data159 = getelementptr %token.2, ptr %to117, i32 0, i32 1
   %176 = load ptr, ptr %data159, align 8
-  call void (ptr, ...) @printf(ptr @99, ptr %176)
+  call void (ptr, ...) @printf(ptr @95, ptr %176)
   br label %merge_block160
 
 merge_block160:                                   ; preds = %merge_block156, %then_block158
@@ -2878,7 +2868,7 @@ then_block162:                                    ; preds = %merge_block160
   %data163 = getelementptr %token.2, ptr %to117, i32 0, i32 1
   %180 = load ptr, ptr %data163, align 8
   %181 = load i64, ptr %180, align 4
-  call void (ptr, ...) @printf(ptr @100, i64 %181)
+  call void (ptr, ...) @printf(ptr @96, i64 %181)
   br label %merge_block164
 
 merge_block164:                                   ; preds = %merge_block160, %then_block162
@@ -2892,7 +2882,7 @@ then_block166:                                    ; preds = %merge_block164
   %data167 = getelementptr %token.2, ptr %to117, i32 0, i32 1
   %185 = load ptr, ptr %data167, align 8
   %186 = load i1, ptr %185, align 1
-  call void (ptr, ...) @printf(ptr @101, i1 %186)
+  call void (ptr, ...) @printf(ptr @97, i1 %186)
   br label %merge_block168
 
 merge_block168:                                   ; preds = %merge_block164, %then_block166
@@ -2903,7 +2893,7 @@ merge_block168:                                   ; preds = %merge_block164, %th
   br i1 %189, label %then_block170, label %merge_block171
 
 then_block170:                                    ; preds = %merge_block168
-  call void (ptr, ...) @printf(ptr @102)
+  call void (ptr, ...) @printf(ptr @98)
   br label %merge_block171
 
 merge_block171:                                   ; preds = %merge_block168, %then_block170
@@ -2917,7 +2907,7 @@ then_block173:                                    ; preds = %merge_block171
   %data174 = getelementptr %token.2, ptr %to117, i32 0, i32 1
   %193 = load ptr, ptr %data174, align 8
   %194 = load i8, ptr %193, align 1
-  call void (ptr, ...) @printf(ptr @103, i8 %194)
+  call void (ptr, ...) @printf(ptr @99, i8 %194)
   br label %merge_block175
 
 merge_block175:                                   ; preds = %merge_block171, %then_block173
@@ -2930,7 +2920,7 @@ merge_block175:                                   ; preds = %merge_block171, %th
 then_block177:                                    ; preds = %merge_block175
   %data178 = getelementptr %token.2, ptr %to117, i32 0, i32 1
   %198 = load ptr, ptr %data178, align 8
-  call void (ptr, ...) @printf(ptr @104, ptr %198)
+  call void (ptr, ...) @printf(ptr @100, ptr %198)
   br label %merge_block179
 
 merge_block179:                                   ; preds = %merge_block175, %then_block177
@@ -2941,7 +2931,7 @@ merge_block179:                                   ; preds = %merge_block175, %th
   br i1 %201, label %then_block181, label %merge_block182
 
 then_block181:                                    ; preds = %merge_block179
-  call void (ptr, ...) @printf(ptr @105)
+  call void (ptr, ...) @printf(ptr @101)
   br label %merge_block182
 
 merge_block182:                                   ; preds = %merge_block179, %then_block181
@@ -2952,7 +2942,7 @@ merge_block182:                                   ; preds = %merge_block179, %th
   br i1 %204, label %then_block184, label %merge_block185
 
 then_block184:                                    ; preds = %merge_block182
-  call void (ptr, ...) @printf(ptr @106)
+  call void (ptr, ...) @printf(ptr @102)
   br label %merge_block185
 
 merge_block185:                                   ; preds = %merge_block182, %then_block184
@@ -2963,7 +2953,7 @@ merge_block185:                                   ; preds = %merge_block182, %th
   br i1 %207, label %then_block187, label %merge_block188
 
 then_block187:                                    ; preds = %merge_block185
-  call void (ptr, ...) @printf(ptr @107)
+  call void (ptr, ...) @printf(ptr @103)
   br label %merge_block188
 
 merge_block188:                                   ; preds = %merge_block185, %then_block187
@@ -2974,7 +2964,7 @@ merge_block188:                                   ; preds = %merge_block185, %th
   br i1 %210, label %then_block190, label %merge_block191
 
 then_block190:                                    ; preds = %merge_block188
-  call void (ptr, ...) @printf(ptr @108)
+  call void (ptr, ...) @printf(ptr @104)
   br label %merge_block191
 
 merge_block191:                                   ; preds = %merge_block188, %then_block190
@@ -2985,7 +2975,7 @@ merge_block191:                                   ; preds = %merge_block188, %th
   br i1 %213, label %then_block193, label %merge_block194
 
 then_block193:                                    ; preds = %merge_block191
-  call void (ptr, ...) @printf(ptr @109)
+  call void (ptr, ...) @printf(ptr @105)
   br label %merge_block194
 
 merge_block194:                                   ; preds = %merge_block191, %then_block193
@@ -2996,7 +2986,7 @@ merge_block194:                                   ; preds = %merge_block191, %th
   br i1 %216, label %then_block196, label %merge_block197
 
 then_block196:                                    ; preds = %merge_block194
-  call void (ptr, ...) @printf(ptr @110)
+  call void (ptr, ...) @printf(ptr @106)
   br label %merge_block197
 
 merge_block197:                                   ; preds = %merge_block194, %then_block196
@@ -3007,7 +2997,7 @@ merge_block197:                                   ; preds = %merge_block194, %th
   br i1 %219, label %then_block199, label %merge_block200
 
 then_block199:                                    ; preds = %merge_block197
-  call void (ptr, ...) @printf(ptr @111)
+  call void (ptr, ...) @printf(ptr @107)
   br label %merge_block200
 
 merge_block200:                                   ; preds = %merge_block197, %then_block199
@@ -3018,7 +3008,7 @@ merge_block200:                                   ; preds = %merge_block197, %th
   br i1 %222, label %then_block202, label %merge_block203
 
 then_block202:                                    ; preds = %merge_block200
-  call void (ptr, ...) @printf(ptr @112)
+  call void (ptr, ...) @printf(ptr @108)
   br label %merge_block203
 
 merge_block203:                                   ; preds = %merge_block200, %then_block202
@@ -3029,7 +3019,7 @@ merge_block203:                                   ; preds = %merge_block200, %th
   br i1 %225, label %then_block205, label %merge_block206
 
 then_block205:                                    ; preds = %merge_block203
-  call void (ptr, ...) @printf(ptr @113)
+  call void (ptr, ...) @printf(ptr @109)
   br label %merge_block206
 
 merge_block206:                                   ; preds = %merge_block203, %then_block205
@@ -3040,7 +3030,7 @@ merge_block206:                                   ; preds = %merge_block203, %th
   br i1 %228, label %then_block208, label %merge_block209
 
 then_block208:                                    ; preds = %merge_block206
-  call void (ptr, ...) @printf(ptr @114)
+  call void (ptr, ...) @printf(ptr @110)
   br label %merge_block209
 
 merge_block209:                                   ; preds = %merge_block206, %then_block208
@@ -3051,7 +3041,7 @@ merge_block209:                                   ; preds = %merge_block206, %th
   br i1 %231, label %then_block211, label %merge_block212
 
 then_block211:                                    ; preds = %merge_block209
-  call void (ptr, ...) @printf(ptr @115)
+  call void (ptr, ...) @printf(ptr @111)
   br label %merge_block212
 
 merge_block212:                                   ; preds = %merge_block209, %then_block211
@@ -3062,7 +3052,7 @@ merge_block212:                                   ; preds = %merge_block209, %th
   br i1 %234, label %then_block214, label %merge_block215
 
 then_block214:                                    ; preds = %merge_block212
-  call void (ptr, ...) @printf(ptr @116)
+  call void (ptr, ...) @printf(ptr @112)
   br label %merge_block215
 
 merge_block215:                                   ; preds = %merge_block212, %then_block214
@@ -3073,7 +3063,7 @@ merge_block215:                                   ; preds = %merge_block212, %th
   br i1 %237, label %then_block217, label %merge_block218
 
 then_block217:                                    ; preds = %merge_block215
-  call void (ptr, ...) @printf(ptr @117)
+  call void (ptr, ...) @printf(ptr @113)
   br label %merge_block218
 
 merge_block218:                                   ; preds = %merge_block215, %then_block217
@@ -3084,7 +3074,7 @@ merge_block218:                                   ; preds = %merge_block215, %th
   br i1 %240, label %then_block220, label %merge_block221
 
 then_block220:                                    ; preds = %merge_block218
-  call void (ptr, ...) @printf(ptr @118)
+  call void (ptr, ...) @printf(ptr @114)
   br label %merge_block221
 
 merge_block221:                                   ; preds = %merge_block218, %then_block220
@@ -3095,7 +3085,7 @@ merge_block221:                                   ; preds = %merge_block218, %th
   br i1 %243, label %then_block223, label %merge_block224
 
 then_block223:                                    ; preds = %merge_block221
-  call void (ptr, ...) @printf(ptr @119)
+  call void (ptr, ...) @printf(ptr @115)
   br label %merge_block224
 
 merge_block224:                                   ; preds = %merge_block221, %then_block223
@@ -3106,7 +3096,7 @@ merge_block224:                                   ; preds = %merge_block221, %th
   br i1 %246, label %then_block226, label %merge_block227
 
 then_block226:                                    ; preds = %merge_block224
-  call void (ptr, ...) @printf(ptr @120)
+  call void (ptr, ...) @printf(ptr @116)
   br label %merge_block227
 
 merge_block227:                                   ; preds = %merge_block224, %then_block226
@@ -3117,7 +3107,7 @@ merge_block227:                                   ; preds = %merge_block224, %th
   br i1 %249, label %then_block229, label %merge_block230
 
 then_block229:                                    ; preds = %merge_block227
-  call void (ptr, ...) @printf(ptr @121)
+  call void (ptr, ...) @printf(ptr @117)
   br label %merge_block230
 
 merge_block230:                                   ; preds = %merge_block227, %then_block229
@@ -4164,7 +4154,7 @@ entrypoint5:                                      ; No predecessors!
   %prev_offset8 = alloca i64, align 8
   store i64 %17, ptr %prev_offset8, align 4
   %18 = load ptr, ptr %t6, align 8
-  %19 = call i1 @tokenizer_accept_string(ptr %18, ptr @122)
+  %19 = call i1 @tokenizer_accept_string(ptr %18, ptr @118)
   %20 = icmp eq i1 %19, false
   br i1 %20, label %then_block9, label %merge_block11
 
@@ -4181,7 +4171,7 @@ merge_block11:                                    ; preds = %entrypoint5
   %string12 = alloca ptr, align 8
   store ptr %24, ptr %string12, align 8
   %25 = load ptr, ptr %t6, align 8
-  %26 = call i1 @tokenizer_accept_string(ptr %25, ptr @123)
+  %26 = call i1 @tokenizer_accept_string(ptr %25, ptr @119)
   %27 = icmp eq i1 %26, false
   br i1 %27, label %then_block13, label %merge_block15
 
@@ -4257,7 +4247,7 @@ entrypoint5:                                      ; No predecessors!
   %prev_offset8 = alloca i64, align 8
   store i64 %17, ptr %prev_offset8, align 4
   %18 = load ptr, ptr %t6, align 8
-  %19 = call i1 @tokenizer_accept_string(ptr %18, ptr @124)
+  %19 = call i1 @tokenizer_accept_string(ptr %18, ptr @120)
   %20 = icmp eq i1 %19, false
   br i1 %20, label %then_block9, label %merge_block11
 
@@ -4274,7 +4264,7 @@ merge_block11:                                    ; preds = %entrypoint5
   %string12 = alloca ptr, align 8
   store ptr %24, ptr %string12, align 8
   %25 = load ptr, ptr %t6, align 8
-  %26 = call i1 @tokenizer_accept_string(ptr %25, ptr @125)
+  %26 = call i1 @tokenizer_accept_string(ptr %25, ptr @121)
   %27 = icmp eq i1 %26, false
   br i1 %27, label %then_block13, label %merge_block15
 
@@ -4362,7 +4352,7 @@ entrypoint6:                                      ; No predecessors!
   %t7 = alloca ptr, align 8
   store ptr %0, ptr %t7, align 8
   %23 = load ptr, ptr %t7, align 8
-  %24 = call i1 @tokenizer_accept_string(ptr %23, ptr @126)
+  %24 = call i1 @tokenizer_accept_string(ptr %23, ptr @122)
   %25 = icmp eq i1 %24, false
   br i1 %25, label %then_block8, label %merge_block9
 
@@ -4374,7 +4364,7 @@ merge_block9:                                     ; preds = %entrypoint6
 
 while_block10:                                    ; preds = %merge_block19, %merge_block9
   %26 = load ptr, ptr %t7, align 8
-  %27 = call i1 @tokenizer_accept_string(ptr %26, ptr @127)
+  %27 = call i1 @tokenizer_accept_string(ptr %26, ptr @123)
   %28 = icmp eq i1 %27, false
   br i1 %28, label %inner_block11, label %outer_block12
 
@@ -5031,7 +5021,7 @@ merge_block127:                                   ; preds = %entrypoint122
   %244 = load i64, ptr %line131, align 4
   store i64 %244, ptr %line130, align 4
   %245 = load ptr, ptr %t123, align 8
-  %246 = call i1 @tokenizer_accept_keyword(ptr %245, ptr @128)
+  %246 = call i1 @tokenizer_accept_keyword(ptr %245, ptr @124)
   br i1 %246, label %then_block132, label %merge_block134
 
 then_block132:                                    ; preds = %merge_block127
@@ -5044,7 +5034,7 @@ then_block132:                                    ; preds = %merge_block127
 
 merge_block134:                                   ; preds = %merge_block127
   %250 = load ptr, ptr %t123, align 8
-  %251 = call i1 @tokenizer_accept_keyword(ptr %250, ptr @129)
+  %251 = call i1 @tokenizer_accept_keyword(ptr %250, ptr @125)
   br i1 %251, label %then_block135, label %merge_block137
 
 then_block135:                                    ; preds = %merge_block134
@@ -5057,7 +5047,7 @@ then_block135:                                    ; preds = %merge_block134
 
 merge_block137:                                   ; preds = %merge_block134
   %255 = load ptr, ptr %t123, align 8
-  %256 = call i1 @tokenizer_accept_keyword(ptr %255, ptr @130)
+  %256 = call i1 @tokenizer_accept_keyword(ptr %255, ptr @126)
   br i1 %256, label %then_block138, label %merge_block140
 
 then_block138:                                    ; preds = %merge_block137
@@ -5070,7 +5060,7 @@ then_block138:                                    ; preds = %merge_block137
 
 merge_block140:                                   ; preds = %merge_block137
   %260 = load ptr, ptr %t123, align 8
-  %261 = call i1 @tokenizer_accept_keyword(ptr %260, ptr @131)
+  %261 = call i1 @tokenizer_accept_keyword(ptr %260, ptr @127)
   br i1 %261, label %then_block141, label %merge_block143
 
 then_block141:                                    ; preds = %merge_block140
@@ -5083,7 +5073,7 @@ then_block141:                                    ; preds = %merge_block140
 
 merge_block143:                                   ; preds = %merge_block140
   %265 = load ptr, ptr %t123, align 8
-  %266 = call i1 @tokenizer_accept_keyword(ptr %265, ptr @132)
+  %266 = call i1 @tokenizer_accept_keyword(ptr %265, ptr @128)
   br i1 %266, label %then_block144, label %merge_block146
 
 then_block144:                                    ; preds = %merge_block143
@@ -5096,7 +5086,7 @@ then_block144:                                    ; preds = %merge_block143
 
 merge_block146:                                   ; preds = %merge_block143
   %270 = load ptr, ptr %t123, align 8
-  %271 = call i1 @tokenizer_accept_keyword(ptr %270, ptr @133)
+  %271 = call i1 @tokenizer_accept_keyword(ptr %270, ptr @129)
   br i1 %271, label %then_block147, label %merge_block149
 
 then_block147:                                    ; preds = %merge_block146
@@ -5109,7 +5099,7 @@ then_block147:                                    ; preds = %merge_block146
 
 merge_block149:                                   ; preds = %merge_block146
   %275 = load ptr, ptr %t123, align 8
-  %276 = call i1 @tokenizer_accept_keyword(ptr %275, ptr @134)
+  %276 = call i1 @tokenizer_accept_keyword(ptr %275, ptr @130)
   br i1 %276, label %then_block150, label %merge_block152
 
 then_block150:                                    ; preds = %merge_block149
@@ -5122,7 +5112,7 @@ then_block150:                                    ; preds = %merge_block149
 
 merge_block152:                                   ; preds = %merge_block149
   %280 = load ptr, ptr %t123, align 8
-  %281 = call i1 @tokenizer_accept_keyword(ptr %280, ptr @135)
+  %281 = call i1 @tokenizer_accept_keyword(ptr %280, ptr @131)
   br i1 %281, label %then_block153, label %merge_block155
 
 then_block153:                                    ; preds = %merge_block152
@@ -5135,7 +5125,7 @@ then_block153:                                    ; preds = %merge_block152
 
 merge_block155:                                   ; preds = %merge_block152
   %285 = load ptr, ptr %t123, align 8
-  %286 = call i1 @tokenizer_accept_keyword(ptr %285, ptr @136)
+  %286 = call i1 @tokenizer_accept_keyword(ptr %285, ptr @132)
   br i1 %286, label %then_block156, label %merge_block161
 
 then_block156:                                    ; preds = %merge_block155
@@ -5160,7 +5150,7 @@ then_block156:                                    ; preds = %merge_block155
 
 merge_block161:                                   ; preds = %merge_block155
   %296 = load ptr, ptr %t123, align 8
-  %297 = call i1 @tokenizer_accept_keyword(ptr %296, ptr @137)
+  %297 = call i1 @tokenizer_accept_keyword(ptr %296, ptr @133)
   br i1 %297, label %then_block162, label %merge_block167
 
 then_block162:                                    ; preds = %merge_block161
@@ -5185,7 +5175,7 @@ then_block162:                                    ; preds = %merge_block161
 
 merge_block167:                                   ; preds = %merge_block161
   %307 = load ptr, ptr %t123, align 8
-  %308 = call i1 @tokenizer_accept_keyword(ptr %307, ptr @138)
+  %308 = call i1 @tokenizer_accept_keyword(ptr %307, ptr @134)
   br i1 %308, label %then_block168, label %merge_block170
 
 then_block168:                                    ; preds = %merge_block167
@@ -5198,7 +5188,7 @@ then_block168:                                    ; preds = %merge_block167
 
 merge_block170:                                   ; preds = %merge_block167
   %312 = load ptr, ptr %t123, align 8
-  %313 = call i1 @tokenizer_accept_keyword(ptr %312, ptr @139)
+  %313 = call i1 @tokenizer_accept_keyword(ptr %312, ptr @135)
   br i1 %313, label %then_block171, label %merge_block173
 
 then_block171:                                    ; preds = %merge_block170
@@ -5211,7 +5201,7 @@ then_block171:                                    ; preds = %merge_block170
 
 merge_block173:                                   ; preds = %merge_block170
   %317 = load ptr, ptr %t123, align 8
-  %318 = call i1 @tokenizer_accept_keyword(ptr %317, ptr @140)
+  %318 = call i1 @tokenizer_accept_keyword(ptr %317, ptr @136)
   br i1 %318, label %then_block174, label %merge_block176
 
 then_block174:                                    ; preds = %merge_block173
@@ -5224,7 +5214,7 @@ then_block174:                                    ; preds = %merge_block173
 
 merge_block176:                                   ; preds = %merge_block173
   %322 = load ptr, ptr %t123, align 8
-  %323 = call i1 @tokenizer_accept_keyword(ptr %322, ptr @141)
+  %323 = call i1 @tokenizer_accept_keyword(ptr %322, ptr @137)
   br i1 %323, label %then_block177, label %merge_block179
 
 then_block177:                                    ; preds = %merge_block176
@@ -5237,7 +5227,7 @@ then_block177:                                    ; preds = %merge_block176
 
 merge_block179:                                   ; preds = %merge_block176
   %327 = load ptr, ptr %t123, align 8
-  %328 = call i1 @tokenizer_accept_keyword(ptr %327, ptr @142)
+  %328 = call i1 @tokenizer_accept_keyword(ptr %327, ptr @138)
   br i1 %328, label %then_block180, label %merge_block182
 
 then_block180:                                    ; preds = %merge_block179
@@ -5250,7 +5240,7 @@ then_block180:                                    ; preds = %merge_block179
 
 merge_block182:                                   ; preds = %merge_block179
   %332 = load ptr, ptr %t123, align 8
-  %333 = call i1 @tokenizer_accept_string(ptr %332, ptr @143)
+  %333 = call i1 @tokenizer_accept_string(ptr %332, ptr @139)
   br i1 %333, label %then_block183, label %merge_block185
 
 then_block183:                                    ; preds = %merge_block182
@@ -5263,7 +5253,7 @@ then_block183:                                    ; preds = %merge_block182
 
 merge_block185:                                   ; preds = %merge_block182
   %337 = load ptr, ptr %t123, align 8
-  %338 = call i1 @tokenizer_accept_string(ptr %337, ptr @144)
+  %338 = call i1 @tokenizer_accept_string(ptr %337, ptr @140)
   br i1 %338, label %then_block186, label %merge_block188
 
 then_block186:                                    ; preds = %merge_block185
@@ -5276,7 +5266,7 @@ then_block186:                                    ; preds = %merge_block185
 
 merge_block188:                                   ; preds = %merge_block185
   %342 = load ptr, ptr %t123, align 8
-  %343 = call i1 @tokenizer_accept_string(ptr %342, ptr @145)
+  %343 = call i1 @tokenizer_accept_string(ptr %342, ptr @141)
   br i1 %343, label %then_block189, label %merge_block191
 
 then_block189:                                    ; preds = %merge_block188
@@ -5289,7 +5279,7 @@ then_block189:                                    ; preds = %merge_block188
 
 merge_block191:                                   ; preds = %merge_block188
   %347 = load ptr, ptr %t123, align 8
-  %348 = call i1 @tokenizer_accept_string(ptr %347, ptr @146)
+  %348 = call i1 @tokenizer_accept_string(ptr %347, ptr @142)
   br i1 %348, label %then_block192, label %merge_block194
 
 then_block192:                                    ; preds = %merge_block191
@@ -5302,7 +5292,7 @@ then_block192:                                    ; preds = %merge_block191
 
 merge_block194:                                   ; preds = %merge_block191
   %352 = load ptr, ptr %t123, align 8
-  %353 = call i1 @tokenizer_accept_string(ptr %352, ptr @147)
+  %353 = call i1 @tokenizer_accept_string(ptr %352, ptr @143)
   br i1 %353, label %then_block195, label %merge_block197
 
 then_block195:                                    ; preds = %merge_block194
@@ -5315,7 +5305,7 @@ then_block195:                                    ; preds = %merge_block194
 
 merge_block197:                                   ; preds = %merge_block194
   %357 = load ptr, ptr %t123, align 8
-  %358 = call i1 @tokenizer_accept_string(ptr %357, ptr @148)
+  %358 = call i1 @tokenizer_accept_string(ptr %357, ptr @144)
   br i1 %358, label %then_block198, label %merge_block200
 
 then_block198:                                    ; preds = %merge_block197
@@ -5328,7 +5318,7 @@ then_block198:                                    ; preds = %merge_block197
 
 merge_block200:                                   ; preds = %merge_block197
   %362 = load ptr, ptr %t123, align 8
-  %363 = call i1 @tokenizer_accept_string(ptr %362, ptr @149)
+  %363 = call i1 @tokenizer_accept_string(ptr %362, ptr @145)
   br i1 %363, label %then_block201, label %merge_block203
 
 then_block201:                                    ; preds = %merge_block200
@@ -5341,7 +5331,7 @@ then_block201:                                    ; preds = %merge_block200
 
 merge_block203:                                   ; preds = %merge_block200
   %367 = load ptr, ptr %t123, align 8
-  %368 = call i1 @tokenizer_accept_string(ptr %367, ptr @150)
+  %368 = call i1 @tokenizer_accept_string(ptr %367, ptr @146)
   br i1 %368, label %then_block204, label %merge_block206
 
 then_block204:                                    ; preds = %merge_block203
@@ -5354,7 +5344,7 @@ then_block204:                                    ; preds = %merge_block203
 
 merge_block206:                                   ; preds = %merge_block203
   %372 = load ptr, ptr %t123, align 8
-  %373 = call i1 @tokenizer_accept_string(ptr %372, ptr @151)
+  %373 = call i1 @tokenizer_accept_string(ptr %372, ptr @147)
   br i1 %373, label %then_block207, label %merge_block209
 
 then_block207:                                    ; preds = %merge_block206
@@ -5367,7 +5357,7 @@ then_block207:                                    ; preds = %merge_block206
 
 merge_block209:                                   ; preds = %merge_block206
   %377 = load ptr, ptr %t123, align 8
-  %378 = call i1 @tokenizer_accept_string(ptr %377, ptr @152)
+  %378 = call i1 @tokenizer_accept_string(ptr %377, ptr @148)
   br i1 %378, label %then_block210, label %merge_block212
 
 then_block210:                                    ; preds = %merge_block209
@@ -5380,7 +5370,7 @@ then_block210:                                    ; preds = %merge_block209
 
 merge_block212:                                   ; preds = %merge_block209
   %382 = load ptr, ptr %t123, align 8
-  %383 = call i1 @tokenizer_accept_string(ptr %382, ptr @153)
+  %383 = call i1 @tokenizer_accept_string(ptr %382, ptr @149)
   br i1 %383, label %then_block213, label %merge_block215
 
 then_block213:                                    ; preds = %merge_block212
@@ -5393,7 +5383,7 @@ then_block213:                                    ; preds = %merge_block212
 
 merge_block215:                                   ; preds = %merge_block212
   %387 = load ptr, ptr %t123, align 8
-  %388 = call i1 @tokenizer_accept_string(ptr %387, ptr @154)
+  %388 = call i1 @tokenizer_accept_string(ptr %387, ptr @150)
   br i1 %388, label %then_block216, label %merge_block218
 
 then_block216:                                    ; preds = %merge_block215
@@ -5406,7 +5396,7 @@ then_block216:                                    ; preds = %merge_block215
 
 merge_block218:                                   ; preds = %merge_block215
   %392 = load ptr, ptr %t123, align 8
-  %393 = call i1 @tokenizer_accept_string(ptr %392, ptr @155)
+  %393 = call i1 @tokenizer_accept_string(ptr %392, ptr @151)
   br i1 %393, label %then_block219, label %merge_block221
 
 then_block219:                                    ; preds = %merge_block218
@@ -5419,7 +5409,7 @@ then_block219:                                    ; preds = %merge_block218
 
 merge_block221:                                   ; preds = %merge_block218
   %397 = load ptr, ptr %t123, align 8
-  %398 = call i1 @tokenizer_accept_string(ptr %397, ptr @156)
+  %398 = call i1 @tokenizer_accept_string(ptr %397, ptr @152)
   br i1 %398, label %then_block222, label %merge_block224
 
 then_block222:                                    ; preds = %merge_block221
@@ -5432,7 +5422,7 @@ then_block222:                                    ; preds = %merge_block221
 
 merge_block224:                                   ; preds = %merge_block221
   %402 = load ptr, ptr %t123, align 8
-  %403 = call i1 @tokenizer_accept_string(ptr %402, ptr @157)
+  %403 = call i1 @tokenizer_accept_string(ptr %402, ptr @153)
   br i1 %403, label %then_block225, label %merge_block227
 
 then_block225:                                    ; preds = %merge_block224
@@ -5445,7 +5435,7 @@ then_block225:                                    ; preds = %merge_block224
 
 merge_block227:                                   ; preds = %merge_block224
   %407 = load ptr, ptr %t123, align 8
-  %408 = call i1 @tokenizer_accept_string(ptr %407, ptr @158)
+  %408 = call i1 @tokenizer_accept_string(ptr %407, ptr @154)
   br i1 %408, label %then_block228, label %merge_block230
 
 then_block228:                                    ; preds = %merge_block227
@@ -5458,7 +5448,7 @@ then_block228:                                    ; preds = %merge_block227
 
 merge_block230:                                   ; preds = %merge_block227
   %412 = load ptr, ptr %t123, align 8
-  %413 = call i1 @tokenizer_accept_string(ptr %412, ptr @159)
+  %413 = call i1 @tokenizer_accept_string(ptr %412, ptr @155)
   br i1 %413, label %then_block231, label %merge_block233
 
 then_block231:                                    ; preds = %merge_block230
@@ -5471,7 +5461,7 @@ then_block231:                                    ; preds = %merge_block230
 
 merge_block233:                                   ; preds = %merge_block230
   %417 = load ptr, ptr %t123, align 8
-  %418 = call i1 @tokenizer_accept_string(ptr %417, ptr @160)
+  %418 = call i1 @tokenizer_accept_string(ptr %417, ptr @156)
   br i1 %418, label %then_block234, label %merge_block236
 
 then_block234:                                    ; preds = %merge_block233
@@ -5559,7 +5549,7 @@ then_block253:                                    ; preds = %merge_block251
   %454 = load ptr, ptr %t123, align 8
   %line254 = getelementptr %tokenizer.3, ptr %454, i32 0, i32 3
   %455 = load i64, ptr %line254, align 4
-  call void (ptr, ...) @printf(ptr @161, i64 %455)
+  call void (ptr, ...) @printf(ptr @157, i64 %455)
   ret ptr null
 
 merge_block255:                                   ; preds = %merge_block251
@@ -5629,55 +5619,39 @@ entrypoint:
   %11 = load i64, ptr %data_len, align 4
   store i64 %11, ptr %buf_len, align 4
   %12 = load ptr, ptr %t, align 8
-  %buf_len1 = getelementptr %tokenizer, ptr %12, i32 0, i32 1
-  %13 = load i64, ptr %buf_len1, align 4
-  call void (ptr, ...) @printf(ptr @80, i64 %13)
-  %14 = load ptr, ptr %t, align 8
-  %buf2 = getelementptr %tokenizer, ptr %14, i32 0, i32 0
-  %15 = load ptr, ptr %buf2, align 8
-  call void (ptr, ...) @printf(ptr @81, ptr %15)
-  %16 = load ptr, ptr %t, align 8
-  ret ptr %16
+  ret ptr %12
 
-entrypoint3:                                      ; No predecessors!
-  %alloc4 = alloca ptr, align 8
-  store ptr %0, ptr %alloc4, align 8
-  %file5 = alloca %slice, align 8
-  store %slice %1, ptr %file5, align 8
-  %17 = load ptr, ptr %alloc4, align 8
-  %18 = call ptr @arena_alloc(ptr %17, i64 40)
-  %t6 = alloca ptr, align 8
-  store ptr %18, ptr %t6, align 8
-  %19 = load ptr, ptr %t6, align 8
-  %arena7 = getelementptr %tokenizer.3, ptr %19, i32 0, i32 4
-  %20 = load ptr, ptr %alloc4, align 8
-  store ptr %20, ptr %arena7, align 8
-  %21 = load ptr, ptr %t6, align 8
-  %offset8 = getelementptr %tokenizer.3, ptr %21, i32 0, i32 2
-  store i64 0, ptr %offset8, align 4
-  %22 = load ptr, ptr %t6, align 8
-  %line9 = getelementptr %tokenizer.3, ptr %22, i32 0, i32 3
-  store i64 1, ptr %line9, align 4
-  %23 = load ptr, ptr %t6, align 8
-  %buf10 = getelementptr %tokenizer.3, ptr %23, i32 0, i32 0
-  %data11 = getelementptr %slice, ptr %file5, i32 0, i32 0
-  %24 = load ptr, ptr %data11, align 8
-  store ptr %24, ptr %buf10, align 8
-  %25 = load ptr, ptr %t6, align 8
-  %buf_len12 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 1
-  %data_len13 = getelementptr %slice, ptr %file5, i32 0, i32 1
-  %26 = load i64, ptr %data_len13, align 4
-  store i64 %26, ptr %buf_len12, align 4
-  %27 = load ptr, ptr %t6, align 8
-  %buf_len14 = getelementptr %tokenizer.3, ptr %27, i32 0, i32 1
-  %28 = load i64, ptr %buf_len14, align 4
-  call void (ptr, ...) @printf(ptr @162, i64 %28)
-  %29 = load ptr, ptr %t6, align 8
-  %buf15 = getelementptr %tokenizer.3, ptr %29, i32 0, i32 0
-  %30 = load ptr, ptr %buf15, align 8
-  call void (ptr, ...) @printf(ptr @163, ptr %30)
-  %31 = load ptr, ptr %t6, align 8
-  ret ptr %31
+entrypoint1:                                      ; No predecessors!
+  %alloc2 = alloca ptr, align 8
+  store ptr %0, ptr %alloc2, align 8
+  %file3 = alloca %slice, align 8
+  store %slice %1, ptr %file3, align 8
+  %13 = load ptr, ptr %alloc2, align 8
+  %14 = call ptr @arena_alloc(ptr %13, i64 40)
+  %t4 = alloca ptr, align 8
+  store ptr %14, ptr %t4, align 8
+  %15 = load ptr, ptr %t4, align 8
+  %arena5 = getelementptr %tokenizer.3, ptr %15, i32 0, i32 4
+  %16 = load ptr, ptr %alloc2, align 8
+  store ptr %16, ptr %arena5, align 8
+  %17 = load ptr, ptr %t4, align 8
+  %offset6 = getelementptr %tokenizer.3, ptr %17, i32 0, i32 2
+  store i64 0, ptr %offset6, align 4
+  %18 = load ptr, ptr %t4, align 8
+  %line7 = getelementptr %tokenizer.3, ptr %18, i32 0, i32 3
+  store i64 1, ptr %line7, align 4
+  %19 = load ptr, ptr %t4, align 8
+  %buf8 = getelementptr %tokenizer.3, ptr %19, i32 0, i32 0
+  %data9 = getelementptr %slice, ptr %file3, i32 0, i32 0
+  %20 = load ptr, ptr %data9, align 8
+  store ptr %20, ptr %buf8, align 8
+  %21 = load ptr, ptr %t4, align 8
+  %buf_len10 = getelementptr %tokenizer.3, ptr %21, i32 0, i32 1
+  %data_len11 = getelementptr %slice, ptr %file3, i32 0, i32 1
+  %22 = load i64, ptr %data_len11, align 4
+  store i64 %22, ptr %buf_len10, align 4
+  %23 = load ptr, ptr %t4, align 8
+  ret ptr %23
 }
 
 define %slice @tokenizer_tokenize(ptr %0) {
@@ -5707,52 +5681,43 @@ inner_block:                                      ; preds = %while_block
   br i1 %7, label %then_block, label %merge_block
 
 outer_block:                                      ; preds = %then_block, %while_block
-  %8 = load i64, ptr %tokens_len, align 4
-  call void (ptr, ...) @printf(ptr @83, i64 %8)
-  %9 = load ptr, ptr %tokens, align 8
-  %10 = load i64, ptr %tokens_len, align 4
-  %11 = call i64 @print_tokens(ptr %9, i64 %10)
   %slice = alloca %slice, align 8
-  %12 = load %slice, ptr %slice, align 8
+  %8 = load %slice, ptr %slice, align 8
   %res = alloca %slice, align 8
-  store %slice %12, ptr %res, align 8
+  store %slice %8, ptr %res, align 8
   %data = getelementptr %slice, ptr %res, i32 0, i32 0
-  %13 = load ptr, ptr %tokens, align 8
-  store ptr %13, ptr %data, align 8
+  %9 = load ptr, ptr %tokens, align 8
+  store ptr %9, ptr %data, align 8
   %data_len = getelementptr %slice, ptr %res, i32 0, i32 1
-  %14 = load i64, ptr %tokens_len, align 4
-  store i64 %14, ptr %data_len, align 4
-  %15 = load %slice, ptr %res, align 8
-  ret %slice %15
+  %10 = load i64, ptr %tokens_len, align 4
+  store i64 %10, ptr %data_len, align 4
+  %11 = load %slice, ptr %res, align 8
+  ret %slice %11
 
 then_block:                                       ; preds = %inner_block
   br label %outer_block
 
 merge_block:                                      ; preds = %inner_block
-  %16 = load ptr, ptr %tk, align 8
-  %type = getelementptr %token, ptr %16, i32 0, i32 0
-  %17 = load i64, ptr %type, align 4
-  call void (ptr, ...) @printf(ptr @82, i64 %17)
-  %18 = load ptr, ptr %tokens, align 8
-  %19 = load i64, ptr %tokens_len, align 4
-  %20 = getelementptr %token, ptr %18, i64 %19
-  %21 = load ptr, ptr %tk, align 8
-  %22 = load %token, ptr %21, align 8
-  store %token %22, ptr %20, align 8
-  %23 = load i64, ptr %tokens_len, align 4
-  %24 = add i64 %23, 1
-  store i64 %24, ptr %tokens_len, align 4
+  %12 = load ptr, ptr %tokens, align 8
+  %13 = load i64, ptr %tokens_len, align 4
+  %14 = getelementptr %token, ptr %12, i64 %13
+  %15 = load ptr, ptr %tk, align 8
+  %16 = load %token, ptr %15, align 8
+  store %token %16, ptr %14, align 8
+  %17 = load i64, ptr %tokens_len, align 4
+  %18 = add i64 %17, 1
+  store i64 %18, ptr %tokens_len, align 4
   br label %while_block
 
 entrypoint1:                                      ; No predecessors!
   %t2 = alloca ptr, align 8
   store ptr %0, ptr %t2, align 8
-  %25 = load ptr, ptr %t2, align 8
-  %arena3 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 4
-  %26 = load ptr, ptr %arena3, align 8
-  %27 = call ptr @arena_alloc(ptr %26, i64 960000)
+  %19 = load ptr, ptr %t2, align 8
+  %arena3 = getelementptr %tokenizer.3, ptr %19, i32 0, i32 4
+  %20 = load ptr, ptr %arena3, align 8
+  %21 = call ptr @arena_alloc(ptr %20, i64 960000)
   %tokens4 = alloca ptr, align 8
-  store ptr %27, ptr %tokens4, align 8
+  store ptr %21, ptr %tokens4, align 8
   %tokens_len5 = alloca i64, align 8
   store i64 0, ptr %tokens_len5, align 4
   br label %while_block6
@@ -5761,50 +5726,41 @@ while_block6:                                     ; preds = %merge_block11, %ent
   br i1 true, label %inner_block7, label %outer_block8
 
 inner_block7:                                     ; preds = %while_block6
-  %28 = load ptr, ptr %t2, align 8
-  %29 = call ptr @tokenizer_next(ptr %28)
+  %22 = load ptr, ptr %t2, align 8
+  %23 = call ptr @tokenizer_next(ptr %22)
   %tk9 = alloca ptr, align 8
-  store ptr %29, ptr %tk9, align 8
-  %30 = load ptr, ptr %tk9, align 8
-  %31 = icmp eq ptr %30, null
-  br i1 %31, label %then_block10, label %merge_block11
+  store ptr %23, ptr %tk9, align 8
+  %24 = load ptr, ptr %tk9, align 8
+  %25 = icmp eq ptr %24, null
+  br i1 %25, label %then_block10, label %merge_block11
 
 outer_block8:                                     ; preds = %then_block10, %while_block6
-  %32 = load i64, ptr %tokens_len5, align 4
-  call void (ptr, ...) @printf(ptr @165, i64 %32)
-  %33 = load ptr, ptr %tokens4, align 8
-  %34 = load i64, ptr %tokens_len5, align 4
-  %35 = call i64 @print_tokens(ptr %33, i64 %34)
-  %slice13 = alloca %slice, align 8
-  %36 = load %slice, ptr %slice13, align 8
-  %res14 = alloca %slice, align 8
-  store %slice %36, ptr %res14, align 8
-  %data15 = getelementptr %slice, ptr %res14, i32 0, i32 0
-  %37 = load ptr, ptr %tokens4, align 8
-  store ptr %37, ptr %data15, align 8
-  %data_len16 = getelementptr %slice, ptr %res14, i32 0, i32 1
-  %38 = load i64, ptr %tokens_len5, align 4
-  store i64 %38, ptr %data_len16, align 4
-  %39 = load %slice, ptr %res14, align 8
-  ret %slice %39
+  %slice12 = alloca %slice, align 8
+  %26 = load %slice, ptr %slice12, align 8
+  %res13 = alloca %slice, align 8
+  store %slice %26, ptr %res13, align 8
+  %data14 = getelementptr %slice, ptr %res13, i32 0, i32 0
+  %27 = load ptr, ptr %tokens4, align 8
+  store ptr %27, ptr %data14, align 8
+  %data_len15 = getelementptr %slice, ptr %res13, i32 0, i32 1
+  %28 = load i64, ptr %tokens_len5, align 4
+  store i64 %28, ptr %data_len15, align 4
+  %29 = load %slice, ptr %res13, align 8
+  ret %slice %29
 
 then_block10:                                     ; preds = %inner_block7
   br label %outer_block8
 
 merge_block11:                                    ; preds = %inner_block7
-  %40 = load ptr, ptr %tk9, align 8
-  %type12 = getelementptr %token.2, ptr %40, i32 0, i32 0
-  %41 = load i64, ptr %type12, align 4
-  call void (ptr, ...) @printf(ptr @164, i64 %41)
-  %42 = load ptr, ptr %tokens4, align 8
-  %43 = load i64, ptr %tokens_len5, align 4
-  %44 = getelementptr %token.2, ptr %42, i64 %43
-  %45 = load ptr, ptr %tk9, align 8
-  %46 = load %token.2, ptr %45, align 8
-  store %token.2 %46, ptr %44, align 8
-  %47 = load i64, ptr %tokens_len5, align 4
-  %48 = add i64 %47, 1
-  store i64 %48, ptr %tokens_len5, align 4
+  %30 = load ptr, ptr %tokens4, align 8
+  %31 = load i64, ptr %tokens_len5, align 4
+  %32 = getelementptr %token.2, ptr %30, i64 %31
+  %33 = load ptr, ptr %tk9, align 8
+  %34 = load %token.2, ptr %33, align 8
+  store %token.2 %34, ptr %32, align 8
+  %35 = load i64, ptr %tokens_len5, align 4
+  %36 = add i64 %35, 1
+  store i64 %36, ptr %tokens_len5, align 4
   br label %while_block6
 }
 
@@ -5899,256 +5855,165 @@ entrypoint:
   store ptr %2, ptr %fn_call, align 8
   %3 = load ptr, ptr %fn_call, align 8
   %4 = icmp ne ptr %3, null
-  br i1 %4, label %then_block, label %merge_block2
+  br i1 %4, label %then_block, label %merge_block
 
 then_block:                                       ; preds = %entrypoint
   %5 = load ptr, ptr %p, align 8
-  %6 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %7 = call ptr @parser_accept_token(ptr %5, i64 %6)
-  %8 = icmp eq ptr %7, null
-  br i1 %8, label %then_block1, label %merge_block
+  call void @parser_expect_semicolon(ptr %5)
+  %6 = load ptr, ptr %fn_call, align 8
+  ret ptr %6
 
-then_block1:                                      ; preds = %then_block
-  ret ptr null
+merge_block:                                      ; preds = %entrypoint
+  %7 = load ptr, ptr %p, align 8
+  %8 = call ptr @parser_accept_parse(ptr %7, ptr @parser_parse_sizeof_statement)
+  %fn_call1 = alloca ptr, align 8
+  store ptr %8, ptr %fn_call1, align 8
+  %9 = load ptr, ptr %fn_call1, align 8
+  %10 = icmp ne ptr %9, null
+  br i1 %10, label %then_block2, label %merge_block3
 
-merge_block:                                      ; preds = %then_block
-  %9 = load ptr, ptr %fn_call, align 8
-  ret ptr %9
+then_block2:                                      ; preds = %merge_block
+  %11 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %11)
+  %12 = load ptr, ptr %fn_call1, align 8
+  ret ptr %12
 
-merge_block2:                                     ; preds = %entrypoint
-  %10 = load ptr, ptr %p, align 8
-  %11 = call ptr @parser_accept_parse(ptr %10, ptr @parser_parse_sizeof_statement)
-  %fn_call3 = alloca ptr, align 8
-  store ptr %11, ptr %fn_call3, align 8
-  %12 = load ptr, ptr %fn_call3, align 8
-  %13 = icmp ne ptr %12, null
-  br i1 %13, label %then_block4, label %merge_block7
+merge_block3:                                     ; preds = %merge_block
+  %13 = load ptr, ptr %p, align 8
+  %14 = call ptr @parser_accept_parse(ptr %13, ptr @parse_function_call_statement)
+  %fn_call4 = alloca ptr, align 8
+  store ptr %14, ptr %fn_call4, align 8
+  %15 = load ptr, ptr %fn_call4, align 8
+  %16 = icmp ne ptr %15, null
+  br i1 %16, label %then_block5, label %merge_block6
 
-then_block4:                                      ; preds = %merge_block2
-  %14 = load ptr, ptr %p, align 8
-  %15 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %16 = call ptr @parser_accept_token(ptr %14, i64 %15)
-  %17 = icmp eq ptr %16, null
-  br i1 %17, label %then_block5, label %merge_block6
-
-then_block5:                                      ; preds = %then_block4
-  ret ptr null
-
-merge_block6:                                     ; preds = %then_block4
-  %18 = load ptr, ptr %fn_call3, align 8
+then_block5:                                      ; preds = %merge_block3
+  %17 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %17)
+  %18 = load ptr, ptr %fn_call4, align 8
   ret ptr %18
 
-merge_block7:                                     ; preds = %merge_block2
+merge_block6:                                     ; preds = %merge_block3
   %19 = load ptr, ptr %p, align 8
-  %20 = call ptr @parser_accept_parse(ptr %19, ptr @parse_function_call_statement)
-  %fn_call8 = alloca ptr, align 8
-  store ptr %20, ptr %fn_call8, align 8
-  %21 = load ptr, ptr %fn_call8, align 8
-  %22 = icmp ne ptr %21, null
-  br i1 %22, label %then_block9, label %merge_block12
-
-then_block9:                                      ; preds = %merge_block7
-  %23 = load ptr, ptr %p, align 8
-  %24 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %25 = call ptr @parser_accept_token(ptr %23, i64 %24)
-  %26 = icmp eq ptr %25, null
-  br i1 %26, label %then_block10, label %merge_block11
-
-then_block10:                                     ; preds = %then_block9
-  ret ptr null
-
-merge_block11:                                    ; preds = %then_block9
-  %27 = load ptr, ptr %fn_call8, align 8
-  ret ptr %27
-
-merge_block12:                                    ; preds = %merge_block7
-  %28 = load ptr, ptr %p, align 8
-  %29 = call ptr @parser_accept_parse(ptr %28, ptr @parse_assignment_statement)
+  %20 = call ptr @parser_accept_parse(ptr %19, ptr @parse_assignment_statement)
   %assignment = alloca ptr, align 8
-  store ptr %29, ptr %assignment, align 8
-  %30 = load ptr, ptr %assignment, align 8
-  %31 = icmp ne ptr %30, null
-  br i1 %31, label %then_block13, label %merge_block16
+  store ptr %20, ptr %assignment, align 8
+  %21 = load ptr, ptr %assignment, align 8
+  %22 = icmp ne ptr %21, null
+  br i1 %22, label %then_block7, label %merge_block8
 
-then_block13:                                     ; preds = %merge_block12
-  %32 = load ptr, ptr %p, align 8
-  %33 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %34 = call ptr @parser_accept_token(ptr %32, i64 %33)
-  %35 = icmp eq ptr %34, null
-  br i1 %35, label %then_block14, label %merge_block15
+then_block7:                                      ; preds = %merge_block6
+  %23 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %23)
+  %24 = load ptr, ptr %assignment, align 8
+  ret ptr %24
 
-then_block14:                                     ; preds = %then_block13
-  ret ptr null
+merge_block8:                                     ; preds = %merge_block6
+  %25 = load ptr, ptr %p, align 8
+  %26 = call ptr @parser_accept_parse(ptr %25, ptr @parser_parse_return_statement)
+  %retu = alloca ptr, align 8
+  store ptr %26, ptr %retu, align 8
+  %27 = load ptr, ptr %retu, align 8
+  %28 = icmp ne ptr %27, null
+  br i1 %28, label %then_block9, label %merge_block10
 
-merge_block15:                                    ; preds = %then_block13
-  %36 = load ptr, ptr %assignment, align 8
+then_block9:                                      ; preds = %merge_block8
+  %29 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %29)
+  %30 = load ptr, ptr %retu, align 8
+  ret ptr %30
+
+merge_block10:                                    ; preds = %merge_block8
+  %31 = load ptr, ptr %p, align 8
+  %32 = call ptr @parser_accept_parse(ptr %31, ptr @parser_parse_import_declaration)
+  %retu11 = alloca ptr, align 8
+  store ptr %32, ptr %retu11, align 8
+  %33 = load ptr, ptr %retu11, align 8
+  %34 = icmp ne ptr %33, null
+  br i1 %34, label %then_block12, label %merge_block13
+
+then_block12:                                     ; preds = %merge_block10
+  %35 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %35)
+  %36 = load ptr, ptr %retu11, align 8
   ret ptr %36
 
-merge_block16:                                    ; preds = %merge_block12
+merge_block13:                                    ; preds = %merge_block10
   %37 = load ptr, ptr %p, align 8
-  %38 = call ptr @parser_accept_parse(ptr %37, ptr @parser_parse_return_statement)
-  %retu = alloca ptr, align 8
-  store ptr %38, ptr %retu, align 8
-  %39 = load ptr, ptr %retu, align 8
+  %38 = call ptr @parser_accept_parse(ptr %37, ptr @parser_parse_extern_declaration)
+  %retu14 = alloca ptr, align 8
+  store ptr %38, ptr %retu14, align 8
+  %39 = load ptr, ptr %retu14, align 8
   %40 = icmp ne ptr %39, null
-  br i1 %40, label %then_block17, label %merge_block20
+  br i1 %40, label %then_block15, label %merge_block16
 
-then_block17:                                     ; preds = %merge_block16
+then_block15:                                     ; preds = %merge_block13
   %41 = load ptr, ptr %p, align 8
-  %42 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %43 = call ptr @parser_accept_token(ptr %41, i64 %42)
-  %44 = icmp eq ptr %43, null
-  br i1 %44, label %then_block18, label %merge_block19
+  call void @parser_expect_semicolon(ptr %41)
+  %42 = load ptr, ptr %retu14, align 8
+  ret ptr %42
 
-then_block18:                                     ; preds = %then_block17
-  ret ptr null
+merge_block16:                                    ; preds = %merge_block13
+  %43 = load ptr, ptr %p, align 8
+  %44 = call ptr @parser_accept_parse(ptr %43, ptr @parser_parse_if_statement)
+  %retu17 = alloca ptr, align 8
+  store ptr %44, ptr %retu17, align 8
+  %45 = load ptr, ptr %retu17, align 8
+  %46 = icmp ne ptr %45, null
+  br i1 %46, label %then_block18, label %merge_block19
 
-merge_block19:                                    ; preds = %then_block17
-  %45 = load ptr, ptr %retu, align 8
-  ret ptr %45
+then_block18:                                     ; preds = %merge_block16
+  %47 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %47)
+  %48 = load ptr, ptr %retu17, align 8
+  ret ptr %48
 
-merge_block20:                                    ; preds = %merge_block16
-  %46 = load ptr, ptr %p, align 8
-  %47 = call ptr @parser_accept_parse(ptr %46, ptr @parser_parse_import_declaration)
-  %retu21 = alloca ptr, align 8
-  store ptr %47, ptr %retu21, align 8
-  %48 = load ptr, ptr %retu21, align 8
-  %49 = icmp ne ptr %48, null
-  br i1 %49, label %then_block22, label %merge_block25
+merge_block19:                                    ; preds = %merge_block16
+  %49 = load ptr, ptr %p, align 8
+  %50 = call ptr @parser_accept_parse(ptr %49, ptr @parser_parse_while_statement)
+  %retu20 = alloca ptr, align 8
+  store ptr %50, ptr %retu20, align 8
+  %51 = load ptr, ptr %retu20, align 8
+  %52 = icmp ne ptr %51, null
+  br i1 %52, label %then_block21, label %merge_block22
 
-then_block22:                                     ; preds = %merge_block20
-  %50 = load ptr, ptr %p, align 8
-  %51 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %52 = call ptr @parser_accept_token(ptr %50, i64 %51)
-  %53 = icmp eq ptr %52, null
-  br i1 %53, label %then_block23, label %merge_block24
-
-then_block23:                                     ; preds = %then_block22
-  ret ptr null
-
-merge_block24:                                    ; preds = %then_block22
-  %54 = load ptr, ptr %retu21, align 8
+then_block21:                                     ; preds = %merge_block19
+  %53 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %53)
+  %54 = load ptr, ptr %retu20, align 8
   ret ptr %54
 
-merge_block25:                                    ; preds = %merge_block20
+merge_block22:                                    ; preds = %merge_block19
   %55 = load ptr, ptr %p, align 8
-  %56 = call ptr @parser_accept_parse(ptr %55, ptr @parser_parse_extern_declaration)
-  %retu26 = alloca ptr, align 8
-  store ptr %56, ptr %retu26, align 8
-  %57 = load ptr, ptr %retu26, align 8
+  %56 = call ptr @parser_accept_parse(ptr %55, ptr @unnamed_func.49)
+  %retu23 = alloca ptr, align 8
+  store ptr %56, ptr %retu23, align 8
+  %57 = load ptr, ptr %retu23, align 8
   %58 = icmp ne ptr %57, null
-  br i1 %58, label %then_block27, label %merge_block30
+  br i1 %58, label %then_block24, label %merge_block25
+
+then_block24:                                     ; preds = %merge_block22
+  %59 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %59)
+  %60 = load ptr, ptr %retu23, align 8
+  ret ptr %60
+
+merge_block25:                                    ; preds = %merge_block22
+  %61 = load ptr, ptr %p, align 8
+  %62 = call ptr @parser_accept_parse(ptr %61, ptr @unnamed_func.50)
+  %retu26 = alloca ptr, align 8
+  store ptr %62, ptr %retu26, align 8
+  %63 = load ptr, ptr %retu26, align 8
+  %64 = icmp ne ptr %63, null
+  br i1 %64, label %then_block27, label %merge_block28
 
 then_block27:                                     ; preds = %merge_block25
-  %59 = load ptr, ptr %p, align 8
-  %60 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %61 = call ptr @parser_accept_token(ptr %59, i64 %60)
-  %62 = icmp eq ptr %61, null
-  br i1 %62, label %then_block28, label %merge_block29
+  %65 = load ptr, ptr %p, align 8
+  call void @parser_expect_semicolon(ptr %65)
+  %66 = load ptr, ptr %retu26, align 8
+  ret ptr %66
 
-then_block28:                                     ; preds = %then_block27
-  ret ptr null
-
-merge_block29:                                    ; preds = %then_block27
-  %63 = load ptr, ptr %retu26, align 8
-  ret ptr %63
-
-merge_block30:                                    ; preds = %merge_block25
-  %64 = load ptr, ptr %p, align 8
-  %65 = call ptr @parser_accept_parse(ptr %64, ptr @parser_parse_if_statement)
-  %retu31 = alloca ptr, align 8
-  store ptr %65, ptr %retu31, align 8
-  %66 = load ptr, ptr %retu31, align 8
-  %67 = icmp ne ptr %66, null
-  br i1 %67, label %then_block32, label %merge_block35
-
-then_block32:                                     ; preds = %merge_block30
-  %68 = load ptr, ptr %p, align 8
-  %69 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %70 = call ptr @parser_accept_token(ptr %68, i64 %69)
-  %71 = icmp eq ptr %70, null
-  br i1 %71, label %then_block33, label %merge_block34
-
-then_block33:                                     ; preds = %then_block32
-  ret ptr null
-
-merge_block34:                                    ; preds = %then_block32
-  %72 = load ptr, ptr %retu31, align 8
-  ret ptr %72
-
-merge_block35:                                    ; preds = %merge_block30
-  %73 = load ptr, ptr %p, align 8
-  %74 = call ptr @parser_accept_parse(ptr %73, ptr @parser_parse_while_statement)
-  %retu36 = alloca ptr, align 8
-  store ptr %74, ptr %retu36, align 8
-  %75 = load ptr, ptr %retu36, align 8
-  %76 = icmp ne ptr %75, null
-  br i1 %76, label %then_block37, label %merge_block40
-
-then_block37:                                     ; preds = %merge_block35
-  %77 = load ptr, ptr %p, align 8
-  %78 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %79 = call ptr @parser_accept_token(ptr %77, i64 %78)
-  %80 = icmp eq ptr %79, null
-  br i1 %80, label %then_block38, label %merge_block39
-
-then_block38:                                     ; preds = %then_block37
-  ret ptr null
-
-merge_block39:                                    ; preds = %then_block37
-  %81 = load ptr, ptr %retu36, align 8
-  ret ptr %81
-
-merge_block40:                                    ; preds = %merge_block35
-  %82 = load ptr, ptr %p, align 8
-  %83 = call ptr @parser_accept_parse(ptr %82, ptr @unnamed_func.49)
-  %retu41 = alloca ptr, align 8
-  store ptr %83, ptr %retu41, align 8
-  %84 = load ptr, ptr %retu41, align 8
-  %85 = icmp ne ptr %84, null
-  br i1 %85, label %then_block42, label %merge_block45
-
-then_block42:                                     ; preds = %merge_block40
-  %86 = load ptr, ptr %p, align 8
-  %87 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %88 = call ptr @parser_accept_token(ptr %86, i64 %87)
-  %89 = icmp eq ptr %88, null
-  br i1 %89, label %then_block43, label %merge_block44
-
-then_block43:                                     ; preds = %then_block42
-  ret ptr null
-
-merge_block44:                                    ; preds = %then_block42
-  %90 = load ptr, ptr %retu41, align 8
-  ret ptr %90
-
-merge_block45:                                    ; preds = %merge_block40
-  %91 = load ptr, ptr %p, align 8
-  %92 = call ptr @parser_accept_parse(ptr %91, ptr @unnamed_func.50)
-  %retu46 = alloca ptr, align 8
-  store ptr %92, ptr %retu46, align 8
-  %93 = load ptr, ptr %retu46, align 8
-  %94 = icmp ne ptr %93, null
-  br i1 %94, label %then_block47, label %merge_block50
-
-then_block47:                                     ; preds = %merge_block45
-  %95 = load ptr, ptr %p, align 8
-  %96 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  %97 = call ptr @parser_accept_token(ptr %95, i64 %96)
-  %98 = icmp eq ptr %97, null
-  br i1 %98, label %then_block48, label %merge_block49
-
-then_block48:                                     ; preds = %then_block47
-  ret ptr null
-
-merge_block49:                                    ; preds = %then_block47
-  %99 = load ptr, ptr %retu46, align 8
-  ret ptr %99
-
-merge_block50:                                    ; preds = %merge_block45
-  %100 = load ptr, ptr %p, align 8
-  %101 = call i64 @parser_current_line(ptr %100)
-  call void (ptr, ...) @printf(ptr @176, i64 %101)
+merge_block28:                                    ; preds = %merge_block25
   ret ptr null
 }
 
@@ -6829,7 +6694,7 @@ merge_block:                                      ; preds = %entrypoint
   %6 = load ptr, ptr %ident, align 8
   %data = getelementptr %token.2, ptr %6, i32 0, i32 1
   %7 = load ptr, ptr %data, align 8
-  %8 = call i1 @strcmp(ptr %7, ptr @166)
+  %8 = call i1 @strcmp(ptr %7, ptr @158)
   %9 = icmp eq i1 %8, false
   br i1 %9, label %then_block1, label %merge_block2
 
@@ -6941,7 +6806,7 @@ merge_block:                                      ; preds = %entrypoint
   %6 = load ptr, ptr %ident, align 8
   %data = getelementptr %token.2, ptr %6, i32 0, i32 1
   %7 = load ptr, ptr %data, align 8
-  %8 = call i1 @strcmp(ptr %7, ptr @167)
+  %8 = call i1 @strcmp(ptr %7, ptr @159)
   %9 = icmp eq i1 %8, false
   br i1 %9, label %then_block1, label %merge_block2
 
@@ -7639,7 +7504,7 @@ merge_block2:                                     ; preds = %merge_block
   store ptr %11, ptr %d, align 8
   %12 = load ptr, ptr %d, align 8
   %name = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %12, i32 0, i32 0
-  store ptr @168, ptr %name, align 8
+  store ptr @160, ptr %name, align 8
   %13 = load ptr, ptr %d, align 8
   %underlying_type = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %13, i32 0, i32 1
   %14 = load ptr, ptr %typ, align 8
@@ -7803,40 +7668,36 @@ then_block3:                                      ; preds = %merge_block2
   ret ptr null
 
 merge_block4:                                     ; preds = %merge_block2
-  %14 = load ptr, ptr %typ_annotation, align 8
-  %type = getelementptr %Node, ptr %14, i32 0, i32 0
-  %15 = load i64, ptr %type, align 4
-  call void (ptr, ...) @printf(ptr @169, i64 %15)
-  %16 = load ptr, ptr %ip, align 8
-  %arena = getelementptr %parser, ptr %16, i32 0, i32 3
-  %17 = load ptr, ptr %arena, align 8
-  %18 = call ptr @arena_alloc(ptr %17, i64 16)
+  %14 = load ptr, ptr %ip, align 8
+  %arena = getelementptr %parser, ptr %14, i32 0, i32 3
+  %15 = load ptr, ptr %arena, align 8
+  %16 = call ptr @arena_alloc(ptr %15, i64 16)
   %d = alloca ptr, align 8
-  store ptr %18, ptr %d, align 8
-  %19 = load ptr, ptr %d, align 8
-  %name = getelementptr %NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, ptr %19, i32 0, i32 0
-  %20 = load ptr, ptr %ident, align 8
-  %data = getelementptr %token.2, ptr %20, i32 0, i32 1
-  %21 = load ptr, ptr %data, align 8
-  store ptr %21, ptr %name, align 8
-  %22 = load ptr, ptr %d, align 8
-  %type5 = getelementptr %NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, ptr %22, i32 0, i32 1
-  %23 = load ptr, ptr %typ_annotation, align 8
-  store ptr %23, ptr %type5, align 8
+  store ptr %16, ptr %d, align 8
+  %17 = load ptr, ptr %d, align 8
+  %name = getelementptr %NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, ptr %17, i32 0, i32 0
+  %18 = load ptr, ptr %ident, align 8
+  %data = getelementptr %token.2, ptr %18, i32 0, i32 1
+  %19 = load ptr, ptr %data, align 8
+  store ptr %19, ptr %name, align 8
+  %20 = load ptr, ptr %d, align 8
+  %type = getelementptr %NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, ptr %20, i32 0, i32 1
+  %21 = load ptr, ptr %typ_annotation, align 8
+  store ptr %21, ptr %type, align 8
   %Node = alloca %Node, align 8
-  %24 = load %Node, ptr %Node, align 8
+  %22 = load %Node, ptr %Node, align 8
   %n = alloca %Node, align 8
-  store %Node %24, ptr %n, align 8
-  %type6 = getelementptr %Node, ptr %n, i32 0, i32 0
-  %25 = load i64, ptr @NODE_PRIMARY_EXPRESSION_IDENTIFIER, align 4
-  store i64 %25, ptr %type6, align 4
-  %data7 = getelementptr %Node, ptr %n, i32 0, i32 1
-  %26 = load ptr, ptr %d, align 8
-  store ptr %26, ptr %data7, align 8
-  %27 = load ptr, ptr %ip, align 8
-  %28 = load %Node, ptr %n, align 8
-  %29 = call ptr @parser_create_node(ptr %27, %Node %28)
-  ret ptr %29
+  store %Node %22, ptr %n, align 8
+  %type5 = getelementptr %Node, ptr %n, i32 0, i32 0
+  %23 = load i64, ptr @NODE_PRIMARY_EXPRESSION_IDENTIFIER, align 4
+  store i64 %23, ptr %type5, align 4
+  %data6 = getelementptr %Node, ptr %n, i32 0, i32 1
+  %24 = load ptr, ptr %d, align 8
+  store ptr %24, ptr %data6, align 8
+  %25 = load ptr, ptr %ip, align 8
+  %26 = load %Node, ptr %n, align 8
+  %27 = call ptr @parser_create_node(ptr %25, %Node %26)
+  ret ptr %27
 }
 
 define ptr @parser_parse_function_definition(ptr %0) {
@@ -8330,7 +8191,7 @@ merge_block15:                                    ; preds = %merge_block9
 then_block16:                                     ; preds = %merge_block15
   %38 = load ptr, ptr %p, align 8
   %39 = call i64 @parser_current_line(ptr %38)
-  call void (ptr, ...) @printf(ptr @170, i64 %39)
+  call void (ptr, ...) @printf(ptr @161, i64 %39)
   ret ptr null
 
 merge_block17:                                    ; preds = %merge_block15
@@ -9691,7 +9552,7 @@ merge_block2:                                     ; preds = %merge_block
 then_block3:                                      ; preds = %merge_block2
   %13 = load ptr, ptr %p, align 8
   %14 = call i64 @parser_current_line(ptr %13)
-  call void (ptr, ...) @printf(ptr @171, i64 %14)
+  call void (ptr, ...) @printf(ptr @162, i64 %14)
   call void @exit(i64 1)
   br label %merge_block4
 
@@ -9729,10 +9590,10 @@ then_block5:                                      ; preds = %merge_block4
   %31 = load ptr, ptr %buf, align 8
   %32 = load ptr, ptr %impor_filename, align 8
   %33 = getelementptr i8, ptr %32, i64 1
-  call void (ptr, ptr, ...) @sprintf(ptr %31, ptr @172, ptr %33)
+  call void (ptr, ptr, ...) @sprintf(ptr %31, ptr @163, ptr %33)
   %34 = load ptr, ptr %buf, align 8
   store ptr %34, ptr %impor_filename, align 8
-  store ptr @173, ptr %current_file, align 8
+  store ptr @164, ptr %current_file, align 8
   br label %merge_block7
 
 merge_block7:                                     ; preds = %merge_block4, %then_block5
@@ -9751,7 +9612,7 @@ merge_block7:                                     ; preds = %merge_block4, %then
 then_block8:                                      ; preds = %merge_block7
   %41 = load ptr, ptr %p, align 8
   %42 = call i64 @parser_current_line(ptr %41)
-  call void (ptr, ...) @printf(ptr @174, i64 %42)
+  call void (ptr, ...) @printf(ptr @165, i64 %42)
   call void @exit(i64 1)
   br label %merge_block9
 
@@ -9768,7 +9629,7 @@ merge_block9:                                     ; preds = %merge_block7, %then
 then_block10:                                     ; preds = %merge_block9
   %48 = load ptr, ptr %p, align 8
   %49 = call i64 @parser_current_line(ptr %48)
-  call void (ptr, ...) @printf(ptr @175, i64 %49)
+  call void (ptr, ...) @printf(ptr @166, i64 %49)
   call void @exit(i64 1)
   br label %merge_block11
 
@@ -9981,6 +9842,27 @@ merge_block3:                                     ; preds = %merge_block
   br label %while_block
 }
 
+define void @parser_expect_semicolon(ptr %0) {
+entrypoint:
+  %p = alloca ptr, align 8
+  store ptr %0, ptr %p, align 8
+  %1 = load ptr, ptr %p, align 8
+  %2 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
+  %3 = call ptr @parser_accept_token(ptr %1, i64 %2)
+  %4 = icmp eq ptr %3, null
+  br i1 %4, label %then_block, label %merge_block
+
+then_block:                                       ; preds = %entrypoint
+  %5 = load ptr, ptr %p, align 8
+  %6 = call i64 @parser_current_line(ptr %5)
+  call void (ptr, ...) @printf(ptr @167, i64 %6)
+  call void @exit(i64 1)
+  br label %merge_block
+
+merge_block:                                      ; preds = %entrypoint, %then_block
+  ret void
+}
+
 define ptr @unnamed_func.49(ptr %0) {
 entrypoint:
   %ip = alloca ptr, align 8
@@ -10101,7 +9983,7 @@ outer_block:                                      ; preds = %while_block
 then_block:                                       ; preds = %inner_block
   %26 = load ptr, ptr %p, align 8
   %27 = call i64 @parser_current_line(ptr %26)
-  call void (ptr, ...) @printf(ptr @177, i64 %27)
+  call void (ptr, ...) @printf(ptr @168, i64 %27)
   call void @exit(i64 1)
   br label %merge_block
 
@@ -10858,7 +10740,7 @@ then_block:                                       ; preds = %and_merge3
   store %NODE_TYPE_SIMPLE_TYPE_DATA %26, ptr %simple_type_a, align 8
   %name = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a, i32 0, i32 0
   %27 = load ptr, ptr %name, align 8
-  %28 = call i1 @strcmp(ptr %27, ptr @181)
+  %28 = call i1 @strcmp(ptr %27, ptr @172)
   br i1 %28, label %then_block8, label %merge_block
 
 then_block8:                                      ; preds = %then_block
@@ -10903,11 +10785,11 @@ then_block17:                                     ; preds = %merge_block14
   %43 = load ptr, ptr %a, align 8
   %type18 = getelementptr %Node, ptr %43, i32 0, i32 0
   %44 = load i64, ptr %type18, align 4
-  call void (ptr, ...) @printf(ptr @182, i64 %44)
+  call void (ptr, ...) @printf(ptr @173, i64 %44)
   %45 = load ptr, ptr %b, align 8
   %type19 = getelementptr %Node, ptr %45, i32 0, i32 0
   %46 = load i64, ptr %type19, align 4
-  call void (ptr, ...) @printf(ptr @183, i64 %46)
+  call void (ptr, ...) @printf(ptr @174, i64 %46)
   ret i1 false
 
 merge_block20:                                    ; preds = %merge_block14
@@ -10951,10 +10833,10 @@ then_block22:                                     ; preds = %merge_block20
 then_block29:                                     ; preds = %then_block22
   %name30 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a25, i32 0, i32 0
   %66 = load ptr, ptr %name30, align 8
-  call void (ptr, ...) @printf(ptr @184, ptr %66)
+  call void (ptr, ...) @printf(ptr @175, ptr %66)
   %name31 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_b, i32 0, i32 0
   %67 = load ptr, ptr %name31, align 8
-  call void (ptr, ...) @printf(ptr @185, ptr %67)
+  call void (ptr, ...) @printf(ptr @176, ptr %67)
   br label %merge_block32
 
 merge_block32:                                    ; preds = %then_block22, %then_block29
@@ -10998,7 +10880,7 @@ then_block35:                                     ; preds = %merge_block33
   br i1 %87, label %then_block40, label %merge_block41
 
 then_block40:                                     ; preds = %then_block35
-  call void (ptr, ...) @printf(ptr @186)
+  call void (ptr, ...) @printf(ptr @177)
   ret i1 false
 
 merge_block41:                                    ; preds = %then_block35
@@ -11010,7 +10892,7 @@ merge_block41:                                    ; preds = %then_block35
   br i1 %90, label %then_block43, label %merge_block44
 
 then_block43:                                     ; preds = %merge_block41
-  call void (ptr, ...) @printf(ptr @187)
+  call void (ptr, ...) @printf(ptr @178)
   ret i1 false
 
 merge_block44:                                    ; preds = %merge_block41
@@ -11051,7 +10933,7 @@ outer_block:                                      ; preds = %while_block
   ret i1 true
 
 then_block47:                                     ; preds = %inner_block
-  call void (ptr, ...) @printf(ptr @188)
+  call void (ptr, ...) @printf(ptr @179)
   ret i1 false
 
 merge_block48:                                    ; preds = %inner_block
@@ -11105,7 +10987,7 @@ then_block58:                                     ; preds = %then_block51
   store %NODE_TYPE_SIMPLE_TYPE_DATA %129, ptr %simple_type_b61, align 8
   %name62 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_b61, i32 0, i32 0
   %130 = load ptr, ptr %name62, align 8
-  %131 = call i1 @strcmp(ptr %130, ptr @189)
+  %131 = call i1 @strcmp(ptr %130, ptr @180)
   br i1 %131, label %then_block63, label %merge_block64
 
 then_block63:                                     ; preds = %then_block58
@@ -11133,7 +11015,7 @@ then_block68:                                     ; preds = %merge_block65
   store %NODE_TYPE_SIMPLE_TYPE_DATA %138, ptr %simple_type_a71, align 8
   %name72 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type_a71, i32 0, i32 0
   %139 = load ptr, ptr %name72, align 8
-  %140 = call i1 @strcmp(ptr %139, ptr @190)
+  %140 = call i1 @strcmp(ptr %139, ptr @181)
   br i1 %140, label %then_block73, label %merge_block74
 
 then_block73:                                     ; preds = %then_block68
@@ -11153,7 +11035,7 @@ merge_block75:                                    ; preds = %merge_block65, %mer
   br i1 %145, label %then_block78, label %merge_block79
 
 then_block78:                                     ; preds = %merge_block75
-  call void (ptr, ...) @printf(ptr @191)
+  call void (ptr, ...) @printf(ptr @182)
   ret i1 false
 
 merge_block79:                                    ; preds = %merge_block75
@@ -11194,7 +11076,7 @@ then_block82:                                     ; preds = %merge_block80
   br i1 %162, label %then_block87, label %merge_block88
 
 then_block87:                                     ; preds = %then_block82
-  call void (ptr, ...) @printf(ptr @192)
+  call void (ptr, ...) @printf(ptr @183)
   ret i1 false
 
 merge_block88:                                    ; preds = %then_block82
@@ -11235,7 +11117,7 @@ outer_block93:                                    ; preds = %while_block90
   ret i1 true
 
 then_block95:                                     ; preds = %inner_block92
-  call void (ptr, ...) @printf(ptr @193)
+  call void (ptr, ...) @printf(ptr @184)
   ret i1 false
 
 merge_block96:                                    ; preds = %inner_block92
@@ -11482,7 +11364,7 @@ entrypoint:
   call void @LLVMInitializeAllTargets()
   call void @LLVMInitializeAllAsmPrinters()
   call void @LLVMInitializeAllAsmParsers()
-  %1 = call ptr @LLVMModuleCreateWithName(ptr @194)
+  %1 = call ptr @LLVMModuleCreateWithName(ptr @185)
   %module = alloca ptr, align 8
   store ptr %1, ptr %module, align 8
   %2 = call ptr @LLVMGetGlobalContext()
@@ -11603,7 +11485,7 @@ then_block:                                       ; preds = %and_merge
   store %NODE_TYPE_SIMPLE_TYPE_DATA %16, ptr %simple_type, align 8
   %name = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type, i32 0, i32 0
   %17 = load ptr, ptr %name, align 8
-  %18 = call i1 @strcmp(ptr %17, ptr @195)
+  %18 = call i1 @strcmp(ptr %17, ptr @186)
   br i1 %18, label %then_block3, label %merge_block
 
 then_block3:                                      ; preds = %then_block
@@ -11622,7 +11504,7 @@ then_block3:                                      ; preds = %then_block
 merge_block:                                      ; preds = %then_block
   %name4 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type, i32 0, i32 0
   %25 = load ptr, ptr %name4, align 8
-  %26 = call i1 @strcmp(ptr %25, ptr @196)
+  %26 = call i1 @strcmp(ptr %25, ptr @187)
   br i1 %26, label %then_block5, label %merge_block8
 
 then_block5:                                      ; preds = %merge_block
@@ -11641,7 +11523,7 @@ then_block5:                                      ; preds = %merge_block
 merge_block8:                                     ; preds = %merge_block
   %name9 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type, i32 0, i32 0
   %33 = load ptr, ptr %name9, align 8
-  %34 = call i1 @strcmp(ptr %33, ptr @197)
+  %34 = call i1 @strcmp(ptr %33, ptr @188)
   br i1 %34, label %then_block10, label %merge_block13
 
 then_block10:                                     ; preds = %merge_block8
@@ -11660,7 +11542,7 @@ then_block10:                                     ; preds = %merge_block8
 merge_block13:                                    ; preds = %merge_block8
   %name14 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type, i32 0, i32 0
   %41 = load ptr, ptr %name14, align 8
-  %42 = call i1 @strcmp(ptr %41, ptr @198)
+  %42 = call i1 @strcmp(ptr %41, ptr @189)
   br i1 %42, label %then_block15, label %merge_block18
 
 then_block15:                                     ; preds = %merge_block13
@@ -11679,7 +11561,7 @@ then_block15:                                     ; preds = %merge_block13
 merge_block18:                                    ; preds = %merge_block13
   %name19 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type, i32 0, i32 0
   %49 = load ptr, ptr %name19, align 8
-  %50 = call i1 @strcmp(ptr %49, ptr @199)
+  %50 = call i1 @strcmp(ptr %49, ptr @190)
   br i1 %50, label %then_block20, label %merge_block23
 
 then_block20:                                     ; preds = %merge_block18
@@ -11733,7 +11615,7 @@ merge_block30:                                    ; preds = %merge_block23
   %74 = load ptr, ptr %node, align 8
   %line = getelementptr %Node, ptr %74, i32 0, i32 2
   %75 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @200, i64 %75)
+  call void (ptr, ...) @printf(ptr @191, i64 %75)
   call void @exit(i64 1)
   br label %merge_block31
 
@@ -11846,7 +11728,7 @@ then_block41:                                     ; preds = %inner_block
   store %NODE_TYPE_SIMPLE_TYPE_DATA %125, ptr %simple_type43, align 8
   %name44 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type43, i32 0, i32 0
   %126 = load ptr, ptr %name44, align 8
-  %127 = call i1 @strcmp(ptr %126, ptr @201)
+  %127 = call i1 @strcmp(ptr %126, ptr @192)
   br i1 %127, label %then_block45, label %merge_block46
 
 then_block45:                                     ; preds = %then_block41
@@ -11940,7 +11822,7 @@ merge_block60:                                    ; preds = %merge_block53
   %172 = load ptr, ptr %node, align 8
   %line61 = getelementptr %Node, ptr %172, i32 0, i32 2
   %173 = load i64, ptr %line61, align 4
-  call void (ptr, ...) @printf(ptr @202, i64 %173)
+  call void (ptr, ...) @printf(ptr @193, i64 %173)
   call void @exit(i64 1)
   ret ptr null
 }
@@ -12160,7 +12042,7 @@ then_block24:                                     ; preds = %merge_block22
 merge_block25:                                    ; preds = %merge_block22
   %line = getelementptr %Node, ptr %stmt, i32 0, i32 2
   %50 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @261, i64 %50)
+  call void (ptr, ...) @printf(ptr @252, i64 %50)
   call void @exit(i64 1)
   ret i64 0
 }
@@ -12221,7 +12103,7 @@ then_block4:                                      ; preds = %then_block
   %24 = load ptr, ptr %expression1, align 8
   %line = getelementptr %Node, ptr %24, i32 0, i32 2
   %25 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @253, i64 %25)
+  call void (ptr, ...) @printf(ptr @244, i64 %25)
   call void @exit(i64 1)
   br label %merge_block
 
@@ -12230,7 +12112,7 @@ merge_block:                                      ; preds = %then_block, %then_b
   %value = getelementptr %Variable, ptr %26, i32 0, i32 0
   %27 = load ptr, ptr %value, align 8
   %28 = call i64 @LLVMGetValueKind(ptr %27)
-  %29 = load i64, ptr @180, align 4
+  %29 = load i64, ptr @171, align 4
   %30 = icmp ne i64 %28, %29
   br i1 %30, label %then_block5, label %merge_block9
 
@@ -12256,7 +12138,7 @@ then_block5:                                      ; preds = %merge_block
   %43 = load ptr, ptr %function, align 8
   %value7 = getelementptr %Variable, ptr %43, i32 0, i32 0
   %44 = load ptr, ptr %value7, align 8
-  %45 = call ptr @LLVMBuildLoad2(ptr %39, ptr %42, ptr %44, ptr @254)
+  %45 = call ptr @LLVMBuildLoad2(ptr %39, ptr %42, ptr %44, ptr @245)
   store ptr %45, ptr %value6, align 8
   %46 = load ptr, ptr %function, align 8
   %node8 = getelementptr %Variable, ptr %46, i32 0, i32 2
@@ -12394,7 +12276,7 @@ outer_block:                                      ; preds = %while_block
   %116 = load ptr, ptr %value24, align 8
   %117 = load ptr, ptr %arguments, align 8
   %118 = load i64, ptr %i, align 4
-  %119 = call ptr @LLVMBuildCall2(ptr %112, ptr %114, ptr %116, ptr %117, i64 %118, ptr @255)
+  %119 = call ptr @LLVMBuildCall2(ptr %112, ptr %114, ptr %116, ptr %117, i64 %118, ptr @246)
   %res = alloca ptr, align 8
   store ptr %119, ptr %res, align 8
   %120 = load ptr, ptr %c, align 8
@@ -12451,7 +12333,7 @@ then_block:                                       ; preds = %entrypoint
   store ptr %9, ptr %inner_type_data, align 8
   %10 = load ptr, ptr %inner_type_data, align 8
   %name1 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %10, i32 0, i32 0
-  store ptr @207, ptr %name1, align 8
+  store ptr @198, ptr %name1, align 8
   %Node = alloca %Node, align 8
   %11 = load %Node, ptr %Node, align 8
   %inner_type = alloca %Node, align 8
@@ -12527,7 +12409,7 @@ then_block9:                                      ; preds = %merge_block
   store ptr %45, ptr %d, align 8
   %46 = load ptr, ptr %d, align 8
   %name15 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %46, i32 0, i32 0
-  store ptr @208, ptr %name15, align 8
+  store ptr @199, ptr %name15, align 8
   %47 = load ptr, ptr %d, align 8
   %underlying_type = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %47, i32 0, i32 1
   store ptr null, ptr %underlying_type, align 8
@@ -12577,7 +12459,7 @@ then_block19:                                     ; preds = %merge_block17
   store ptr %70, ptr %d26, align 8
   %71 = load ptr, ptr %d26, align 8
   %name27 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %71, i32 0, i32 0
-  store ptr @209, ptr %name27, align 8
+  store ptr @200, ptr %name27, align 8
   %72 = load ptr, ptr %d26, align 8
   %underlying_type28 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %72, i32 0, i32 1
   store ptr null, ptr %underlying_type28, align 8
@@ -12638,7 +12520,7 @@ then_block34:                                     ; preds = %merge_block32
   store ptr %97, ptr %d41, align 8
   %98 = load ptr, ptr %d41, align 8
   %name42 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %98, i32 0, i32 0
-  store ptr @210, ptr %name42, align 8
+  store ptr @201, ptr %name42, align 8
   %99 = load ptr, ptr %d41, align 8
   %underlying_type43 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %99, i32 0, i32 1
   store ptr null, ptr %underlying_type43, align 8
@@ -12677,7 +12559,7 @@ then_block47:                                     ; preds = %merge_block45
   %builder = getelementptr %codegen, ptr %118, i32 0, i32 2
   %119 = load ptr, ptr %builder, align 8
   %120 = load ptr, ptr %str, align 8
-  %121 = call ptr @LLVMBuildGlobalStringPtr(ptr %119, ptr %120, ptr @211)
+  %121 = call ptr @LLVMBuildGlobalStringPtr(ptr %119, ptr %120, ptr @202)
   %x = alloca ptr, align 8
   store ptr %121, ptr %x, align 8
   %122 = load ptr, ptr %c, align 8
@@ -12688,7 +12570,7 @@ then_block47:                                     ; preds = %merge_block45
   store ptr %124, ptr %inner_type_data51, align 8
   %125 = load ptr, ptr %inner_type_data51, align 8
   %name52 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %125, i32 0, i32 0
-  store ptr @212, ptr %name52, align 8
+  store ptr @203, ptr %name52, align 8
   %Node53 = alloca %Node, align 8
   %126 = load %Node, ptr %Node53, align 8
   %inner_type54 = alloca %Node, align 8
@@ -12823,7 +12705,7 @@ merge_block78:                                    ; preds = %then_block75, %then
   %186 = load ptr, ptr %variable, align 8
   %value80 = getelementptr %Variable, ptr %186, i32 0, i32 0
   %187 = load ptr, ptr %value80, align 8
-  %188 = call ptr @LLVMBuildLoad2(ptr %183, ptr %185, ptr %187, ptr @213)
+  %188 = call ptr @LLVMBuildLoad2(ptr %183, ptr %185, ptr %187, ptr @204)
   store ptr %188, ptr %param_value, align 8
   store i1 true, ptr %done, align 1
   br label %merge_block81
@@ -12874,7 +12756,7 @@ merge_block88:                                    ; preds = %then_block84, %then
   %212 = load ptr, ptr %variable, align 8
   %value90 = getelementptr %Variable, ptr %212, i32 0, i32 0
   %213 = load ptr, ptr %value90, align 8
-  %214 = call ptr @LLVMBuildLoad2(ptr %209, ptr %211, ptr %213, ptr @214)
+  %214 = call ptr @LLVMBuildLoad2(ptr %209, ptr %211, ptr %213, ptr @205)
   store ptr %214, ptr %param_value, align 8
   store i1 true, ptr %done, align 1
   br label %merge_block91
@@ -12999,7 +12881,7 @@ then_block107:                                    ; preds = %inner_block
   store %NODE_TYPE_SIMPLE_TYPE_DATA %269, ptr %simple_type, align 8
   %name109 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type, i32 0, i32 0
   %270 = load ptr, ptr %name109, align 8
-  %271 = call i1 @strcmp(ptr %270, ptr @215)
+  %271 = call i1 @strcmp(ptr %270, ptr @206)
   br i1 %271, label %then_block110, label %merge_block111
 
 then_block110:                                    ; preds = %then_block107
@@ -13109,7 +12991,7 @@ then_block127:                                    ; preds = %merge_block126
   br i1 %320, label %then_block128, label %merge_block129
 
 then_block128:                                    ; preds = %then_block127
-  store ptr @216, ptr %n_name, align 8
+  store ptr @207, ptr %n_name, align 8
   br label %merge_block129
 
 merge_block129:                                   ; preds = %then_block127, %then_block128
@@ -13124,7 +13006,7 @@ merge_block129:                                   ; preds = %then_block127, %the
 
 merge_block130:                                   ; preds = %merge_block126, %merge_block129
   %326 = load ptr, ptr %function, align 8
-  %327 = call ptr @LLVMAppendBasicBlock(ptr %326, ptr @217)
+  %327 = call ptr @LLVMAppendBasicBlock(ptr %326, ptr @208)
   %function_entry = alloca ptr, align 8
   store ptr %327, ptr %function_entry, align 8
   %328 = load ptr, ptr %c, align 8
@@ -13462,7 +13344,7 @@ then_block201:                                    ; preds = %merge_block199
   store ptr %480, ptr %d209, align 8
   %481 = load ptr, ptr %d209, align 8
   %name210 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %481, i32 0, i32 0
-  store ptr @218, ptr %name210, align 8
+  store ptr @209, ptr %name210, align 8
   %482 = load ptr, ptr %d209, align 8
   %underlying_type211 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %482, i32 0, i32 1
   store ptr null, ptr %underlying_type211, align 8
@@ -13472,13 +13354,13 @@ then_block201:                                    ; preds = %merge_block199
   %484 = load ptr, ptr %c, align 8
   %current_function213 = getelementptr %codegen, ptr %484, i32 0, i32 7
   %485 = load ptr, ptr %current_function213, align 8
-  %486 = call ptr @LLVMAppendBasicBlock(ptr %485, ptr @219)
+  %486 = call ptr @LLVMAppendBasicBlock(ptr %485, ptr @210)
   %rhs_block = alloca ptr, align 8
   store ptr %486, ptr %rhs_block, align 8
   %487 = load ptr, ptr %c, align 8
   %current_function214 = getelementptr %codegen, ptr %487, i32 0, i32 7
   %488 = load ptr, ptr %current_function214, align 8
-  %489 = call ptr @LLVMAppendBasicBlock(ptr %488, ptr @220)
+  %489 = call ptr @LLVMAppendBasicBlock(ptr %488, ptr @211)
   %merge_block215 = alloca ptr, align 8
   store ptr %489, ptr %merge_block215, align 8
   %490 = load ptr, ptr %c, align 8
@@ -13548,7 +13430,7 @@ then_block201:                                    ; preds = %merge_block199
   %builder225 = getelementptr %codegen, ptr %530, i32 0, i32 2
   %531 = load ptr, ptr %builder225, align 8
   %532 = call ptr @LLVMInt1Type()
-  %533 = call ptr @LLVMBuildPhi(ptr %531, ptr %532, ptr @221)
+  %533 = call ptr @LLVMBuildPhi(ptr %531, ptr %532, ptr @212)
   %phi = alloca ptr, align 8
   store ptr %533, ptr %phi, align 8
   %534 = load ptr, ptr %c, align 8
@@ -13632,7 +13514,7 @@ then_block231:                                    ; preds = %merge_block229
   store ptr %578, ptr %d241, align 8
   %579 = load ptr, ptr %d241, align 8
   %name242 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %579, i32 0, i32 0
-  store ptr @222, ptr %name242, align 8
+  store ptr @213, ptr %name242, align 8
   %580 = load ptr, ptr %d241, align 8
   %underlying_type243 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %580, i32 0, i32 1
   store ptr null, ptr %underlying_type243, align 8
@@ -13642,13 +13524,13 @@ then_block231:                                    ; preds = %merge_block229
   %582 = load ptr, ptr %c, align 8
   %current_function245 = getelementptr %codegen, ptr %582, i32 0, i32 7
   %583 = load ptr, ptr %current_function245, align 8
-  %584 = call ptr @LLVMAppendBasicBlock(ptr %583, ptr @223)
+  %584 = call ptr @LLVMAppendBasicBlock(ptr %583, ptr @214)
   %rhs_block246 = alloca ptr, align 8
   store ptr %584, ptr %rhs_block246, align 8
   %585 = load ptr, ptr %c, align 8
   %current_function247 = getelementptr %codegen, ptr %585, i32 0, i32 7
   %586 = load ptr, ptr %current_function247, align 8
-  %587 = call ptr @LLVMAppendBasicBlock(ptr %586, ptr @224)
+  %587 = call ptr @LLVMAppendBasicBlock(ptr %586, ptr @215)
   %merge_block248 = alloca ptr, align 8
   store ptr %587, ptr %merge_block248, align 8
   %588 = load ptr, ptr %c, align 8
@@ -13718,7 +13600,7 @@ then_block231:                                    ; preds = %merge_block229
   %builder263 = getelementptr %codegen, ptr %628, i32 0, i32 2
   %629 = load ptr, ptr %builder263, align 8
   %630 = call ptr @LLVMInt1Type()
-  %631 = call ptr @LLVMBuildPhi(ptr %629, ptr %630, ptr @225)
+  %631 = call ptr @LLVMBuildPhi(ptr %629, ptr %630, ptr @216)
   %phi264 = alloca ptr, align 8
   store ptr %631, ptr %phi264, align 8
   %632 = load ptr, ptr %c, align 8
@@ -13841,7 +13723,7 @@ merge_block284:                                   ; preds = %merge_block281, %th
   %696 = load ptr, ptr %rhs_value277, align 8
   %value287 = getelementptr %Variable, ptr %696, i32 0, i32 0
   %697 = load ptr, ptr %value287, align 8
-  %698 = call ptr @LLVMBuildICmp(ptr %692, i64 %693, ptr %695, ptr %697, ptr @226)
+  %698 = call ptr @LLVMBuildICmp(ptr %692, i64 %693, ptr %695, ptr %697, ptr @217)
   %cmp = alloca ptr, align 8
   store ptr %698, ptr %cmp, align 8
   %Node288 = alloca %Node, align 8
@@ -13859,7 +13741,7 @@ merge_block284:                                   ; preds = %merge_block281, %th
   store ptr %703, ptr %d292, align 8
   %704 = load ptr, ptr %d292, align 8
   %name293 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %704, i32 0, i32 0
-  store ptr @227, ptr %name293, align 8
+  store ptr @218, ptr %name293, align 8
   %705 = load ptr, ptr %d292, align 8
   %underlying_type294 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %705, i32 0, i32 1
   store ptr null, ptr %underlying_type294, align 8
@@ -13981,7 +13863,7 @@ merge_block319:                                   ; preds = %merge_block316, %th
   %761 = load ptr, ptr %rhs_value304, align 8
   %value322 = getelementptr %Variable, ptr %761, i32 0, i32 0
   %762 = load ptr, ptr %value322, align 8
-  %763 = call ptr @LLVMBuildICmp(ptr %757, i64 %758, ptr %760, ptr %762, ptr @228)
+  %763 = call ptr @LLVMBuildICmp(ptr %757, i64 %758, ptr %760, ptr %762, ptr @219)
   %cmp323 = alloca ptr, align 8
   store ptr %763, ptr %cmp323, align 8
   %Node324 = alloca %Node, align 8
@@ -13999,7 +13881,7 @@ merge_block319:                                   ; preds = %merge_block316, %th
   store ptr %768, ptr %d328, align 8
   %769 = load ptr, ptr %d328, align 8
   %name329 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %769, i32 0, i32 0
-  store ptr @229, ptr %name329, align 8
+  store ptr @220, ptr %name329, align 8
   %770 = load ptr, ptr %d328, align 8
   %underlying_type330 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %770, i32 0, i32 1
   store ptr null, ptr %underlying_type330, align 8
@@ -14075,7 +13957,7 @@ then_block334:                                    ; preds = %merge_block332
   store ptr %807, ptr %d347, align 8
   %808 = load ptr, ptr %d347, align 8
   %name348 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %808, i32 0, i32 0
-  store ptr @230, ptr %name348, align 8
+  store ptr @221, ptr %name348, align 8
   %809 = load ptr, ptr %d347, align 8
   %underlying_type349 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %809, i32 0, i32 1
   store ptr null, ptr %underlying_type349, align 8
@@ -14141,7 +14023,7 @@ then_block354:                                    ; preds = %then_block351
   %value360 = getelementptr %Variable, ptr %840, i32 0, i32 0
   %841 = load ptr, ptr %value360, align 8
   %842 = load ptr, ptr %arr, align 8
-  %843 = call ptr @LLVMBuildGEP2(ptr %837, ptr %839, ptr %841, ptr %842, i64 1, ptr @231)
+  %843 = call ptr @LLVMBuildGEP2(ptr %837, ptr %839, ptr %841, ptr %842, i64 1, ptr @222)
   store ptr %843, ptr %result, align 8
   %844 = load ptr, ptr %lhs_value338, align 8
   %node_type361 = getelementptr %Variable, ptr %844, i32 0, i32 3
@@ -14167,7 +14049,7 @@ then_block364:                                    ; preds = %merge_block362
   %854 = load ptr, ptr %rhs_value340, align 8
   %value367 = getelementptr %Variable, ptr %854, i32 0, i32 0
   %855 = load ptr, ptr %value367, align 8
-  %856 = call ptr @LLVMBuildAdd(ptr %851, ptr %853, ptr %855, ptr @232)
+  %856 = call ptr @LLVMBuildAdd(ptr %851, ptr %853, ptr %855, ptr @223)
   store ptr %856, ptr %result, align 8
   br label %merge_block368
 
@@ -14190,7 +14072,7 @@ then_block371:                                    ; preds = %merge_block369
   %863 = load ptr, ptr %rhs_value340, align 8
   %value374 = getelementptr %Variable, ptr %863, i32 0, i32 0
   %864 = load ptr, ptr %value374, align 8
-  %865 = call ptr @LLVMBuildSub(ptr %860, ptr %862, ptr %864, ptr @233)
+  %865 = call ptr @LLVMBuildSub(ptr %860, ptr %862, ptr %864, ptr @224)
   store ptr %865, ptr %result, align 8
   br label %merge_block375
 
@@ -14263,7 +14145,7 @@ then_block389:                                    ; preds = %then_block378
   %902 = load ptr, ptr %rhs_value384, align 8
   %value392 = getelementptr %Variable, ptr %902, i32 0, i32 0
   %903 = load ptr, ptr %value392, align 8
-  %904 = call ptr @LLVMBuildMul(ptr %899, ptr %901, ptr %903, ptr @234)
+  %904 = call ptr @LLVMBuildMul(ptr %899, ptr %901, ptr %903, ptr @225)
   store ptr %904, ptr %result387, align 8
   br label %merge_block393
 
@@ -14284,7 +14166,7 @@ then_block395:                                    ; preds = %merge_block393
   %912 = load ptr, ptr %rhs_value384, align 8
   %value398 = getelementptr %Variable, ptr %912, i32 0, i32 0
   %913 = load ptr, ptr %value398, align 8
-  %914 = call ptr @LLVMBuildSDiv(ptr %909, ptr %911, ptr %913, ptr @235)
+  %914 = call ptr @LLVMBuildSDiv(ptr %909, ptr %911, ptr %913, ptr @226)
   store ptr %914, ptr %result387, align 8
   br label %merge_block399
 
@@ -14305,7 +14187,7 @@ then_block401:                                    ; preds = %merge_block399
   %922 = load ptr, ptr %rhs_value384, align 8
   %value404 = getelementptr %Variable, ptr %922, i32 0, i32 0
   %923 = load ptr, ptr %value404, align 8
-  %924 = call ptr @LLVMBuildSRem(ptr %919, ptr %921, ptr %923, ptr @236)
+  %924 = call ptr @LLVMBuildSRem(ptr %919, ptr %921, ptr %923, ptr @227)
   store ptr %924, ptr %result387, align 8
   br label %merge_block405
 
@@ -14375,7 +14257,7 @@ then_block416:                                    ; preds = %then_block409
   store %NODE_TYPE_SIMPLE_TYPE_DATA %957, ptr %simple_type419, align 8
   %name420 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %simple_type419, i32 0, i32 0
   %958 = load ptr, ptr %name420, align 8
-  %959 = call i1 @strcmp(ptr %958, ptr @237)
+  %959 = call i1 @strcmp(ptr %958, ptr @228)
   call void @assert(i1 %959)
   %960 = load ptr, ptr %c, align 8
   %builder421 = getelementptr %codegen, ptr %960, i32 0, i32 2
@@ -14386,7 +14268,7 @@ then_block416:                                    ; preds = %then_block409
   %964 = load ptr, ptr %value422, align 8
   %965 = call ptr @LLVMInt1Type()
   %966 = call ptr @LLVMConstInt(ptr %965, i64 0, i64 0)
-  %967 = call ptr @LLVMBuildICmp(ptr %961, i64 %962, ptr %964, ptr %966, ptr @238)
+  %967 = call ptr @LLVMBuildICmp(ptr %961, i64 %962, ptr %964, ptr %966, ptr @229)
   store ptr %967, ptr %r, align 8
   %Node423 = alloca %Node, align 8
   %968 = load %Node, ptr %Node423, align 8
@@ -14403,7 +14285,7 @@ then_block416:                                    ; preds = %then_block409
   store ptr %972, ptr %d427, align 8
   %973 = load ptr, ptr %d427, align 8
   %name428 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %973, i32 0, i32 0
-  store ptr @239, ptr %name428, align 8
+  store ptr @230, ptr %name428, align 8
   %974 = load ptr, ptr %d427, align 8
   %underlying_type429 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %974, i32 0, i32 1
   store ptr null, ptr %underlying_type429, align 8
@@ -14430,7 +14312,7 @@ then_block433:                                    ; preds = %merge_block431
   %984 = load ptr, ptr %k, align 8
   %value435 = getelementptr %Variable, ptr %984, i32 0, i32 0
   %985 = load ptr, ptr %value435, align 8
-  %986 = call ptr @LLVMBuildNeg(ptr %983, ptr %985, ptr @240)
+  %986 = call ptr @LLVMBuildNeg(ptr %983, ptr %985, ptr @231)
   store ptr %986, ptr %r, align 8
   %Node436 = alloca %Node, align 8
   %987 = load %Node, ptr %Node436, align 8
@@ -14447,7 +14329,7 @@ then_block433:                                    ; preds = %merge_block431
   store ptr %991, ptr %d440, align 8
   %992 = load ptr, ptr %d440, align 8
   %name441 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %992, i32 0, i32 0
-  store ptr @241, ptr %name441, align 8
+  store ptr @232, ptr %name441, align 8
   %993 = load ptr, ptr %d440, align 8
   %underlying_type442 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %993, i32 0, i32 1
   store ptr null, ptr %underlying_type442, align 8
@@ -14501,7 +14383,7 @@ then_block446:                                    ; preds = %merge_block444
   %1019 = load ptr, ptr %k, align 8
   %value453 = getelementptr %Variable, ptr %1019, i32 0, i32 0
   %1020 = load ptr, ptr %value453, align 8
-  %1021 = call ptr @LLVMBuildLoad2(ptr %1016, ptr %1018, ptr %1020, ptr @242)
+  %1021 = call ptr @LLVMBuildLoad2(ptr %1016, ptr %1018, ptr %1020, ptr @233)
   store ptr %1021, ptr %r, align 8
   br label %merge_block454
 
@@ -14620,7 +14502,7 @@ then_block477:                                    ; preds = %merge_block475
   %1076 = load ptr, ptr %c, align 8
   %expression480 = getelementptr %NODE_CAST_STATEMENT_DATA, ptr %exp479, i32 0, i32 1
   %1077 = load ptr, ptr %expression480, align 8
-  %1078 = call ptr @codegen_generate_expression_value(ptr %1076, ptr %1077, ptr @243)
+  %1078 = call ptr @codegen_generate_expression_value(ptr %1076, ptr %1077, ptr @234)
   %val = alloca ptr, align 8
   store ptr %1078, ptr %val, align 8
   %1079 = load ptr, ptr %val, align 8
@@ -14703,7 +14585,7 @@ then_block492:                                    ; preds = %merge_block490
   store ptr %1113, ptr %d501, align 8
   %1114 = load ptr, ptr %d501, align 8
   %name502 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %1114, i32 0, i32 0
-  store ptr @244, ptr %name502, align 8
+  store ptr @235, ptr %name502, align 8
   %1115 = load ptr, ptr %d501, align 8
   %underlying_type503 = getelementptr %NODE_TYPE_SIMPLE_TYPE_DATA, ptr %1115, i32 0, i32 1
   store ptr null, ptr %underlying_type503, align 8
@@ -15128,7 +15010,7 @@ outer_block592:                                   ; preds = %then_block598, %whi
   %1308 = load ptr, ptr %1307, align 8
   %1309 = load ptr, ptr %alloca572, align 8
   %1310 = load ptr, ptr %indices, align 8
-  %1311 = call ptr @LLVMBuildGEP2(ptr %1306, ptr %1308, ptr %1309, ptr %1310, i64 2, ptr @245)
+  %1311 = call ptr @LLVMBuildGEP2(ptr %1306, ptr %1308, ptr %1309, ptr %1310, i64 2, ptr @236)
   %field_ptr = alloca ptr, align 8
   store ptr %1311, ptr %field_ptr, align 8
   %1312 = load ptr, ptr %c, align 8
@@ -15169,7 +15051,7 @@ merge_block604:                                   ; preds = %then_block564, %out
   %1329 = load ptr, ptr %llvm_type, align 8
   %1330 = load ptr, ptr %1329, align 8
   %1331 = load ptr, ptr %alloca572, align 8
-  %1332 = call ptr @LLVMBuildLoad2(ptr %1328, ptr %1330, ptr %1331, ptr @246)
+  %1332 = call ptr @LLVMBuildLoad2(ptr %1328, ptr %1330, ptr %1331, ptr @237)
   %loaded = alloca ptr, align 8
   store ptr %1332, ptr %loaded, align 8
   %Variable606 = alloca %Variable, align 8
@@ -15242,7 +15124,7 @@ then_block616:                                    ; preds = %merge_block614
   %1366 = load ptr, ptr %x620, align 8
   %value624 = getelementptr %StructField, ptr %1366, i32 0, i32 0
   %1367 = load ptr, ptr %value624, align 8
-  %1368 = call ptr @LLVMBuildLoad2(ptr %1363, ptr %1365, ptr %1367, ptr @247)
+  %1368 = call ptr @LLVMBuildLoad2(ptr %1363, ptr %1365, ptr %1367, ptr @238)
   %loaded625 = alloca ptr, align 8
   store ptr %1368, ptr %loaded625, align 8
   %Variable626 = alloca %Variable, align 8
@@ -15273,7 +15155,7 @@ merge_block634:                                   ; preds = %merge_block614
   %1377 = load ptr, ptr %expression, align 8
   %line = getelementptr %Node, ptr %1377, i32 0, i32 2
   %1378 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @248, i64 %1378)
+  call void (ptr, ...) @printf(ptr @239, i64 %1378)
   call void @exit(i64 1)
   ret ptr null
 }
@@ -15331,7 +15213,7 @@ then_block3:                                      ; preds = %merge_block
   store ptr %20, ptr %xd, align 8
   %21 = load ptr, ptr %c, align 8
   %22 = load ptr, ptr %xd, align 8
-  %23 = call ptr @codegen_generate_expression_value(ptr %21, ptr %22, ptr @203)
+  %23 = call ptr @codegen_generate_expression_value(ptr %21, ptr %22, ptr @194)
   store ptr %23, ptr %ptr, align 8
   store i1 true, ptr %is_explicit_deref, align 1
   br label %merge_block5
@@ -15380,7 +15262,7 @@ then_block7:                                      ; preds = %merge_block5
   %47 = load ptr, ptr %x, align 8
   %value = getelementptr %StructField, ptr %47, i32 0, i32 0
   %48 = load ptr, ptr %value, align 8
-  %49 = call ptr @LLVMBuildLoad2(ptr %44, ptr %46, ptr %48, ptr @204)
+  %49 = call ptr @LLVMBuildLoad2(ptr %44, ptr %46, ptr %48, ptr @195)
   %loaded = alloca ptr, align 8
   store ptr %49, ptr %loaded, align 8
   %Variable = alloca %Variable, align 8
@@ -15612,7 +15494,7 @@ then_block52:                                     ; preds = %outer_block
   %148 = load ptr, ptr %node, align 8
   %line = getelementptr %Node, ptr %148, i32 0, i32 2
   %149 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @205, i64 %149)
+  call void (ptr, ...) @printf(ptr @196, i64 %149)
   call void @exit(i64 1)
   br label %merge_block53
 
@@ -15689,7 +15571,7 @@ then_block58:                                     ; preds = %and_merge
   %187 = load ptr, ptr %ptr, align 8
   %value60 = getelementptr %Variable, ptr %187, i32 0, i32 0
   %188 = load ptr, ptr %value60, align 8
-  %189 = call ptr @LLVMBuildLoad2(ptr %184, ptr %186, ptr %188, ptr @206)
+  %189 = call ptr @LLVMBuildLoad2(ptr %184, ptr %186, ptr %188, ptr @197)
   store ptr %189, ptr %base_ptr, align 8
   br label %merge_block61
 
@@ -15901,7 +15783,7 @@ then_block16:                                     ; preds = %merge_block14
   %79 = load ptr, ptr %ltyp, align 8
   %80 = load ptr, ptr %79, align 8
   %81 = load ptr, ptr %ptr, align 8
-  %82 = call ptr @LLVMBuildLoad2(ptr %78, ptr %80, ptr %81, ptr @249)
+  %82 = call ptr @LLVMBuildLoad2(ptr %78, ptr %80, ptr %81, ptr @240)
   store ptr %82, ptr %ptr, align 8
   br label %merge_block18
 
@@ -16119,7 +16001,7 @@ then_block55:                                     ; preds = %merge_block53
 merge_block69:                                    ; preds = %merge_block53
   %line = getelementptr %Node, ptr %lhs1, i32 0, i32 2
   %185 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @250, i64 %185)
+  call void (ptr, ...) @printf(ptr @241, i64 %185)
   call void @exit(i64 1)
   ret i64 0
 }
@@ -16229,7 +16111,7 @@ then_block5:                                      ; preds = %then_block2
   %23 = load ptr, ptr %fun, align 8
   %line = getelementptr %Node, ptr %23, i32 0, i32 2
   %24 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @251, i64 %24)
+  call void (ptr, ...) @printf(ptr @242, i64 %24)
   call void @exit(i64 1)
   br label %merge_block6
 
@@ -16273,7 +16155,7 @@ merge_block14:                                    ; preds = %merge_block8
   %42 = load ptr, ptr %fun, align 8
   %line15 = getelementptr %Node, ptr %42, i32 0, i32 2
   %43 = load i64, ptr %line15, align 4
-  call void (ptr, ...) @printf(ptr @252, i64 %43)
+  call void (ptr, ...) @printf(ptr @243, i64 %43)
   call void @exit(i64 1)
   ret ptr null
 }
@@ -16341,7 +16223,7 @@ entrypoint:
   %11 = load ptr, ptr %c, align 8
   %current_function = getelementptr %codegen, ptr %11, i32 0, i32 7
   %12 = load ptr, ptr %current_function, align 8
-  %13 = call ptr @LLVMAppendBasicBlock(ptr %12, ptr @256)
+  %13 = call ptr @LLVMAppendBasicBlock(ptr %12, ptr @247)
   %then_block = alloca ptr, align 8
   store ptr %13, ptr %then_block, align 8
   %14 = load ptr, ptr %c, align 8
@@ -16395,7 +16277,7 @@ outer_block:                                      ; preds = %while_block
   %37 = load ptr, ptr %c, align 8
   %current_function3 = getelementptr %codegen, ptr %37, i32 0, i32 7
   %38 = load ptr, ptr %current_function3, align 8
-  %39 = call ptr @LLVMAppendBasicBlock(ptr %38, ptr @257)
+  %39 = call ptr @LLVMAppendBasicBlock(ptr %38, ptr @248)
   %merge_block = alloca ptr, align 8
   store ptr %39, ptr %merge_block, align 8
   %40 = load ptr, ptr %c, align 8
@@ -16472,7 +16354,7 @@ entrypoint:
   %2 = load ptr, ptr %c, align 8
   %current_function = getelementptr %codegen, ptr %2, i32 0, i32 7
   %3 = load ptr, ptr %current_function, align 8
-  %4 = call ptr @LLVMAppendBasicBlock(ptr %3, ptr @258)
+  %4 = call ptr @LLVMAppendBasicBlock(ptr %3, ptr @249)
   %whil_block = alloca ptr, align 8
   store ptr %4, ptr %whil_block, align 8
   %5 = load ptr, ptr %c, align 8
@@ -16498,13 +16380,13 @@ entrypoint:
   %18 = load ptr, ptr %c, align 8
   %current_function2 = getelementptr %codegen, ptr %18, i32 0, i32 7
   %19 = load ptr, ptr %current_function2, align 8
-  %20 = call ptr @LLVMAppendBasicBlock(ptr %19, ptr @259)
+  %20 = call ptr @LLVMAppendBasicBlock(ptr %19, ptr @250)
   %inner_block = alloca ptr, align 8
   store ptr %20, ptr %inner_block, align 8
   %21 = load ptr, ptr %c, align 8
   %current_function3 = getelementptr %codegen, ptr %21, i32 0, i32 7
   %22 = load ptr, ptr %current_function3, align 8
-  %23 = call ptr @LLVMAppendBasicBlock(ptr %22, ptr @260)
+  %23 = call ptr @LLVMAppendBasicBlock(ptr %22, ptr @251)
   %outer_block = alloca ptr, align 8
   store ptr %23, ptr %outer_block, align 8
   %24 = load ptr, ptr %c, align 8
@@ -16684,7 +16566,7 @@ then_block:                                       ; preds = %entrypoint
   %llvm_module1 = getelementptr %codegen, ptr %5, i32 0, i32 0
   %6 = load ptr, ptr %llvm_module1, align 8
   %7 = load ptr, ptr %message, align 8
-  %8 = call i64 @LLVMPrintModuleToFile(ptr %6, ptr @262, ptr %7)
+  %8 = call i64 @LLVMPrintModuleToFile(ptr %6, ptr @253, ptr %7)
   ret i64 0
 
 merge_block:                                      ; preds = %entrypoint
@@ -16710,7 +16592,7 @@ merge_block:                                      ; preds = %entrypoint
 then_block2:                                      ; preds = %merge_block
   %19 = load ptr, ptr %message, align 8
   %20 = load ptr, ptr %19, align 8
-  call void (ptr, ...) @printf(ptr @263, ptr %20)
+  call void (ptr, ...) @printf(ptr @254, ptr %20)
   %21 = load ptr, ptr %message, align 8
   %22 = load ptr, ptr %21, align 8
   call void @LLVMDisposeMessage(ptr %22)
@@ -16723,7 +16605,7 @@ merge_block3:                                     ; preds = %merge_block, %then_
   %26 = load i64, ptr @LLVMCodeGenLevelDefault, align 4
   %27 = load i64, ptr @LLVMRelocDefault, align 4
   %28 = load i64, ptr @LLVMCodeModelDefault, align 4
-  %29 = call ptr @LLVMCreateTargetMachine(ptr %24, ptr %25, ptr @264, ptr @265, i64 %26, i64 %27, i64 %28)
+  %29 = call ptr @LLVMCreateTargetMachine(ptr %24, ptr %25, ptr @255, ptr @256, i64 %26, i64 %27, i64 %28)
   %target_machine = alloca ptr, align 8
   store ptr %29, ptr %target_machine, align 8
   %30 = load ptr, ptr %triple, align 8
@@ -16742,7 +16624,7 @@ merge_block3:                                     ; preds = %merge_block, %then_
 then_block5:                                      ; preds = %merge_block3
   %38 = load ptr, ptr %message, align 8
   %39 = load ptr, ptr %38, align 8
-  call void (ptr, ...) @printf(ptr @266, ptr %39)
+  call void (ptr, ...) @printf(ptr @257, ptr %39)
   %40 = load ptr, ptr %message, align 8
   %41 = load ptr, ptr %40, align 8
   call void @LLVMDisposeMessage(ptr %41)
@@ -16750,7 +16632,7 @@ then_block5:                                      ; preds = %merge_block3
 
 merge_block6:                                     ; preds = %merge_block3, %then_block5
   %filename = alloca ptr, align 8
-  store ptr @267, ptr %filename, align 8
+  store ptr @258, ptr %filename, align 8
   %42 = load ptr, ptr %target_machine, align 8
   %43 = load ptr, ptr %c, align 8
   %llvm_module7 = getelementptr %codegen, ptr %43, i32 0, i32 0
@@ -16761,7 +16643,7 @@ merge_block6:                                     ; preds = %merge_block3, %then
   %48 = load ptr, ptr %target_machine, align 8
   call void @LLVMDisposeTargetMachine(ptr %48)
   %49 = load ptr, ptr %filename, align 8
-  call void (ptr, ...) @printf(ptr @268, ptr %49)
+  call void (ptr, ...) @printf(ptr @259, ptr %49)
   ret i64 0
 }
 
@@ -16788,7 +16670,7 @@ entrypoint:
   %alloc = alloca ptr, align 8
   store ptr %1, ptr %alloc, align 8
   %2 = load ptr, ptr %filename, align 8
-  %3 = call ptr @fopen(ptr %2, ptr @269)
+  %3 = call ptr @fopen(ptr %2, ptr @260)
   %file = alloca ptr, align 8
   store ptr %3, ptr %file, align 8
   %4 = load ptr, ptr %file, align 8
@@ -16842,7 +16724,7 @@ entrypoint:
   br i1 %3, label %then_block, label %merge_block
 
 then_block:                                       ; preds = %entrypoint
-  call void (ptr, ...) @printf(ptr @270)
+  call void (ptr, ...) @printf(ptr @261)
   ret i64 1
 
 merge_block:                                      ; preds = %entrypoint
@@ -16872,60 +16754,58 @@ inner_block:                                      ; preds = %while_block
   %arg = alloca ptr, align 8
   store ptr %13, ptr %arg, align 8
   %14 = load ptr, ptr %arg, align 8
-  %15 = call i1 @strcmp(ptr %14, ptr @271)
+  %15 = call i1 @strcmp(ptr %14, ptr @262)
   br i1 %15, label %then_block1, label %merge_block2
 
 outer_block:                                      ; preds = %while_block
-  %16 = load ptr, ptr %filename, align 8
-  call void (ptr, ...) @printf(ptr @273, ptr %16)
-  %17 = call ptr @arena_init(i64 1073741824)
+  %16 = call ptr @arena_init(i64 1073741824)
   %alloc = alloca ptr, align 8
-  store ptr %17, ptr %alloc, align 8
-  %18 = load ptr, ptr %filename, align 8
-  %19 = load ptr, ptr %alloc, align 8
-  %20 = call %slice @read_file(ptr %18, ptr %19)
+  store ptr %16, ptr %alloc, align 8
+  %17 = load ptr, ptr %filename, align 8
+  %18 = load ptr, ptr %alloc, align 8
+  %19 = call %slice @read_file(ptr %17, ptr %18)
   %file = alloca %slice, align 8
-  store %slice %20, ptr %file, align 8
-  %21 = load ptr, ptr %alloc, align 8
-  %22 = load %slice, ptr %file, align 8
-  %23 = call ptr @tokenizer_init(ptr %21, %slice %22)
+  store %slice %19, ptr %file, align 8
+  %20 = load ptr, ptr %alloc, align 8
+  %21 = load %slice, ptr %file, align 8
+  %22 = call ptr @tokenizer_init(ptr %20, %slice %21)
   %t = alloca ptr, align 8
-  store ptr %23, ptr %t, align 8
-  %24 = load ptr, ptr %t, align 8
-  %25 = call %slice @tokenizer_tokenize(ptr %24)
+  store ptr %22, ptr %t, align 8
+  %23 = load ptr, ptr %t, align 8
+  %24 = call %slice @tokenizer_tokenize(ptr %23)
   %ts = alloca %slice, align 8
-  store %slice %25, ptr %ts, align 8
+  store %slice %24, ptr %ts, align 8
   %data = getelementptr %slice, ptr %ts, i32 0, i32 0
-  %26 = load ptr, ptr %data, align 8
+  %25 = load ptr, ptr %data, align 8
   %data_len = getelementptr %slice, ptr %ts, i32 0, i32 1
-  %27 = load i64, ptr %data_len, align 4
-  %28 = load ptr, ptr %alloc, align 8
-  %29 = load ptr, ptr %filename, align 8
-  %30 = call ptr @parser_init(ptr %26, i64 %27, ptr %28, ptr %29)
+  %26 = load i64, ptr %data_len, align 4
+  %27 = load ptr, ptr %alloc, align 8
+  %28 = load ptr, ptr %filename, align 8
+  %29 = call ptr @parser_init(ptr %25, i64 %26, ptr %27, ptr %28)
   %p = alloca ptr, align 8
-  store ptr %30, ptr %p, align 8
-  %31 = load ptr, ptr %p, align 8
-  %32 = call ptr @parse(ptr %31)
+  store ptr %29, ptr %p, align 8
+  %30 = load ptr, ptr %p, align 8
+  %31 = call ptr @parse(ptr %30)
   %ast = alloca ptr, align 8
-  store ptr %32, ptr %ast, align 8
-  %33 = load ptr, ptr %alloc, align 8
-  %34 = call ptr @codegen_init(ptr %33)
+  store ptr %31, ptr %ast, align 8
+  %32 = load ptr, ptr %alloc, align 8
+  %33 = call ptr @codegen_init(ptr %32)
   %c = alloca ptr, align 8
-  store ptr %34, ptr %c, align 8
-  %35 = load ptr, ptr %c, align 8
-  %36 = load ptr, ptr %ast, align 8
-  %37 = call i64 @codegen_generate(ptr %35, ptr %36)
+  store ptr %33, ptr %c, align 8
+  %34 = load ptr, ptr %c, align 8
+  %35 = load ptr, ptr %ast, align 8
+  %36 = call i64 @codegen_generate(ptr %34, ptr %35)
   %res = alloca i64, align 8
-  store i64 %37, ptr %res, align 4
-  %38 = load ptr, ptr %c, align 8
-  %39 = load i1, ptr %generate_ir, align 1
-  %40 = call i64 @codegen_compile(ptr %38, i1 %39)
+  store i64 %36, ptr %res, align 4
+  %37 = load ptr, ptr %c, align 8
+  %38 = load i1, ptr %generate_ir, align 1
+  %39 = call i64 @codegen_compile(ptr %37, i1 %38)
   %res5 = alloca i64, align 8
-  store i64 %40, ptr %res5, align 4
-  %41 = load ptr, ptr %c, align 8
-  call void @codegen_deinit(ptr %41)
-  %42 = load ptr, ptr %alloc, align 8
-  call void @arena_free(ptr %42)
+  store i64 %39, ptr %res5, align 4
+  %40 = load ptr, ptr %c, align 8
+  call void @codegen_deinit(ptr %40)
+  %41 = load ptr, ptr %alloc, align 8
+  call void @arena_free(ptr %41)
   ret i64 0
 
 then_block1:                                      ; preds = %inner_block
@@ -16933,18 +16813,18 @@ then_block1:                                      ; preds = %inner_block
   br label %while_block
 
 merge_block2:                                     ; preds = %inner_block
-  %43 = load ptr, ptr %filename, align 8
-  %44 = icmp eq ptr %43, null
-  br i1 %44, label %then_block3, label %merge_block4
+  %42 = load ptr, ptr %filename, align 8
+  %43 = icmp eq ptr %42, null
+  br i1 %43, label %then_block3, label %merge_block4
 
 then_block3:                                      ; preds = %merge_block2
-  %45 = load ptr, ptr %arg, align 8
-  store ptr %45, ptr %filename, align 8
+  %44 = load ptr, ptr %arg, align 8
+  store ptr %44, ptr %filename, align 8
   br label %while_block
 
 merge_block4:                                     ; preds = %merge_block2
-  %46 = load ptr, ptr %arg, align 8
-  call void (ptr, ...) @printf(ptr @272, ptr %46)
+  %45 = load ptr, ptr %arg, align 8
+  call void (ptr, ...) @printf(ptr @263, ptr %45)
   call void @exit(i64 1)
   br label %while_block
 }

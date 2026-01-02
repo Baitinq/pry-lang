@@ -577,10 +577,6 @@ let tokenizer_init = (alloc: *arena, file: slice) => *tokenizer {
 	(*t).buf = cast(*i8, file.data);
 	(*t).buf_len = file.data_len;
 
-	printf("File size: %d\n", (*t).buf_len);
-
-	printf("%s\n", (*t).buf);
-
 	return t;
 };
 
@@ -593,15 +589,10 @@ let tokenizer_tokenize = (t: *tokenizer) => slice {
 		if tk == null {
 			break;
 		};
-		printf("Add token: %d\n", (*tk).type);
 
 		(*(tokens + cast(*token, tokens_len))) = *tk;
 		tokens_len = tokens_len + 1;
 	};
-
-	printf("PRINT TOKENS: %d\n", tokens_len);
-
-	print_tokens(tokens, tokens_len);
 
 	let res = slice{};
 	res.data = cast(*void, tokens);

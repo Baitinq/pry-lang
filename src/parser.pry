@@ -711,7 +711,6 @@ let parser_parse_struct_definition = (p: *parser) => *Node {
 			if typ_annotation == null {
 				return null;
 			};
-			printf("STRUCT TYP: %d\n", (*typ_annotation).type);
 			let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*ip).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
 			(*d).name = cast(*i8, (*ident).data);
 			(*d).type = typ_annotation;
@@ -1521,114 +1520,98 @@ let parse_function_call_statement = (p: *parser) => *Node {
 };
 
 /* Statement    ::= (AssignmentStatement | ImportDeclaration | ExternDeclaration | CastStatement | SizeOfStatement | FunctionCallStatement | IfStatement | WhileStatement | ReturnStatement | "break" | "continue") SEMICOLON */
+let parser_expect_semicolon = (p: *parser) => void {
+	if parser_accept_token(p, TOKEN_SEMICOLON) == null {
+		printf("Error at line %d: expected ';' at end of statement\n", parser_current_line(p));
+		exit(1);
+	};
+	return;
+};
+
 let parser_parse_statement = (p: *parser) => *Node {
 	/* TODO: Can we not deal with cast / sizeof in parser? */
 	let fn_call = parser_accept_parse(p, parser_parse_cast_statement);
 	if fn_call != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return fn_call;
+		parser_expect_semicolon(p);
+		return fn_call;
 	};
-	
+
 	let fn_call = parser_accept_parse(p, parser_parse_sizeof_statement);
 	if fn_call != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return fn_call;
+		parser_expect_semicolon(p);
+		return fn_call;
 	};
 
 	let fn_call = parser_accept_parse(p, parse_function_call_statement);
 	if fn_call != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return fn_call;
+		parser_expect_semicolon(p);
+		return fn_call;
 	};
 
 	let assignment = parser_accept_parse(p, parse_assignment_statement);
 	if assignment != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return assignment;
+		parser_expect_semicolon(p);
+		return assignment;
 	};
 
 	let retu = parser_accept_parse(p, parser_parse_return_statement);
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
-	
+
 	let retu = parser_accept_parse(p, parser_parse_import_declaration);
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
 
 	let retu = parser_accept_parse(p, parser_parse_extern_declaration);
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
-	
+
 	let retu = parser_accept_parse(p, parser_parse_if_statement);
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
-	
+
 	let retu = parser_accept_parse(p, parser_parse_while_statement);
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
-	
+
 	/*  Break and continue */
 	let retu = parser_accept_parse(p, (ip: *parser) => *Node {
 		if parser_accept_token(ip, TOKEN_BREAK) == null {
 		    return null;
 		};
-		
+
 		let n = Node{};
 		n.type = NODE_BREAK_STATEMENT;
 		return parser_create_node(ip, n);
 	});
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
 
 	let retu = parser_accept_parse(p, (ip: *parser) => *Node {
 		if parser_accept_token(ip, TOKEN_CONTINUE) == null {
 		    return null;
 		};
-		
+
 		let n = Node{};
 		n.type = NODE_CONTINUE_STATEMENT;
 		return parser_create_node(ip, n);
 	});
 	if retu != null {
-		if parser_accept_token(p, TOKEN_SEMICOLON) == null {
-		    return null;
-		};
-	    return retu;
+		parser_expect_semicolon(p);
+		return retu;
 	};
-
-	printf("Error at line %d: Unexpected token\n", parser_current_line(p));
 
 	return null;
 };

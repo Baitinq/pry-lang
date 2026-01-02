@@ -58,8 +58,6 @@ let main = (argc: i64, argv: **i8) => i64 {
 		exit(1);
 	};
 
-	printf("%s\n", filename);
-
 	let alloc = arena_init(1024 * 1024 * 1024);
 
 	let file = read_file(filename, alloc);
