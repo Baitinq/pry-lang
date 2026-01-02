@@ -18,8 +18,8 @@ let main = () => i64 {
 
 	print_struct(*inst);
 
-	(*inst).x = 4;
-	(*inst).y = "hi";
+	inst.x = 4;
+	inst.y = "hi";
 
 	print_struct(*inst);
 

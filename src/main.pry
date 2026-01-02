@@ -49,15 +49,14 @@ let main = (argc: i64, argv: **i8) => i64 {
 		    continue;
 		};
 
-		if filename == cast(*i8, null) {
+		if filename == null {
 		    filename = arg;
 		    continue;
 		};
 
-		assert(false);
+		printf("Error: Unexpected argument '%s'\n", arg);
+		exit(1);
 	};
-
-	printf("%s\n", filename);
 
 	let alloc = arena_init(1024 * 1024 * 1024);
 

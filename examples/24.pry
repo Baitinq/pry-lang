@@ -9,10 +9,10 @@ let test = struct {
 };
 
 let print_struct = (s: *test) => void {
-	printf("X: %d\n", (*s).x);
-	printf("Y: %s\n", (*s).y);
-	if (*s).z != cast(*test, null) {
-		print_struct((*s).z);
+	printf("X: %d\n", s.x);
+	printf("Y: %s\n", s.y);
+	if s.z != null {
+		print_struct(s.z);
 	};
 	return;
 };
@@ -23,11 +23,11 @@ let main = () => i64 {
 
 	print_struct(inst);
 
-	(*inst).x = 4;
-	(*inst).y = "hi";
-	(*inst).z = inst2;
-	
-	(*inst2).y = "bye";
+	inst.x = 4;
+	inst.y = "hi";
+	inst.z = inst2;
+
+	inst2.y = "bye";
 
 	print_struct(inst);
 

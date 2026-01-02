@@ -55,12 +55,14 @@ let TOKEN_RBRACE     = 33;
 let token = struct {
 	type: i64,
 	data: *void,
+	line: i64,
 };
 
 let tokenizer = struct {
 	buf: *i8,
 	buf_len: i64,
 	offset: i64,
+	line: i64,
 
 	arena: *arena,
 };
@@ -192,6 +194,9 @@ let tokenizer_skip_whitespace = (t: *tokenizer) => void {
 		if !iswhitespace(c) {
 			return;
 		};
+		if c == '\n' {
+			(*t).line = (*t).line + 1;
+		};
 		(*t).offset = (*t).offset + 1;
 	};
 
@@ -206,6 +211,33 @@ let tokenizer_accept_string = (t: *tokenizer, str: *i8) => bool {
 	memcpy(cast(*void, s), cast(*void, (*t).buf + cast(*i8, (*t).offset)), str_len);
 
 	if strcmp(s, str) {
+		(*t).offset = (*t).offset + str_len;
+		return true;
+	};
+
+	return false;
+};
+
+/* Accept a keyword only if followed by a non-alphanumeric character (word boundary) */
+let tokenizer_accept_keyword = (t: *tokenizer, str: *i8) => bool {
+	let str_len = strlen(str);
+	if (*t).offset + str_len > (*t).buf_len { return false; };
+
+	let s = cast(*i8, arena_alloc((*t).arena, 1000));
+	memcpy(cast(*void, s), cast(*void, (*t).buf + cast(*i8, (*t).offset)), str_len);
+
+	if strcmp(s, str) {
+		/* Check that next char is not alphanumeric or underscore */
+		let next_offset = (*t).offset + str_len;
+		if next_offset < (*t).buf_len {
+			let next_char = (*((*t).buf + cast(*i8, next_offset)));
+			if isalphanum(next_char) {
+				return false;
+			};
+			if next_char == '_' {
+				return false;
+			};
+		};
 		(*t).offset = (*t).offset + str_len;
 		return true;
 	};
@@ -274,18 +306,18 @@ let tokenizer_consume_until_condition = (t: *tokenizer, condition: (i8) => bool)
 		(*t).offset = offset;
 	};
 
-	return cast(*i8, null);
+	return null;
 };
 
 let tokenizer_accept_int_type = (t: *tokenizer) => *i64 {
 	let string = tokenizer_consume_until_condition(t, (c: i8) => bool {
 		return !isdigit(c);
 	});
-	if string == cast(*i8, null) {
-		return cast(*i64, null);
+	if string == null {
+		return null;
 	};
 	if strlen(string) == 0 {
-		return cast(*i64, null);
+		return null;
 	};
 	let x = cast(*i64, arena_alloc((*t).arena, sizeof(i64)));
 	*x = atoi(string);
@@ -296,7 +328,7 @@ let tokenizer_accept_char_type = (t: *tokenizer) => *i8 {
 	let prev_offset = (*t).offset;
 	if !tokenizer_accept_string(t, "'") {
 		(*t).offset = prev_offset;
-		return cast(*i8, null);
+		return null;
 	};
 
 	let string = tokenizer_consume_until_condition(t, (c: i8) => bool {
@@ -305,7 +337,7 @@ let tokenizer_accept_char_type = (t: *tokenizer) => *i8 {
 
 	if !tokenizer_accept_string(t, "'") {
 		(*t).offset = prev_offset;
-		return cast(*i8, null);
+		return null;
 	};
 
 	return string;
@@ -315,7 +347,7 @@ let tokenizer_accept_string_type = (t: *tokenizer) => *i8 {
 	let prev_offset = (*t).offset;
 	if !tokenizer_accept_string(t, "\"") {
 		(*t).offset = prev_offset;
-		return cast(*i8, null);
+		return null;
 	};
 
 	let string = tokenizer_consume_until_condition(t, (c: i8) => bool {
@@ -324,7 +356,7 @@ let tokenizer_accept_string_type = (t: *tokenizer) => *i8 {
 
 	if !tokenizer_accept_string(t, "\"") {
 		(*t).offset = prev_offset;
-		return cast(*i8, null);
+		return null;
 	};
 
 	return string;
@@ -334,6 +366,10 @@ let tokenizer_skip_comments = (t: *tokenizer) => void {
 	if !tokenizer_accept_string(t, "/*") { return; };
 
 	while !tokenizer_accept_string(t, "*/") {
+		let c = (*((*t).buf + cast(*i8, (*t).offset)));
+		if c == '\n' {
+			(*t).line = (*t).line + 1;
+		};
 		(*t).offset = (*t).offset + 1;
 	};
 
@@ -346,74 +382,75 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	tokenizer_skip_whitespace(t);
 
 	if (*t).offset >= (*t).buf_len {
-		return cast(*token, null);
+		return null;
 	};
-	
-	let to = cast(*token, arena_alloc((*t).arena, sizeof(token)));
 
-	if tokenizer_accept_string(t, "import") {
+	let to = cast(*token, arena_alloc((*t).arena, sizeof(token)));
+	(*to).line = (*t).line;
+
+	if tokenizer_accept_keyword(t, "import") {
 	    (*to).type = TOKEN_IMPORT;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "let") {
+	if tokenizer_accept_keyword(t, "let") {
 	    (*to).type = TOKEN_LET;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "extern") {
+	if tokenizer_accept_keyword(t, "extern") {
 	    (*to).type = TOKEN_EXTERN;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "if") {
+	if tokenizer_accept_keyword(t, "if") {
 	    (*to).type = TOKEN_IF;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "while") {
+	if tokenizer_accept_keyword(t, "while") {
 	    (*to).type = TOKEN_WHILE;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "return") {
+	if tokenizer_accept_keyword(t, "return") {
 	    (*to).type = TOKEN_RETURN;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "break") {
+	if tokenizer_accept_keyword(t, "break") {
 	    (*to).type = TOKEN_BREAK;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "continue") {
+	if tokenizer_accept_keyword(t, "continue") {
 	    (*to).type = TOKEN_CONTINUE;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "true") {
+	if tokenizer_accept_keyword(t, "true") {
 	    (*to).type = TOKEN_BOOLEAN;
 	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
 	    *data = true;
 	    (*to).data = cast(*void, data);
 	    return to;
 	};
-	if tokenizer_accept_string(t, "false") {
+	if tokenizer_accept_keyword(t, "false") {
 	    (*to).type = TOKEN_BOOLEAN;
 	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
 	    *data = false;
 	    (*to).data = cast(*void, data);
 	    return to;
 	};
-	if tokenizer_accept_string(t, "null") {
+	if tokenizer_accept_keyword(t, "null") {
 	    (*to).type = TOKEN_NULL;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "struct") {
+	if tokenizer_accept_keyword(t, "struct") {
 	    (*to).type = TOKEN_STRUCT;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "newtype") {
+	if tokenizer_accept_keyword(t, "newtype") {
 	    (*to).type = TOKEN_TYPE;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "and") {
+	if tokenizer_accept_keyword(t, "and") {
 	    (*to).type = TOKEN_AND;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "or") {
+	if tokenizer_accept_keyword(t, "or") {
 	    (*to).type = TOKEN_OR;
 	    return to;
 	};
@@ -492,21 +529,21 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	};
 	
 	let maybe_int = tokenizer_accept_int_type(t);
-	if maybe_int != cast(*i64, null) {
+	if maybe_int != null {
 		(*to).type = TOKEN_NUMBER;
 		(*to).data = cast(*void, maybe_int);
 		return to;
 	};
 
 	let maybe_char = tokenizer_accept_char_type(t);
-	if maybe_char != cast(*i8, null) {
+	if maybe_char != null {
 		(*to).type = TOKEN_CHAR;
 		(*to).data = cast(*void, maybe_char);
 		return to;
 	};
 
 	let maybe_string = tokenizer_accept_string_type(t);
-	if maybe_string != cast(*i8, null) {
+	if maybe_string != null {
 		(*to).type = TOKEN_STRING;
 		(*to).data = cast(*void, maybe_string);
 		return to;
@@ -522,8 +559,8 @@ let tokenizer_next = (t: *tokenizer) => *token {
 		return true;
 	});
 	if strlen(string) == 0 {
-		printf("NO IDENT!\n");
-		return cast(*token, null);
+		printf("Error at line %d: Unexpected character\n", (*t).line);
+		return null;
 	};
 
 	(*to).type = TOKEN_IDENTIFIER;
@@ -536,12 +573,9 @@ let tokenizer_init = (alloc: *arena, file: slice) => *tokenizer {
 	let t = cast(*tokenizer, arena_alloc(alloc, sizeof(tokenizer)));
 	(*t).arena = alloc;
 	(*t).offset = 0;
+	(*t).line = 1;
 	(*t).buf = cast(*i8, file.data);
 	(*t).buf_len = file.data_len;
-
-	printf("File size: %d\n", (*t).buf_len);
-
-	printf("%s\n", (*t).buf);
 
 	return t;
 };
@@ -552,18 +586,13 @@ let tokenizer_tokenize = (t: *tokenizer) => slice {
 
 	while true {
 		let tk = tokenizer_next(t);
-		if tk == cast(*token, null) {
+		if tk == null {
 			break;
 		};
-		printf("Add token: %d\n", (*tk).type);
 
 		(*(tokens + cast(*token, tokens_len))) = *tk;
 		tokens_len = tokens_len + 1;
 	};
-
-	printf("PRINT TOKENS: %d\n", tokens_len);
-
-	print_tokens(tokens, tokens_len);
 
 	let res = slice{};
 	res.data = cast(*void, tokens);

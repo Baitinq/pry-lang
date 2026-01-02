@@ -29,7 +29,7 @@ let main = () => i64 {
 	printf("Updated City: %s\n", new_city);
 	
 	let missing = hashmap_get(map, "missing");
-	if missing == cast(*void, null) {
+	if missing == null {
 		printf("Missing key not found\n");
 	};
 	
