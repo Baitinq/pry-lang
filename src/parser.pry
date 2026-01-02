@@ -277,10 +277,23 @@ let parser_peek_token = (p: *parser) => *token {
     if (*p).offset >= (*p).tokens_len {
 	return null;
      };
-	
+
     let t = ((*p).tokens + cast(*token, (*p).offset));
     (*p).offset = (*p).offset + 1;
     return t;
+};
+
+let parser_current_line = (p: *parser) => i64 {
+    let tok = parser_peek_token(p);
+    if tok == null {
+        /* If past end, get line from last token */
+        if (*p).tokens_len > 0 {
+            let last = ((*p).tokens + cast(*token, (*p).tokens_len - 1));
+            return (*last).line;
+        };
+        return 0;
+    };
+    return (*tok).line;
 };
 
 let parser_accept_token = (p: *parser, t: i64) => *token {
@@ -932,8 +945,8 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 
 	let tok = parser_consume_token(p);
 	if tok == null {
-	printf("NO TOK\n");
-	    return null; 
+		printf("Error at line %d: Unexpected end of input\n", parser_current_line(p));
+	    return null;
 	};
 	
 	if (*tok).type == TOKEN_NULL {
@@ -1600,8 +1613,8 @@ let parser_parse_statement = (p: *parser) => *Node {
 	    return retu;
 	};
 
-	printf("None\n");
-	
+	printf("Error at line %d: Unexpected token\n", parser_current_line(p));
+
 	return null;
 };
 
