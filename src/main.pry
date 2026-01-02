@@ -37,7 +37,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 	};
 
 	let generate_ir = false;
-	let filename = null;
+	let filename = cast(*i8, null);
 
 	let i = 0;
 	while i < (argc - 1) {

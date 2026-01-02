@@ -20,52 +20,52 @@ let simple_hash = (key: *i8, bucket_count: i64) => i64 {
 
 let hashmap_init = (bucket_count: i64, alloc: *arena) => *HashMap {
 	let map = cast(*HashMap, arena_alloc(alloc, sizeof(HashMap)));
-	map.buckets = cast(**HashMapEntry, arena_alloc(alloc, sizeof(*HashMapEntry) * bucket_count));
-	map.bucket_count = bucket_count;
-	map.arena = alloc;
-
+	(*map).buckets = cast(**HashMapEntry, arena_alloc(alloc, sizeof(*HashMapEntry) * bucket_count));
+	(*map).bucket_count = bucket_count;
+	(*map).arena = alloc;
+	
 	let i = 0;
 	while i < bucket_count {
-		(*(map.buckets + cast(**HashMapEntry, i))) = null;
+		(*((*map).buckets + cast(**HashMapEntry, i))) = null;
 		i = i + 1;
 	};
-
+	
 	return map;
 };
 
 let hashmap_put = (map: *HashMap, key: *i8, value: *void) => void {
-	let bucket_index = simple_hash(key, map.bucket_count);
-	let bucket = *(map.buckets + cast(**HashMapEntry, bucket_index));
-
+	let bucket_index = simple_hash(key, (*map).bucket_count);
+	let bucket = *((*map).buckets + cast(**HashMapEntry, bucket_index));
+	
 	let current = bucket;
 	while current != null {
-		if strcmp(current.key, key) {
-			current.value = value;
+		if strcmp((*current).key, key) {
+			(*current).value = value;
 			return;
 		};
-		current = current.next;
+		current = (*current).next;
 	};
-
-	let new_entry = cast(*HashMapEntry, arena_alloc(map.arena, sizeof(HashMapEntry)));
-	new_entry.key = key;
-	new_entry.value = value;
-	new_entry.next = bucket;
-
-	(*(map.buckets + cast(**HashMapEntry, bucket_index))) = new_entry;
-
+	
+	let new_entry = cast(*HashMapEntry, arena_alloc((*map).arena, sizeof(HashMapEntry)));
+	(*new_entry).key = key;
+	(*new_entry).value = value;
+	(*new_entry).next = bucket;
+	
+	(*((*map).buckets + cast(**HashMapEntry, bucket_index))) = new_entry;
+	
 	return;
 };
 
 let hashmap_get = (map: *HashMap, key: *i8) => *void {
-	let bucket_index = simple_hash(key, map.bucket_count);
-	let current = *(map.buckets + cast(**HashMapEntry, bucket_index));
-
+	let bucket_index = simple_hash(key, (*map).bucket_count);
+	let current = *((*map).buckets + cast(**HashMapEntry, bucket_index));
+	
 	while current != null {
-		if strcmp(current.key, key) {
-			return current.value;
+		if strcmp((*current).key, key) {
+			return (*current).value;
 		};
-		current = current.next;
+		current = (*current).next;
 	};
-
+	
 	return null;
 };
