@@ -298,7 +298,7 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 		};
 
 		printf("Error at line %d: Unknown type\n", (*node).line);
-		assert(false);
+		exit(1);
 	};
 	
 	if (*node).type == NODE_TYPE_FUNCTION_TYPE {
@@ -352,7 +352,7 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 	};
 
 	printf("Error at line %d: Cannot determine type\n", (*node).line);
-	assert(false);
+	exit(1);
 
 	return null;
 };
@@ -1245,8 +1245,8 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		return codegen_create_variable(c, v);
 	};
 
-	printf("ASSERT 1: %d\n", (*expression).type);
-	assert(false);
+	printf("Error at line %d: Unsupported expression type\n", (*expression).line);
+	exit(1);
 
 	return null;
 };
@@ -1348,8 +1348,8 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 		return 0;
 	};
 
-	printf("ASSERT 2 %d\n", lhs.type);
-	assert(false);
+	printf("Error at line %d: Unsupported assignment target\n", lhs.line);
+	exit(1);
 	return 0;
 };
 
@@ -1381,7 +1381,7 @@ let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 		let f = environment_get_variable((*ic).environment, (*d).name);
 		if f == null {
 			printf("Error at line %d: Undefined variable\n", (*fun).line);
-			assert(false);
+			exit(1);
 		};
 		let f_type = (*f).node_type;
 		assert((*f_type).type == NODE_TYPE_FUNCTION_TYPE);
@@ -1391,7 +1391,8 @@ let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 		let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*fun).data);
 		return (*d).retur_type;
 	};
-	assert(false);
+	printf("Error at line %d: Cannot determine function return type\n", (*fun).line);
+	exit(1);
 	return null;
 };
 
@@ -1408,7 +1409,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		function = environment_get_variable((*c).environment, ident.name);
 		if function == null {
 			printf("Error at line %d: Undefined function\n", (*expression).line);
-			assert(false);
+			exit(1);
 		};
 
 		if LLVMGetValueKind((*function).value) != LLVMFunctionValueKind {
@@ -1593,8 +1594,8 @@ let codegen_generate_statement = (c: *codegen, statement: *Node) => i64 {
 		return codegen_generate_break_statement(c);
 	};
 
-	printf("ASSERT 3 %d\n", stmt.type);
-	assert(false);
+	printf("Error at line %d: Unsupported statement type\n", stmt.line);
+	exit(1);
 
 	return 0;
 };

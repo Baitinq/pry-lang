@@ -54,7 +54,8 @@ let main = (argc: i64, argv: **i8) => i64 {
 		    continue;
 		};
 
-		assert(false);
+		printf("Error: Unexpected argument '%s'\n", arg);
+		exit(1);
 	};
 
 	printf("%s\n", filename);

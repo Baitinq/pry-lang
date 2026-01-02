@@ -423,30 +423,32 @@ source_filename = "module"
 @240 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @241 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
 @242 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@243 = private unnamed_addr constant [14 x i8] c"ASSERT 1: %d\0A\00", align 1
+@243 = private unnamed_addr constant [47 x i8] c"Error at line %d: Unsupported expression type\0A\00", align 1
 @244 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@245 = private unnamed_addr constant [13 x i8] c"ASSERT 2 %d\0A\00", align 1
+@245 = private unnamed_addr constant [49 x i8] c"Error at line %d: Unsupported assignment target\0A\00", align 1
 @246 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined variable\0A\00", align 1
-@247 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined function\0A\00", align 1
-@248 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@247 = private unnamed_addr constant [57 x i8] c"Error at line %d: Cannot determine function return type\0A\00", align 1
+@248 = private unnamed_addr constant [38 x i8] c"Error at line %d: Undefined function\0A\00", align 1
 @249 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@250 = private unnamed_addr constant [11 x i8] c"then_block\00", align 1
-@251 = private unnamed_addr constant [12 x i8] c"merge_block\00", align 1
-@252 = private unnamed_addr constant [12 x i8] c"while_block\00", align 1
-@253 = private unnamed_addr constant [12 x i8] c"inner_block\00", align 1
-@254 = private unnamed_addr constant [12 x i8] c"outer_block\00", align 1
-@255 = private unnamed_addr constant [13 x i8] c"ASSERT 3 %d\0A\00", align 1
-@256 = private unnamed_addr constant [10 x i8] c"output.ll\00", align 1
-@257 = private unnamed_addr constant [19 x i8] c"Target output: %s\0A\00", align 1
-@258 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@250 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@251 = private unnamed_addr constant [11 x i8] c"then_block\00", align 1
+@252 = private unnamed_addr constant [12 x i8] c"merge_block\00", align 1
+@253 = private unnamed_addr constant [12 x i8] c"while_block\00", align 1
+@254 = private unnamed_addr constant [12 x i8] c"inner_block\00", align 1
+@255 = private unnamed_addr constant [12 x i8] c"outer_block\00", align 1
+@256 = private unnamed_addr constant [46 x i8] c"Error at line %d: Unsupported statement type\0A\00", align 1
+@257 = private unnamed_addr constant [10 x i8] c"output.ll\00", align 1
+@258 = private unnamed_addr constant [19 x i8] c"Target output: %s\0A\00", align 1
 @259 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
-@260 = private unnamed_addr constant [25 x i8] c"Verification output: %s\0A\00", align 1
-@261 = private unnamed_addr constant [19 x i8] c"bootstrap_output.o\00", align 1
-@262 = private unnamed_addr constant [27 x i8] c"Object file generated: %s\0A\00", align 1
-@263 = private unnamed_addr constant [2 x i8] c"r\00", align 1
-@264 = private unnamed_addr constant [16 x i8] c"Need filename!\0A\00", align 1
-@265 = private unnamed_addr constant [14 x i8] c"--generate-ir\00", align 1
-@266 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
+@260 = private unnamed_addr constant [1 x i8] zeroinitializer, align 1
+@261 = private unnamed_addr constant [25 x i8] c"Verification output: %s\0A\00", align 1
+@262 = private unnamed_addr constant [19 x i8] c"bootstrap_output.o\00", align 1
+@263 = private unnamed_addr constant [27 x i8] c"Object file generated: %s\0A\00", align 1
+@264 = private unnamed_addr constant [2 x i8] c"r\00", align 1
+@265 = private unnamed_addr constant [16 x i8] c"Need filename!\0A\00", align 1
+@266 = private unnamed_addr constant [14 x i8] c"--generate-ir\00", align 1
+@267 = private unnamed_addr constant [33 x i8] c"Error: Unexpected argument '%s'\0A\00", align 1
+@268 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
 
 declare void @printf(ptr, ...)
 
@@ -11691,7 +11693,7 @@ merge_block30:                                    ; preds = %merge_block23
   %line = getelementptr %Node, ptr %74, i32 0, i32 2
   %75 = load i64, ptr %line, align 4
   call void (ptr, ...) @printf(ptr @196, i64 %75)
-  call void @assert(i1 false)
+  call void @exit(i64 1)
   br label %merge_block31
 
 merge_block31:                                    ; preds = %and_merge, %merge_block30
@@ -11898,7 +11900,7 @@ merge_block60:                                    ; preds = %merge_block53
   %line61 = getelementptr %Node, ptr %172, i32 0, i32 2
   %173 = load i64, ptr %line61, align 4
   call void (ptr, ...) @printf(ptr @198, i64 %173)
-  call void @assert(i1 false)
+  call void @exit(i64 1)
   ret ptr null
 }
 
@@ -12115,10 +12117,10 @@ then_block24:                                     ; preds = %merge_block22
   ret i64 %49
 
 merge_block25:                                    ; preds = %merge_block22
-  %type26 = getelementptr %Node, ptr %stmt, i32 0, i32 0
-  %50 = load i64, ptr %type26, align 4
-  call void (ptr, ...) @printf(ptr @255, i64 %50)
-  call void @assert(i1 false)
+  %line = getelementptr %Node, ptr %stmt, i32 0, i32 2
+  %50 = load i64, ptr %line, align 4
+  call void (ptr, ...) @printf(ptr @256, i64 %50)
+  call void @exit(i64 1)
   ret i64 0
 }
 
@@ -12178,8 +12180,8 @@ then_block4:                                      ; preds = %then_block
   %24 = load ptr, ptr %expression1, align 8
   %line = getelementptr %Node, ptr %24, i32 0, i32 2
   %25 = load i64, ptr %line, align 4
-  call void (ptr, ...) @printf(ptr @247, i64 %25)
-  call void @assert(i1 false)
+  call void (ptr, ...) @printf(ptr @248, i64 %25)
+  call void @exit(i64 1)
   br label %merge_block
 
 merge_block:                                      ; preds = %then_block, %then_block4
@@ -12213,7 +12215,7 @@ then_block5:                                      ; preds = %merge_block
   %43 = load ptr, ptr %function, align 8
   %value7 = getelementptr %Variable, ptr %43, i32 0, i32 0
   %44 = load ptr, ptr %value7, align 8
-  %45 = call ptr @LLVMBuildLoad2(ptr %39, ptr %42, ptr %44, ptr @248)
+  %45 = call ptr @LLVMBuildLoad2(ptr %39, ptr %42, ptr %44, ptr @249)
   store ptr %45, ptr %value6, align 8
   %46 = load ptr, ptr %function, align 8
   %node8 = getelementptr %Variable, ptr %46, i32 0, i32 2
@@ -12351,7 +12353,7 @@ outer_block:                                      ; preds = %while_block
   %116 = load ptr, ptr %value24, align 8
   %117 = load ptr, ptr %arguments, align 8
   %118 = load i64, ptr %i, align 4
-  %119 = call ptr @LLVMBuildCall2(ptr %112, ptr %114, ptr %116, ptr %117, i64 %118, ptr @249)
+  %119 = call ptr @LLVMBuildCall2(ptr %112, ptr %114, ptr %116, ptr %117, i64 %118, ptr @250)
   %res = alloca ptr, align 8
   store ptr %119, ptr %res, align 8
   %120 = load ptr, ptr %c, align 8
@@ -15228,10 +15230,10 @@ then_block616:                                    ; preds = %merge_block614
 
 merge_block634:                                   ; preds = %merge_block614
   %1377 = load ptr, ptr %expression, align 8
-  %type635 = getelementptr %Node, ptr %1377, i32 0, i32 0
-  %1378 = load i64, ptr %type635, align 4
+  %line = getelementptr %Node, ptr %1377, i32 0, i32 2
+  %1378 = load i64, ptr %line, align 4
   call void (ptr, ...) @printf(ptr @243, i64 %1378)
-  call void @assert(i1 false)
+  call void @exit(i64 1)
   ret ptr null
 }
 
@@ -16064,10 +16066,10 @@ then_block55:                                     ; preds = %merge_block53
   ret i64 0
 
 merge_block69:                                    ; preds = %merge_block53
-  %type70 = getelementptr %Node, ptr %lhs1, i32 0, i32 0
-  %185 = load i64, ptr %type70, align 4
+  %line = getelementptr %Node, ptr %lhs1, i32 0, i32 2
+  %185 = load i64, ptr %line, align 4
   call void (ptr, ...) @printf(ptr @245, i64 %185)
-  call void @assert(i1 false)
+  call void @exit(i64 1)
   ret i64 0
 }
 
@@ -16177,7 +16179,7 @@ then_block5:                                      ; preds = %then_block2
   %line = getelementptr %Node, ptr %23, i32 0, i32 2
   %24 = load i64, ptr %line, align 4
   call void (ptr, ...) @printf(ptr @246, i64 %24)
-  call void @assert(i1 false)
+  call void @exit(i64 1)
   br label %merge_block6
 
 merge_block6:                                     ; preds = %then_block2, %then_block5
@@ -16217,7 +16219,11 @@ then_block10:                                     ; preds = %merge_block8
   ret ptr %41
 
 merge_block14:                                    ; preds = %merge_block8
-  call void @assert(i1 false)
+  %42 = load ptr, ptr %fun, align 8
+  %line15 = getelementptr %Node, ptr %42, i32 0, i32 2
+  %43 = load i64, ptr %line15, align 4
+  call void (ptr, ...) @printf(ptr @247, i64 %43)
+  call void @exit(i64 1)
   ret ptr null
 }
 
@@ -16284,7 +16290,7 @@ entrypoint:
   %11 = load ptr, ptr %c, align 8
   %current_function = getelementptr %codegen, ptr %11, i32 0, i32 7
   %12 = load ptr, ptr %current_function, align 8
-  %13 = call ptr @LLVMAppendBasicBlock(ptr %12, ptr @250)
+  %13 = call ptr @LLVMAppendBasicBlock(ptr %12, ptr @251)
   %then_block = alloca ptr, align 8
   store ptr %13, ptr %then_block, align 8
   %14 = load ptr, ptr %c, align 8
@@ -16338,7 +16344,7 @@ outer_block:                                      ; preds = %while_block
   %37 = load ptr, ptr %c, align 8
   %current_function3 = getelementptr %codegen, ptr %37, i32 0, i32 7
   %38 = load ptr, ptr %current_function3, align 8
-  %39 = call ptr @LLVMAppendBasicBlock(ptr %38, ptr @251)
+  %39 = call ptr @LLVMAppendBasicBlock(ptr %38, ptr @252)
   %merge_block = alloca ptr, align 8
   store ptr %39, ptr %merge_block, align 8
   %40 = load ptr, ptr %c, align 8
@@ -16415,7 +16421,7 @@ entrypoint:
   %2 = load ptr, ptr %c, align 8
   %current_function = getelementptr %codegen, ptr %2, i32 0, i32 7
   %3 = load ptr, ptr %current_function, align 8
-  %4 = call ptr @LLVMAppendBasicBlock(ptr %3, ptr @252)
+  %4 = call ptr @LLVMAppendBasicBlock(ptr %3, ptr @253)
   %whil_block = alloca ptr, align 8
   store ptr %4, ptr %whil_block, align 8
   %5 = load ptr, ptr %c, align 8
@@ -16441,13 +16447,13 @@ entrypoint:
   %18 = load ptr, ptr %c, align 8
   %current_function2 = getelementptr %codegen, ptr %18, i32 0, i32 7
   %19 = load ptr, ptr %current_function2, align 8
-  %20 = call ptr @LLVMAppendBasicBlock(ptr %19, ptr @253)
+  %20 = call ptr @LLVMAppendBasicBlock(ptr %19, ptr @254)
   %inner_block = alloca ptr, align 8
   store ptr %20, ptr %inner_block, align 8
   %21 = load ptr, ptr %c, align 8
   %current_function3 = getelementptr %codegen, ptr %21, i32 0, i32 7
   %22 = load ptr, ptr %current_function3, align 8
-  %23 = call ptr @LLVMAppendBasicBlock(ptr %22, ptr @254)
+  %23 = call ptr @LLVMAppendBasicBlock(ptr %22, ptr @255)
   %outer_block = alloca ptr, align 8
   store ptr %23, ptr %outer_block, align 8
   %24 = load ptr, ptr %c, align 8
@@ -16627,7 +16633,7 @@ then_block:                                       ; preds = %entrypoint
   %llvm_module1 = getelementptr %codegen, ptr %5, i32 0, i32 0
   %6 = load ptr, ptr %llvm_module1, align 8
   %7 = load ptr, ptr %message, align 8
-  %8 = call i64 @LLVMPrintModuleToFile(ptr %6, ptr @256, ptr %7)
+  %8 = call i64 @LLVMPrintModuleToFile(ptr %6, ptr @257, ptr %7)
   ret i64 0
 
 merge_block:                                      ; preds = %entrypoint
@@ -16653,7 +16659,7 @@ merge_block:                                      ; preds = %entrypoint
 then_block2:                                      ; preds = %merge_block
   %19 = load ptr, ptr %message, align 8
   %20 = load ptr, ptr %19, align 8
-  call void (ptr, ...) @printf(ptr @257, ptr %20)
+  call void (ptr, ...) @printf(ptr @258, ptr %20)
   %21 = load ptr, ptr %message, align 8
   %22 = load ptr, ptr %21, align 8
   call void @LLVMDisposeMessage(ptr %22)
@@ -16666,7 +16672,7 @@ merge_block3:                                     ; preds = %merge_block, %then_
   %26 = load i64, ptr @LLVMCodeGenLevelDefault, align 4
   %27 = load i64, ptr @LLVMRelocDefault, align 4
   %28 = load i64, ptr @LLVMCodeModelDefault, align 4
-  %29 = call ptr @LLVMCreateTargetMachine(ptr %24, ptr %25, ptr @258, ptr @259, i64 %26, i64 %27, i64 %28)
+  %29 = call ptr @LLVMCreateTargetMachine(ptr %24, ptr %25, ptr @259, ptr @260, i64 %26, i64 %27, i64 %28)
   %target_machine = alloca ptr, align 8
   store ptr %29, ptr %target_machine, align 8
   %30 = load ptr, ptr %triple, align 8
@@ -16685,7 +16691,7 @@ merge_block3:                                     ; preds = %merge_block, %then_
 then_block5:                                      ; preds = %merge_block3
   %38 = load ptr, ptr %message, align 8
   %39 = load ptr, ptr %38, align 8
-  call void (ptr, ...) @printf(ptr @260, ptr %39)
+  call void (ptr, ...) @printf(ptr @261, ptr %39)
   %40 = load ptr, ptr %message, align 8
   %41 = load ptr, ptr %40, align 8
   call void @LLVMDisposeMessage(ptr %41)
@@ -16693,7 +16699,7 @@ then_block5:                                      ; preds = %merge_block3
 
 merge_block6:                                     ; preds = %merge_block3, %then_block5
   %filename = alloca ptr, align 8
-  store ptr @261, ptr %filename, align 8
+  store ptr @262, ptr %filename, align 8
   %42 = load ptr, ptr %target_machine, align 8
   %43 = load ptr, ptr %c, align 8
   %llvm_module7 = getelementptr %codegen, ptr %43, i32 0, i32 0
@@ -16704,7 +16710,7 @@ merge_block6:                                     ; preds = %merge_block3, %then
   %48 = load ptr, ptr %target_machine, align 8
   call void @LLVMDisposeTargetMachine(ptr %48)
   %49 = load ptr, ptr %filename, align 8
-  call void (ptr, ...) @printf(ptr @262, ptr %49)
+  call void (ptr, ...) @printf(ptr @263, ptr %49)
   ret i64 0
 }
 
@@ -16731,7 +16737,7 @@ entrypoint:
   %alloc = alloca ptr, align 8
   store ptr %1, ptr %alloc, align 8
   %2 = load ptr, ptr %filename, align 8
-  %3 = call ptr @fopen(ptr %2, ptr @263)
+  %3 = call ptr @fopen(ptr %2, ptr @264)
   %file = alloca ptr, align 8
   store ptr %3, ptr %file, align 8
   %4 = load ptr, ptr %file, align 8
@@ -16785,7 +16791,7 @@ entrypoint:
   br i1 %3, label %then_block, label %merge_block
 
 then_block:                                       ; preds = %entrypoint
-  call void (ptr, ...) @printf(ptr @264)
+  call void (ptr, ...) @printf(ptr @265)
   ret i64 1
 
 merge_block:                                      ; preds = %entrypoint
@@ -16815,12 +16821,12 @@ inner_block:                                      ; preds = %while_block
   %arg = alloca ptr, align 8
   store ptr %13, ptr %arg, align 8
   %14 = load ptr, ptr %arg, align 8
-  %15 = call i1 @strcmp(ptr %14, ptr @265)
+  %15 = call i1 @strcmp(ptr %14, ptr @266)
   br i1 %15, label %then_block1, label %merge_block2
 
 outer_block:                                      ; preds = %while_block
   %16 = load ptr, ptr %filename, align 8
-  call void (ptr, ...) @printf(ptr @266, ptr %16)
+  call void (ptr, ...) @printf(ptr @268, ptr %16)
   %17 = call ptr @arena_init(i64 1073741824)
   %alloc = alloca ptr, align 8
   store ptr %17, ptr %alloc, align 8
@@ -16886,6 +16892,8 @@ then_block3:                                      ; preds = %merge_block2
   br label %while_block
 
 merge_block4:                                     ; preds = %merge_block2
-  call void @assert(i1 false)
+  %46 = load ptr, ptr %arg, align 8
+  call void (ptr, ...) @printf(ptr @267, ptr %46)
+  call void @exit(i64 1)
   br label %while_block
 }
