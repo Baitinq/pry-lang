@@ -380,6 +380,7 @@ let StructField = struct {
 
 let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructField {
 	let ptr = cast(*Variable, null);
+	let is_explicit_deref = false;
 	if (*node).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER {
 		let identifier = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*node).data);
 		ptr = environment_get_variable((*c).environment, identifier.name);
@@ -387,12 +388,14 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 	if (*node).type == NODE_UNARY_EXPRESSION {
 		let xd = (*cast(*NODE_UNARY_EXPRESSION_DATA, (*node).data)).expression;
 		ptr = codegen_generate_expression_value(c, xd, "");
+		is_explicit_deref = true;
 	};
 
 	assert(ptr != cast(*Variable, null));
 
 	let typ = cast(*Node, null);
 	let ptr_typ = (*ptr).node_type;
+	let is_pointer = false;
 	if (*ptr_typ).type == NODE_TYPE_STRUCT_TYPE {
 		typ = ptr_typ;
 	};
@@ -403,7 +406,8 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*pt_type).data);
 		let v = environment_get_variable((*c).environment, simple_type.name);
 		assert(v != cast(*Variable, null));
-		typ = (*v).node_type; /* TODO: we shouldnt be able to get fields of pointers, we have to dref first */
+		typ = (*v).node_type;
+		is_pointer = true;
 	};
 	if (*ptr_typ).type == NODE_TYPE_SIMPLE_TYPE {
 		let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*ptr_typ).data);
@@ -446,12 +450,21 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 
 	let x = codegen_get_llvm_type(c, typ);
 	assert(x != cast(*LLVMTypeRef, null));
-	(*res).value = LLVMBuildGEP2((*c).builder, *x, (*ptr).value, indices, 2, name);
+
+	/* If the type is a pointer to a struct and NOT explicitly dereferenced, load the pointer first before GEP */
+	let base_ptr = (*ptr).value;
+	if is_pointer and !is_explicit_deref {
+		let ptr_llvm_type = codegen_get_llvm_type(c, ptr_typ);
+		assert(ptr_llvm_type != cast(*LLVMTypeRef, null));
+		base_ptr = LLVMBuildLoad2((*c).builder, *ptr_llvm_type, (*ptr).value, "");
+	};
+
+	(*res).value = LLVMBuildGEP2((*c).builder, *x, base_ptr, indices, 2, name);
 	let no = *(struc_type.fields + cast(**Node, *fieldIndex));
 	assert((*no).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
 	let no_d = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*no).data);
 	(*res).type = no_d.type;
-	
+
 	return res;
 };
 
