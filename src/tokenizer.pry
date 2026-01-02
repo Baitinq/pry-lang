@@ -55,12 +55,14 @@ let TOKEN_RBRACE     = 33;
 let token = struct {
 	type: i64,
 	data: *void,
+	line: i64,
 };
 
 let tokenizer = struct {
 	buf: *i8,
 	buf_len: i64,
 	offset: i64,
+	line: i64,
 
 	arena: *arena,
 };
@@ -191,6 +193,9 @@ let tokenizer_skip_whitespace = (t: *tokenizer) => void {
 		let c = (*((*t).buf + cast(*i8, (*t).offset)));
 		if !iswhitespace(c) {
 			return;
+		};
+		if c == '\n' {
+			(*t).line = (*t).line + 1;
 		};
 		(*t).offset = (*t).offset + 1;
 	};
@@ -361,6 +366,10 @@ let tokenizer_skip_comments = (t: *tokenizer) => void {
 	if !tokenizer_accept_string(t, "/*") { return; };
 
 	while !tokenizer_accept_string(t, "*/") {
+		let c = (*((*t).buf + cast(*i8, (*t).offset)));
+		if c == '\n' {
+			(*t).line = (*t).line + 1;
+		};
 		(*t).offset = (*t).offset + 1;
 	};
 
@@ -375,8 +384,9 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	if (*t).offset >= (*t).buf_len {
 		return null;
 	};
-	
+
 	let to = cast(*token, arena_alloc((*t).arena, sizeof(token)));
+	(*to).line = (*t).line;
 
 	if tokenizer_accept_keyword(t, "import") {
 	    (*to).type = TOKEN_IMPORT;
@@ -549,7 +559,7 @@ let tokenizer_next = (t: *tokenizer) => *token {
 		return true;
 	});
 	if strlen(string) == 0 {
-		printf("NO IDENT!\n");
+		printf("Error at line %d: Unexpected character\n", (*t).line);
 		return null;
 	};
 
@@ -563,6 +573,7 @@ let tokenizer_init = (alloc: *arena, file: slice) => *tokenizer {
 	let t = cast(*tokenizer, arena_alloc(alloc, sizeof(tokenizer)));
 	(*t).arena = alloc;
 	(*t).offset = 0;
+	(*t).line = 1;
 	(*t).buf = cast(*i8, file.data);
 	(*t).buf_len = file.data_len;
 

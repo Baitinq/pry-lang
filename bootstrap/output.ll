@@ -5,10 +5,10 @@ source_filename = "module"
 %arena.0 = type { ptr, i64, i64 }
 %arena.1 = type { ptr, i64, i64 }
 %arena.4 = type { ptr, i64, i64 }
-%token = type { i64, ptr }
-%token.2 = type { i64, ptr }
-%tokenizer = type { ptr, i64, i64, ptr }
-%tokenizer.3 = type { ptr, i64, i64, ptr }
+%token = type { i64, ptr, i64 }
+%token.2 = type { i64, ptr, i64 }
+%tokenizer = type { ptr, i64, i64, i64, ptr }
+%tokenizer.3 = type { ptr, i64, i64, i64, ptr }
 %slice = type { ptr, i64 }
 %parser = type { ptr, i64, i64, ptr, ptr }
 %NODE_FUNCTION_CALL_STATEMENT_DATA = type { ptr, ptr, i64 }
@@ -163,7 +163,7 @@ source_filename = "module"
 @76 = private unnamed_addr constant [2 x i8] c"<\00", align 1
 @77 = private unnamed_addr constant [2 x i8] c">\00", align 1
 @78 = private unnamed_addr constant [2 x i8] c".\00", align 1
-@79 = private unnamed_addr constant [11 x i8] c"NO IDENT!\0A\00", align 1
+@79 = private unnamed_addr constant [40 x i8] c"Error at line %d: Unexpected character\0A\00", align 1
 @80 = private unnamed_addr constant [15 x i8] c"File size: %d\0A\00", align 1
 @81 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
 @82 = private unnamed_addr constant [15 x i8] c"Add token: %d\0A\00", align 1
@@ -281,7 +281,7 @@ source_filename = "module"
 @158 = private unnamed_addr constant [2 x i8] c"<\00", align 1
 @159 = private unnamed_addr constant [2 x i8] c">\00", align 1
 @160 = private unnamed_addr constant [2 x i8] c".\00", align 1
-@161 = private unnamed_addr constant [11 x i8] c"NO IDENT!\0A\00", align 1
+@161 = private unnamed_addr constant [40 x i8] c"Error at line %d: Unexpected character\0A\00", align 1
 @162 = private unnamed_addr constant [15 x i8] c"File size: %d\0A\00", align 1
 @163 = private unnamed_addr constant [4 x i8] c"%s\0A\00", align 1
 @164 = private unnamed_addr constant [15 x i8] c"Add token: %d\0A\00", align 1
@@ -3126,7 +3126,7 @@ entrypoint:
   store ptr %0, ptr %t, align 8
   br label %while_block
 
-while_block:                                      ; preds = %merge_block3, %entrypoint
+while_block:                                      ; preds = %merge_block6, %entrypoint
   br i1 true, label %inner_block, label %outer_block
 
 inner_block:                                      ; preds = %while_block
@@ -3165,67 +3165,97 @@ then_block2:                                      ; preds = %merge_block
   ret void
 
 merge_block3:                                     ; preds = %merge_block
-  %15 = load ptr, ptr %t, align 8
-  %offset4 = getelementptr %tokenizer, ptr %15, i32 0, i32 2
-  %16 = load ptr, ptr %t, align 8
-  %offset5 = getelementptr %tokenizer, ptr %16, i32 0, i32 2
-  %17 = load i64, ptr %offset5, align 4
-  %18 = add i64 %17, 1
-  store i64 %18, ptr %offset4, align 4
+  %15 = load i8, ptr %c, align 1
+  %16 = icmp eq i8 %15, 10
+  br i1 %16, label %then_block4, label %merge_block6
+
+then_block4:                                      ; preds = %merge_block3
+  %17 = load ptr, ptr %t, align 8
+  %line = getelementptr %tokenizer, ptr %17, i32 0, i32 3
+  %18 = load ptr, ptr %t, align 8
+  %line5 = getelementptr %tokenizer, ptr %18, i32 0, i32 3
+  %19 = load i64, ptr %line5, align 4
+  %20 = add i64 %19, 1
+  store i64 %20, ptr %line, align 4
+  br label %merge_block6
+
+merge_block6:                                     ; preds = %merge_block3, %then_block4
+  %21 = load ptr, ptr %t, align 8
+  %offset7 = getelementptr %tokenizer, ptr %21, i32 0, i32 2
+  %22 = load ptr, ptr %t, align 8
+  %offset8 = getelementptr %tokenizer, ptr %22, i32 0, i32 2
+  %23 = load i64, ptr %offset8, align 4
+  %24 = add i64 %23, 1
+  store i64 %24, ptr %offset7, align 4
   br label %while_block
 
-entrypoint6:                                      ; No predecessors!
-  %t7 = alloca ptr, align 8
-  store ptr %0, ptr %t7, align 8
-  br label %while_block8
+entrypoint9:                                      ; No predecessors!
+  %t10 = alloca ptr, align 8
+  store ptr %0, ptr %t10, align 8
+  br label %while_block11
 
-while_block8:                                     ; preds = %merge_block19, %entrypoint6
-  br i1 true, label %inner_block9, label %outer_block10
+while_block11:                                    ; preds = %merge_block26, %entrypoint9
+  br i1 true, label %inner_block12, label %outer_block13
 
-inner_block9:                                     ; preds = %while_block8
-  %19 = load ptr, ptr %t7, align 8
-  %offset11 = getelementptr %tokenizer.3, ptr %19, i32 0, i32 2
-  %20 = load i64, ptr %offset11, align 4
-  %21 = load ptr, ptr %t7, align 8
-  %buf_len12 = getelementptr %tokenizer.3, ptr %21, i32 0, i32 1
-  %22 = load i64, ptr %buf_len12, align 4
-  %23 = icmp sge i64 %20, %22
-  br i1 %23, label %then_block13, label %merge_block14
+inner_block12:                                    ; preds = %while_block11
+  %25 = load ptr, ptr %t10, align 8
+  %offset14 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 2
+  %26 = load i64, ptr %offset14, align 4
+  %27 = load ptr, ptr %t10, align 8
+  %buf_len15 = getelementptr %tokenizer.3, ptr %27, i32 0, i32 1
+  %28 = load i64, ptr %buf_len15, align 4
+  %29 = icmp sge i64 %26, %28
+  br i1 %29, label %then_block16, label %merge_block17
 
-outer_block10:                                    ; preds = %while_block8
+outer_block13:                                    ; preds = %while_block11
   ret void
 
-then_block13:                                     ; preds = %inner_block9
+then_block16:                                     ; preds = %inner_block12
   ret void
 
-merge_block14:                                    ; preds = %inner_block9
-  %24 = load ptr, ptr %t7, align 8
-  %buf15 = getelementptr %tokenizer.3, ptr %24, i32 0, i32 0
-  %25 = load ptr, ptr %buf15, align 8
-  %26 = load ptr, ptr %t7, align 8
-  %offset16 = getelementptr %tokenizer.3, ptr %26, i32 0, i32 2
-  %27 = load i64, ptr %offset16, align 4
-  %28 = getelementptr i8, ptr %25, i64 %27
-  %29 = load i8, ptr %28, align 1
-  %c17 = alloca i8, align 1
-  store i8 %29, ptr %c17, align 1
-  %30 = load i8, ptr %c17, align 1
-  %31 = call i1 @iswhitespace(i8 %30)
-  %32 = icmp eq i1 %31, false
-  br i1 %32, label %then_block18, label %merge_block19
+merge_block17:                                    ; preds = %inner_block12
+  %30 = load ptr, ptr %t10, align 8
+  %buf18 = getelementptr %tokenizer.3, ptr %30, i32 0, i32 0
+  %31 = load ptr, ptr %buf18, align 8
+  %32 = load ptr, ptr %t10, align 8
+  %offset19 = getelementptr %tokenizer.3, ptr %32, i32 0, i32 2
+  %33 = load i64, ptr %offset19, align 4
+  %34 = getelementptr i8, ptr %31, i64 %33
+  %35 = load i8, ptr %34, align 1
+  %c20 = alloca i8, align 1
+  store i8 %35, ptr %c20, align 1
+  %36 = load i8, ptr %c20, align 1
+  %37 = call i1 @iswhitespace(i8 %36)
+  %38 = icmp eq i1 %37, false
+  br i1 %38, label %then_block21, label %merge_block22
 
-then_block18:                                     ; preds = %merge_block14
+then_block21:                                     ; preds = %merge_block17
   ret void
 
-merge_block19:                                    ; preds = %merge_block14
-  %33 = load ptr, ptr %t7, align 8
-  %offset20 = getelementptr %tokenizer.3, ptr %33, i32 0, i32 2
-  %34 = load ptr, ptr %t7, align 8
-  %offset21 = getelementptr %tokenizer.3, ptr %34, i32 0, i32 2
-  %35 = load i64, ptr %offset21, align 4
-  %36 = add i64 %35, 1
-  store i64 %36, ptr %offset20, align 4
-  br label %while_block8
+merge_block22:                                    ; preds = %merge_block17
+  %39 = load i8, ptr %c20, align 1
+  %40 = icmp eq i8 %39, 10
+  br i1 %40, label %then_block23, label %merge_block26
+
+then_block23:                                     ; preds = %merge_block22
+  %41 = load ptr, ptr %t10, align 8
+  %line24 = getelementptr %tokenizer.3, ptr %41, i32 0, i32 3
+  %42 = load ptr, ptr %t10, align 8
+  %line25 = getelementptr %tokenizer.3, ptr %42, i32 0, i32 3
+  %43 = load i64, ptr %line25, align 4
+  %44 = add i64 %43, 1
+  store i64 %44, ptr %line24, align 4
+  br label %merge_block26
+
+merge_block26:                                    ; preds = %merge_block22, %then_block23
+  %45 = load ptr, ptr %t10, align 8
+  %offset27 = getelementptr %tokenizer.3, ptr %45, i32 0, i32 2
+  %46 = load ptr, ptr %t10, align 8
+  %offset28 = getelementptr %tokenizer.3, ptr %46, i32 0, i32 2
+  %47 = load i64, ptr %offset28, align 4
+  %48 = add i64 %47, 1
+  store i64 %48, ptr %offset27, align 4
+  br label %while_block11
 }
 
 define i1 @tokenizer_accept_string(ptr %0, ptr %1) {
@@ -3254,7 +3284,7 @@ then_block:                                       ; preds = %entrypoint
 
 merge_block:                                      ; preds = %entrypoint
   %11 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %11, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %11, i32 0, i32 4
   %12 = load ptr, ptr %arena, align 8
   %13 = call ptr @arena_alloc(ptr %12, i64 1000)
   %s = alloca ptr, align 8
@@ -3313,7 +3343,7 @@ then_block12:                                     ; preds = %entrypoint6
 
 merge_block13:                                    ; preds = %entrypoint6
   %38 = load ptr, ptr %t7, align 8
-  %arena14 = getelementptr %tokenizer.3, ptr %38, i32 0, i32 3
+  %arena14 = getelementptr %tokenizer.3, ptr %38, i32 0, i32 4
   %39 = load ptr, ptr %arena14, align 8
   %40 = call ptr @arena_alloc(ptr %39, i64 1000)
   %s15 = alloca ptr, align 8
@@ -3374,7 +3404,7 @@ then_block:                                       ; preds = %entrypoint
 
 merge_block:                                      ; preds = %entrypoint
   %11 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %11, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %11, i32 0, i32 4
   %12 = load ptr, ptr %arena, align 8
   %13 = call ptr @arena_alloc(ptr %12, i64 1000)
   %s = alloca ptr, align 8
@@ -3475,7 +3505,7 @@ then_block21:                                     ; preds = %entrypoint15
 
 merge_block22:                                    ; preds = %entrypoint15
   %55 = load ptr, ptr %t16, align 8
-  %arena23 = getelementptr %tokenizer.3, ptr %55, i32 0, i32 3
+  %arena23 = getelementptr %tokenizer.3, ptr %55, i32 0, i32 4
   %56 = load ptr, ptr %arena23, align 8
   %57 = call ptr @arena_alloc(ptr %56, i64 1000)
   %s24 = alloca ptr, align 8
@@ -3564,7 +3594,7 @@ entrypoint:
   %start = alloca i64, align 8
   store i64 %3, ptr %start, align 4
   %4 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %4, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %4, i32 0, i32 4
   %5 = load ptr, ptr %arena, align 8
   %6 = call ptr @arena_alloc(ptr %5, i64 1000)
   %res = alloca ptr, align 8
@@ -3782,7 +3812,7 @@ entrypoint27:                                     ; No predecessors!
   %start31 = alloca i64, align 8
   store i64 %104, ptr %start31, align 4
   %105 = load ptr, ptr %t28, align 8
-  %arena32 = getelementptr %tokenizer.3, ptr %105, i32 0, i32 3
+  %arena32 = getelementptr %tokenizer.3, ptr %105, i32 0, i32 4
   %106 = load ptr, ptr %arena32, align 8
   %107 = call ptr @arena_alloc(ptr %106, i64 1000)
   %res33 = alloca ptr, align 8
@@ -4016,7 +4046,7 @@ then_block1:                                      ; preds = %merge_block
 
 merge_block2:                                     ; preds = %merge_block
   %8 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %8, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %8, i32 0, i32 4
   %9 = load ptr, ptr %arena, align 8
   %10 = call ptr @arena_alloc(ptr %9, i64 8)
   %x = alloca ptr, align 8
@@ -4053,7 +4083,7 @@ then_block8:                                      ; preds = %merge_block7
 
 merge_block9:                                     ; preds = %merge_block7
   %22 = load ptr, ptr %t4, align 8
-  %arena10 = getelementptr %tokenizer.3, ptr %22, i32 0, i32 3
+  %arena10 = getelementptr %tokenizer.3, ptr %22, i32 0, i32 4
   %23 = load ptr, ptr %arena10, align 8
   %24 = call ptr @arena_alloc(ptr %23, i64 8)
   %x11 = alloca ptr, align 8
@@ -4277,7 +4307,7 @@ then_block:                                       ; preds = %entrypoint
 merge_block:                                      ; preds = %entrypoint
   br label %while_block
 
-while_block:                                      ; preds = %inner_block, %merge_block
+while_block:                                      ; preds = %merge_block3, %merge_block
   %4 = load ptr, ptr %t, align 8
   %5 = call i1 @tokenizer_accept_string(ptr %4, ptr @45)
   %6 = icmp eq i1 %5, false
@@ -4285,49 +4315,99 @@ while_block:                                      ; preds = %inner_block, %merge
 
 inner_block:                                      ; preds = %while_block
   %7 = load ptr, ptr %t, align 8
-  %offset = getelementptr %tokenizer, ptr %7, i32 0, i32 2
-  %8 = load ptr, ptr %t, align 8
-  %offset1 = getelementptr %tokenizer, ptr %8, i32 0, i32 2
-  %9 = load i64, ptr %offset1, align 4
-  %10 = add i64 %9, 1
-  store i64 %10, ptr %offset, align 4
-  br label %while_block
+  %buf = getelementptr %tokenizer, ptr %7, i32 0, i32 0
+  %8 = load ptr, ptr %buf, align 8
+  %9 = load ptr, ptr %t, align 8
+  %offset = getelementptr %tokenizer, ptr %9, i32 0, i32 2
+  %10 = load i64, ptr %offset, align 4
+  %11 = getelementptr i8, ptr %8, i64 %10
+  %12 = load i8, ptr %11, align 1
+  %c = alloca i8, align 1
+  store i8 %12, ptr %c, align 1
+  %13 = load i8, ptr %c, align 1
+  %14 = icmp eq i8 %13, 10
+  br i1 %14, label %then_block1, label %merge_block3
 
 outer_block:                                      ; preds = %while_block
   ret void
 
-entrypoint2:                                      ; No predecessors!
-  %t3 = alloca ptr, align 8
-  store ptr %0, ptr %t3, align 8
-  %11 = load ptr, ptr %t3, align 8
-  %12 = call i1 @tokenizer_accept_string(ptr %11, ptr @126)
-  %13 = icmp eq i1 %12, false
-  br i1 %13, label %then_block4, label %merge_block5
+then_block1:                                      ; preds = %inner_block
+  %15 = load ptr, ptr %t, align 8
+  %line = getelementptr %tokenizer, ptr %15, i32 0, i32 3
+  %16 = load ptr, ptr %t, align 8
+  %line2 = getelementptr %tokenizer, ptr %16, i32 0, i32 3
+  %17 = load i64, ptr %line2, align 4
+  %18 = add i64 %17, 1
+  store i64 %18, ptr %line, align 4
+  br label %merge_block3
 
-then_block4:                                      ; preds = %entrypoint2
+merge_block3:                                     ; preds = %inner_block, %then_block1
+  %19 = load ptr, ptr %t, align 8
+  %offset4 = getelementptr %tokenizer, ptr %19, i32 0, i32 2
+  %20 = load ptr, ptr %t, align 8
+  %offset5 = getelementptr %tokenizer, ptr %20, i32 0, i32 2
+  %21 = load i64, ptr %offset5, align 4
+  %22 = add i64 %21, 1
+  store i64 %22, ptr %offset4, align 4
+  br label %while_block
+
+entrypoint6:                                      ; No predecessors!
+  %t7 = alloca ptr, align 8
+  store ptr %0, ptr %t7, align 8
+  %23 = load ptr, ptr %t7, align 8
+  %24 = call i1 @tokenizer_accept_string(ptr %23, ptr @126)
+  %25 = icmp eq i1 %24, false
+  br i1 %25, label %then_block8, label %merge_block9
+
+then_block8:                                      ; preds = %entrypoint6
   ret void
 
-merge_block5:                                     ; preds = %entrypoint2
-  br label %while_block6
+merge_block9:                                     ; preds = %entrypoint6
+  br label %while_block10
 
-while_block6:                                     ; preds = %inner_block7, %merge_block5
-  %14 = load ptr, ptr %t3, align 8
-  %15 = call i1 @tokenizer_accept_string(ptr %14, ptr @127)
-  %16 = icmp eq i1 %15, false
-  br i1 %16, label %inner_block7, label %outer_block8
+while_block10:                                    ; preds = %merge_block19, %merge_block9
+  %26 = load ptr, ptr %t7, align 8
+  %27 = call i1 @tokenizer_accept_string(ptr %26, ptr @127)
+  %28 = icmp eq i1 %27, false
+  br i1 %28, label %inner_block11, label %outer_block12
 
-inner_block7:                                     ; preds = %while_block6
-  %17 = load ptr, ptr %t3, align 8
-  %offset9 = getelementptr %tokenizer.3, ptr %17, i32 0, i32 2
-  %18 = load ptr, ptr %t3, align 8
-  %offset10 = getelementptr %tokenizer.3, ptr %18, i32 0, i32 2
-  %19 = load i64, ptr %offset10, align 4
-  %20 = add i64 %19, 1
-  store i64 %20, ptr %offset9, align 4
-  br label %while_block6
+inner_block11:                                    ; preds = %while_block10
+  %29 = load ptr, ptr %t7, align 8
+  %buf13 = getelementptr %tokenizer.3, ptr %29, i32 0, i32 0
+  %30 = load ptr, ptr %buf13, align 8
+  %31 = load ptr, ptr %t7, align 8
+  %offset14 = getelementptr %tokenizer.3, ptr %31, i32 0, i32 2
+  %32 = load i64, ptr %offset14, align 4
+  %33 = getelementptr i8, ptr %30, i64 %32
+  %34 = load i8, ptr %33, align 1
+  %c15 = alloca i8, align 1
+  store i8 %34, ptr %c15, align 1
+  %35 = load i8, ptr %c15, align 1
+  %36 = icmp eq i8 %35, 10
+  br i1 %36, label %then_block16, label %merge_block19
 
-outer_block8:                                     ; preds = %while_block6
+outer_block12:                                    ; preds = %while_block10
   ret void
+
+then_block16:                                     ; preds = %inner_block11
+  %37 = load ptr, ptr %t7, align 8
+  %line17 = getelementptr %tokenizer.3, ptr %37, i32 0, i32 3
+  %38 = load ptr, ptr %t7, align 8
+  %line18 = getelementptr %tokenizer.3, ptr %38, i32 0, i32 3
+  %39 = load i64, ptr %line18, align 4
+  %40 = add i64 %39, 1
+  store i64 %40, ptr %line17, align 4
+  br label %merge_block19
+
+merge_block19:                                    ; preds = %inner_block11, %then_block16
+  %41 = load ptr, ptr %t7, align 8
+  %offset20 = getelementptr %tokenizer.3, ptr %41, i32 0, i32 2
+  %42 = load ptr, ptr %t7, align 8
+  %offset21 = getelementptr %tokenizer.3, ptr %42, i32 0, i32 2
+  %43 = load i64, ptr %offset21, align 4
+  %44 = add i64 %43, 1
+  store i64 %44, ptr %offset20, align 4
+  br label %while_block10
 }
 
 define ptr @tokenizer_next(ptr %0) {
@@ -4354,1120 +4434,1138 @@ then_block:                                       ; preds = %entrypoint
 
 merge_block:                                      ; preds = %entrypoint
   %9 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %9, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %9, i32 0, i32 4
   %10 = load ptr, ptr %arena, align 8
-  %11 = call ptr @arena_alloc(ptr %10, i64 16)
+  %11 = call ptr @arena_alloc(ptr %10, i64 24)
   %to = alloca ptr, align 8
   store ptr %11, ptr %to, align 8
-  %12 = load ptr, ptr %t, align 8
-  %13 = call i1 @tokenizer_accept_keyword(ptr %12, ptr @46)
-  br i1 %13, label %then_block1, label %merge_block2
+  %12 = load ptr, ptr %to, align 8
+  %line = getelementptr %token, ptr %12, i32 0, i32 2
+  %13 = load ptr, ptr %t, align 8
+  %line1 = getelementptr %tokenizer, ptr %13, i32 0, i32 3
+  %14 = load i64, ptr %line1, align 4
+  store i64 %14, ptr %line, align 4
+  %15 = load ptr, ptr %t, align 8
+  %16 = call i1 @tokenizer_accept_keyword(ptr %15, ptr @46)
+  br i1 %16, label %then_block2, label %merge_block3
 
-then_block1:                                      ; preds = %merge_block
-  %14 = load ptr, ptr %to, align 8
-  %type = getelementptr %token, ptr %14, i32 0, i32 0
-  %15 = load i64, ptr @TOKEN_IMPORT, align 4
-  store i64 %15, ptr %type, align 4
-  %16 = load ptr, ptr %to, align 8
-  ret ptr %16
-
-merge_block2:                                     ; preds = %merge_block
-  %17 = load ptr, ptr %t, align 8
-  %18 = call i1 @tokenizer_accept_keyword(ptr %17, ptr @47)
-  br i1 %18, label %then_block3, label %merge_block5
-
-then_block3:                                      ; preds = %merge_block2
+then_block2:                                      ; preds = %merge_block
+  %17 = load ptr, ptr %to, align 8
+  %type = getelementptr %token, ptr %17, i32 0, i32 0
+  %18 = load i64, ptr @TOKEN_IMPORT, align 4
+  store i64 %18, ptr %type, align 4
   %19 = load ptr, ptr %to, align 8
-  %type4 = getelementptr %token, ptr %19, i32 0, i32 0
-  %20 = load i64, ptr @TOKEN_LET, align 4
-  store i64 %20, ptr %type4, align 4
-  %21 = load ptr, ptr %to, align 8
-  ret ptr %21
+  ret ptr %19
 
-merge_block5:                                     ; preds = %merge_block2
-  %22 = load ptr, ptr %t, align 8
-  %23 = call i1 @tokenizer_accept_keyword(ptr %22, ptr @48)
-  br i1 %23, label %then_block6, label %merge_block8
+merge_block3:                                     ; preds = %merge_block
+  %20 = load ptr, ptr %t, align 8
+  %21 = call i1 @tokenizer_accept_keyword(ptr %20, ptr @47)
+  br i1 %21, label %then_block4, label %merge_block6
 
-then_block6:                                      ; preds = %merge_block5
+then_block4:                                      ; preds = %merge_block3
+  %22 = load ptr, ptr %to, align 8
+  %type5 = getelementptr %token, ptr %22, i32 0, i32 0
+  %23 = load i64, ptr @TOKEN_LET, align 4
+  store i64 %23, ptr %type5, align 4
   %24 = load ptr, ptr %to, align 8
-  %type7 = getelementptr %token, ptr %24, i32 0, i32 0
-  %25 = load i64, ptr @TOKEN_EXTERN, align 4
-  store i64 %25, ptr %type7, align 4
-  %26 = load ptr, ptr %to, align 8
-  ret ptr %26
+  ret ptr %24
 
-merge_block8:                                     ; preds = %merge_block5
-  %27 = load ptr, ptr %t, align 8
-  %28 = call i1 @tokenizer_accept_keyword(ptr %27, ptr @49)
-  br i1 %28, label %then_block9, label %merge_block11
+merge_block6:                                     ; preds = %merge_block3
+  %25 = load ptr, ptr %t, align 8
+  %26 = call i1 @tokenizer_accept_keyword(ptr %25, ptr @48)
+  br i1 %26, label %then_block7, label %merge_block9
 
-then_block9:                                      ; preds = %merge_block8
+then_block7:                                      ; preds = %merge_block6
+  %27 = load ptr, ptr %to, align 8
+  %type8 = getelementptr %token, ptr %27, i32 0, i32 0
+  %28 = load i64, ptr @TOKEN_EXTERN, align 4
+  store i64 %28, ptr %type8, align 4
   %29 = load ptr, ptr %to, align 8
-  %type10 = getelementptr %token, ptr %29, i32 0, i32 0
-  %30 = load i64, ptr @TOKEN_IF, align 4
-  store i64 %30, ptr %type10, align 4
-  %31 = load ptr, ptr %to, align 8
-  ret ptr %31
+  ret ptr %29
 
-merge_block11:                                    ; preds = %merge_block8
-  %32 = load ptr, ptr %t, align 8
-  %33 = call i1 @tokenizer_accept_keyword(ptr %32, ptr @50)
-  br i1 %33, label %then_block12, label %merge_block14
+merge_block9:                                     ; preds = %merge_block6
+  %30 = load ptr, ptr %t, align 8
+  %31 = call i1 @tokenizer_accept_keyword(ptr %30, ptr @49)
+  br i1 %31, label %then_block10, label %merge_block12
 
-then_block12:                                     ; preds = %merge_block11
+then_block10:                                     ; preds = %merge_block9
+  %32 = load ptr, ptr %to, align 8
+  %type11 = getelementptr %token, ptr %32, i32 0, i32 0
+  %33 = load i64, ptr @TOKEN_IF, align 4
+  store i64 %33, ptr %type11, align 4
   %34 = load ptr, ptr %to, align 8
-  %type13 = getelementptr %token, ptr %34, i32 0, i32 0
-  %35 = load i64, ptr @TOKEN_WHILE, align 4
-  store i64 %35, ptr %type13, align 4
-  %36 = load ptr, ptr %to, align 8
-  ret ptr %36
+  ret ptr %34
 
-merge_block14:                                    ; preds = %merge_block11
-  %37 = load ptr, ptr %t, align 8
-  %38 = call i1 @tokenizer_accept_keyword(ptr %37, ptr @51)
-  br i1 %38, label %then_block15, label %merge_block17
+merge_block12:                                    ; preds = %merge_block9
+  %35 = load ptr, ptr %t, align 8
+  %36 = call i1 @tokenizer_accept_keyword(ptr %35, ptr @50)
+  br i1 %36, label %then_block13, label %merge_block15
 
-then_block15:                                     ; preds = %merge_block14
+then_block13:                                     ; preds = %merge_block12
+  %37 = load ptr, ptr %to, align 8
+  %type14 = getelementptr %token, ptr %37, i32 0, i32 0
+  %38 = load i64, ptr @TOKEN_WHILE, align 4
+  store i64 %38, ptr %type14, align 4
   %39 = load ptr, ptr %to, align 8
-  %type16 = getelementptr %token, ptr %39, i32 0, i32 0
-  %40 = load i64, ptr @TOKEN_RETURN, align 4
-  store i64 %40, ptr %type16, align 4
-  %41 = load ptr, ptr %to, align 8
-  ret ptr %41
+  ret ptr %39
 
-merge_block17:                                    ; preds = %merge_block14
-  %42 = load ptr, ptr %t, align 8
-  %43 = call i1 @tokenizer_accept_keyword(ptr %42, ptr @52)
-  br i1 %43, label %then_block18, label %merge_block20
+merge_block15:                                    ; preds = %merge_block12
+  %40 = load ptr, ptr %t, align 8
+  %41 = call i1 @tokenizer_accept_keyword(ptr %40, ptr @51)
+  br i1 %41, label %then_block16, label %merge_block18
 
-then_block18:                                     ; preds = %merge_block17
+then_block16:                                     ; preds = %merge_block15
+  %42 = load ptr, ptr %to, align 8
+  %type17 = getelementptr %token, ptr %42, i32 0, i32 0
+  %43 = load i64, ptr @TOKEN_RETURN, align 4
+  store i64 %43, ptr %type17, align 4
   %44 = load ptr, ptr %to, align 8
-  %type19 = getelementptr %token, ptr %44, i32 0, i32 0
-  %45 = load i64, ptr @TOKEN_BREAK, align 4
-  store i64 %45, ptr %type19, align 4
-  %46 = load ptr, ptr %to, align 8
-  ret ptr %46
+  ret ptr %44
 
-merge_block20:                                    ; preds = %merge_block17
-  %47 = load ptr, ptr %t, align 8
-  %48 = call i1 @tokenizer_accept_keyword(ptr %47, ptr @53)
-  br i1 %48, label %then_block21, label %merge_block23
+merge_block18:                                    ; preds = %merge_block15
+  %45 = load ptr, ptr %t, align 8
+  %46 = call i1 @tokenizer_accept_keyword(ptr %45, ptr @52)
+  br i1 %46, label %then_block19, label %merge_block21
 
-then_block21:                                     ; preds = %merge_block20
+then_block19:                                     ; preds = %merge_block18
+  %47 = load ptr, ptr %to, align 8
+  %type20 = getelementptr %token, ptr %47, i32 0, i32 0
+  %48 = load i64, ptr @TOKEN_BREAK, align 4
+  store i64 %48, ptr %type20, align 4
   %49 = load ptr, ptr %to, align 8
-  %type22 = getelementptr %token, ptr %49, i32 0, i32 0
-  %50 = load i64, ptr @TOKEN_CONTINUE, align 4
-  store i64 %50, ptr %type22, align 4
-  %51 = load ptr, ptr %to, align 8
-  ret ptr %51
+  ret ptr %49
 
-merge_block23:                                    ; preds = %merge_block20
-  %52 = load ptr, ptr %t, align 8
-  %53 = call i1 @tokenizer_accept_keyword(ptr %52, ptr @54)
-  br i1 %53, label %then_block24, label %merge_block28
+merge_block21:                                    ; preds = %merge_block18
+  %50 = load ptr, ptr %t, align 8
+  %51 = call i1 @tokenizer_accept_keyword(ptr %50, ptr @53)
+  br i1 %51, label %then_block22, label %merge_block24
 
-then_block24:                                     ; preds = %merge_block23
+then_block22:                                     ; preds = %merge_block21
+  %52 = load ptr, ptr %to, align 8
+  %type23 = getelementptr %token, ptr %52, i32 0, i32 0
+  %53 = load i64, ptr @TOKEN_CONTINUE, align 4
+  store i64 %53, ptr %type23, align 4
   %54 = load ptr, ptr %to, align 8
-  %type25 = getelementptr %token, ptr %54, i32 0, i32 0
-  %55 = load i64, ptr @TOKEN_BOOLEAN, align 4
-  store i64 %55, ptr %type25, align 4
-  %56 = load ptr, ptr %t, align 8
-  %arena26 = getelementptr %tokenizer, ptr %56, i32 0, i32 3
-  %57 = load ptr, ptr %arena26, align 8
-  %58 = call ptr @arena_alloc(ptr %57, i64 1)
+  ret ptr %54
+
+merge_block24:                                    ; preds = %merge_block21
+  %55 = load ptr, ptr %t, align 8
+  %56 = call i1 @tokenizer_accept_keyword(ptr %55, ptr @54)
+  br i1 %56, label %then_block25, label %merge_block29
+
+then_block25:                                     ; preds = %merge_block24
+  %57 = load ptr, ptr %to, align 8
+  %type26 = getelementptr %token, ptr %57, i32 0, i32 0
+  %58 = load i64, ptr @TOKEN_BOOLEAN, align 4
+  store i64 %58, ptr %type26, align 4
+  %59 = load ptr, ptr %t, align 8
+  %arena27 = getelementptr %tokenizer, ptr %59, i32 0, i32 4
+  %60 = load ptr, ptr %arena27, align 8
+  %61 = call ptr @arena_alloc(ptr %60, i64 1)
   %data = alloca ptr, align 8
-  store ptr %58, ptr %data, align 8
-  %59 = load ptr, ptr %data, align 8
-  store i1 true, ptr %59, align 1
-  %60 = load ptr, ptr %to, align 8
-  %data27 = getelementptr %token, ptr %60, i32 0, i32 1
-  %61 = load ptr, ptr %data, align 8
-  store ptr %61, ptr %data27, align 8
-  %62 = load ptr, ptr %to, align 8
-  ret ptr %62
-
-merge_block28:                                    ; preds = %merge_block23
-  %63 = load ptr, ptr %t, align 8
-  %64 = call i1 @tokenizer_accept_keyword(ptr %63, ptr @55)
-  br i1 %64, label %then_block29, label %merge_block34
-
-then_block29:                                     ; preds = %merge_block28
+  store ptr %61, ptr %data, align 8
+  %62 = load ptr, ptr %data, align 8
+  store i1 true, ptr %62, align 1
+  %63 = load ptr, ptr %to, align 8
+  %data28 = getelementptr %token, ptr %63, i32 0, i32 1
+  %64 = load ptr, ptr %data, align 8
+  store ptr %64, ptr %data28, align 8
   %65 = load ptr, ptr %to, align 8
-  %type30 = getelementptr %token, ptr %65, i32 0, i32 0
-  %66 = load i64, ptr @TOKEN_BOOLEAN, align 4
-  store i64 %66, ptr %type30, align 4
-  %67 = load ptr, ptr %t, align 8
-  %arena31 = getelementptr %tokenizer, ptr %67, i32 0, i32 3
-  %68 = load ptr, ptr %arena31, align 8
-  %69 = call ptr @arena_alloc(ptr %68, i64 1)
-  %data32 = alloca ptr, align 8
-  store ptr %69, ptr %data32, align 8
-  %70 = load ptr, ptr %data32, align 8
-  store i1 false, ptr %70, align 1
-  %71 = load ptr, ptr %to, align 8
-  %data33 = getelementptr %token, ptr %71, i32 0, i32 1
-  %72 = load ptr, ptr %data32, align 8
+  ret ptr %65
+
+merge_block29:                                    ; preds = %merge_block24
+  %66 = load ptr, ptr %t, align 8
+  %67 = call i1 @tokenizer_accept_keyword(ptr %66, ptr @55)
+  br i1 %67, label %then_block30, label %merge_block35
+
+then_block30:                                     ; preds = %merge_block29
+  %68 = load ptr, ptr %to, align 8
+  %type31 = getelementptr %token, ptr %68, i32 0, i32 0
+  %69 = load i64, ptr @TOKEN_BOOLEAN, align 4
+  store i64 %69, ptr %type31, align 4
+  %70 = load ptr, ptr %t, align 8
+  %arena32 = getelementptr %tokenizer, ptr %70, i32 0, i32 4
+  %71 = load ptr, ptr %arena32, align 8
+  %72 = call ptr @arena_alloc(ptr %71, i64 1)
+  %data33 = alloca ptr, align 8
   store ptr %72, ptr %data33, align 8
-  %73 = load ptr, ptr %to, align 8
-  ret ptr %73
-
-merge_block34:                                    ; preds = %merge_block28
-  %74 = load ptr, ptr %t, align 8
-  %75 = call i1 @tokenizer_accept_keyword(ptr %74, ptr @56)
-  br i1 %75, label %then_block35, label %merge_block37
-
-then_block35:                                     ; preds = %merge_block34
+  %73 = load ptr, ptr %data33, align 8
+  store i1 false, ptr %73, align 1
+  %74 = load ptr, ptr %to, align 8
+  %data34 = getelementptr %token, ptr %74, i32 0, i32 1
+  %75 = load ptr, ptr %data33, align 8
+  store ptr %75, ptr %data34, align 8
   %76 = load ptr, ptr %to, align 8
-  %type36 = getelementptr %token, ptr %76, i32 0, i32 0
-  %77 = load i64, ptr @TOKEN_NULL, align 4
-  store i64 %77, ptr %type36, align 4
-  %78 = load ptr, ptr %to, align 8
-  ret ptr %78
+  ret ptr %76
 
-merge_block37:                                    ; preds = %merge_block34
-  %79 = load ptr, ptr %t, align 8
-  %80 = call i1 @tokenizer_accept_keyword(ptr %79, ptr @57)
-  br i1 %80, label %then_block38, label %merge_block40
+merge_block35:                                    ; preds = %merge_block29
+  %77 = load ptr, ptr %t, align 8
+  %78 = call i1 @tokenizer_accept_keyword(ptr %77, ptr @56)
+  br i1 %78, label %then_block36, label %merge_block38
 
-then_block38:                                     ; preds = %merge_block37
+then_block36:                                     ; preds = %merge_block35
+  %79 = load ptr, ptr %to, align 8
+  %type37 = getelementptr %token, ptr %79, i32 0, i32 0
+  %80 = load i64, ptr @TOKEN_NULL, align 4
+  store i64 %80, ptr %type37, align 4
   %81 = load ptr, ptr %to, align 8
-  %type39 = getelementptr %token, ptr %81, i32 0, i32 0
-  %82 = load i64, ptr @TOKEN_STRUCT, align 4
-  store i64 %82, ptr %type39, align 4
-  %83 = load ptr, ptr %to, align 8
-  ret ptr %83
+  ret ptr %81
 
-merge_block40:                                    ; preds = %merge_block37
-  %84 = load ptr, ptr %t, align 8
-  %85 = call i1 @tokenizer_accept_keyword(ptr %84, ptr @58)
-  br i1 %85, label %then_block41, label %merge_block43
+merge_block38:                                    ; preds = %merge_block35
+  %82 = load ptr, ptr %t, align 8
+  %83 = call i1 @tokenizer_accept_keyword(ptr %82, ptr @57)
+  br i1 %83, label %then_block39, label %merge_block41
 
-then_block41:                                     ; preds = %merge_block40
+then_block39:                                     ; preds = %merge_block38
+  %84 = load ptr, ptr %to, align 8
+  %type40 = getelementptr %token, ptr %84, i32 0, i32 0
+  %85 = load i64, ptr @TOKEN_STRUCT, align 4
+  store i64 %85, ptr %type40, align 4
   %86 = load ptr, ptr %to, align 8
-  %type42 = getelementptr %token, ptr %86, i32 0, i32 0
-  %87 = load i64, ptr @TOKEN_TYPE, align 4
-  store i64 %87, ptr %type42, align 4
-  %88 = load ptr, ptr %to, align 8
-  ret ptr %88
+  ret ptr %86
 
-merge_block43:                                    ; preds = %merge_block40
-  %89 = load ptr, ptr %t, align 8
-  %90 = call i1 @tokenizer_accept_keyword(ptr %89, ptr @59)
-  br i1 %90, label %then_block44, label %merge_block46
+merge_block41:                                    ; preds = %merge_block38
+  %87 = load ptr, ptr %t, align 8
+  %88 = call i1 @tokenizer_accept_keyword(ptr %87, ptr @58)
+  br i1 %88, label %then_block42, label %merge_block44
 
-then_block44:                                     ; preds = %merge_block43
+then_block42:                                     ; preds = %merge_block41
+  %89 = load ptr, ptr %to, align 8
+  %type43 = getelementptr %token, ptr %89, i32 0, i32 0
+  %90 = load i64, ptr @TOKEN_TYPE, align 4
+  store i64 %90, ptr %type43, align 4
   %91 = load ptr, ptr %to, align 8
-  %type45 = getelementptr %token, ptr %91, i32 0, i32 0
-  %92 = load i64, ptr @TOKEN_AND, align 4
-  store i64 %92, ptr %type45, align 4
-  %93 = load ptr, ptr %to, align 8
-  ret ptr %93
+  ret ptr %91
 
-merge_block46:                                    ; preds = %merge_block43
-  %94 = load ptr, ptr %t, align 8
-  %95 = call i1 @tokenizer_accept_keyword(ptr %94, ptr @60)
-  br i1 %95, label %then_block47, label %merge_block49
+merge_block44:                                    ; preds = %merge_block41
+  %92 = load ptr, ptr %t, align 8
+  %93 = call i1 @tokenizer_accept_keyword(ptr %92, ptr @59)
+  br i1 %93, label %then_block45, label %merge_block47
 
-then_block47:                                     ; preds = %merge_block46
+then_block45:                                     ; preds = %merge_block44
+  %94 = load ptr, ptr %to, align 8
+  %type46 = getelementptr %token, ptr %94, i32 0, i32 0
+  %95 = load i64, ptr @TOKEN_AND, align 4
+  store i64 %95, ptr %type46, align 4
   %96 = load ptr, ptr %to, align 8
-  %type48 = getelementptr %token, ptr %96, i32 0, i32 0
-  %97 = load i64, ptr @TOKEN_OR, align 4
-  store i64 %97, ptr %type48, align 4
-  %98 = load ptr, ptr %to, align 8
-  ret ptr %98
+  ret ptr %96
 
-merge_block49:                                    ; preds = %merge_block46
-  %99 = load ptr, ptr %t, align 8
-  %100 = call i1 @tokenizer_accept_string(ptr %99, ptr @61)
-  br i1 %100, label %then_block50, label %merge_block52
+merge_block47:                                    ; preds = %merge_block44
+  %97 = load ptr, ptr %t, align 8
+  %98 = call i1 @tokenizer_accept_keyword(ptr %97, ptr @60)
+  br i1 %98, label %then_block48, label %merge_block50
 
-then_block50:                                     ; preds = %merge_block49
+then_block48:                                     ; preds = %merge_block47
+  %99 = load ptr, ptr %to, align 8
+  %type49 = getelementptr %token, ptr %99, i32 0, i32 0
+  %100 = load i64, ptr @TOKEN_OR, align 4
+  store i64 %100, ptr %type49, align 4
   %101 = load ptr, ptr %to, align 8
-  %type51 = getelementptr %token, ptr %101, i32 0, i32 0
-  %102 = load i64, ptr @TOKEN_ARROW, align 4
-  store i64 %102, ptr %type51, align 4
-  %103 = load ptr, ptr %to, align 8
-  ret ptr %103
+  ret ptr %101
 
-merge_block52:                                    ; preds = %merge_block49
-  %104 = load ptr, ptr %t, align 8
-  %105 = call i1 @tokenizer_accept_string(ptr %104, ptr @62)
-  br i1 %105, label %then_block53, label %merge_block55
+merge_block50:                                    ; preds = %merge_block47
+  %102 = load ptr, ptr %t, align 8
+  %103 = call i1 @tokenizer_accept_string(ptr %102, ptr @61)
+  br i1 %103, label %then_block51, label %merge_block53
 
-then_block53:                                     ; preds = %merge_block52
+then_block51:                                     ; preds = %merge_block50
+  %104 = load ptr, ptr %to, align 8
+  %type52 = getelementptr %token, ptr %104, i32 0, i32 0
+  %105 = load i64, ptr @TOKEN_ARROW, align 4
+  store i64 %105, ptr %type52, align 4
   %106 = load ptr, ptr %to, align 8
-  %type54 = getelementptr %token, ptr %106, i32 0, i32 0
-  %107 = load i64, ptr @TOKEN_SEMICOLON, align 4
-  store i64 %107, ptr %type54, align 4
-  %108 = load ptr, ptr %to, align 8
-  ret ptr %108
+  ret ptr %106
 
-merge_block55:                                    ; preds = %merge_block52
-  %109 = load ptr, ptr %t, align 8
-  %110 = call i1 @tokenizer_accept_string(ptr %109, ptr @63)
-  br i1 %110, label %then_block56, label %merge_block58
+merge_block53:                                    ; preds = %merge_block50
+  %107 = load ptr, ptr %t, align 8
+  %108 = call i1 @tokenizer_accept_string(ptr %107, ptr @62)
+  br i1 %108, label %then_block54, label %merge_block56
 
-then_block56:                                     ; preds = %merge_block55
+then_block54:                                     ; preds = %merge_block53
+  %109 = load ptr, ptr %to, align 8
+  %type55 = getelementptr %token, ptr %109, i32 0, i32 0
+  %110 = load i64, ptr @TOKEN_SEMICOLON, align 4
+  store i64 %110, ptr %type55, align 4
   %111 = load ptr, ptr %to, align 8
-  %type57 = getelementptr %token, ptr %111, i32 0, i32 0
-  %112 = load i64, ptr @TOKEN_COMMA, align 4
-  store i64 %112, ptr %type57, align 4
-  %113 = load ptr, ptr %to, align 8
-  ret ptr %113
+  ret ptr %111
 
-merge_block58:                                    ; preds = %merge_block55
-  %114 = load ptr, ptr %t, align 8
-  %115 = call i1 @tokenizer_accept_string(ptr %114, ptr @64)
-  br i1 %115, label %then_block59, label %merge_block61
+merge_block56:                                    ; preds = %merge_block53
+  %112 = load ptr, ptr %t, align 8
+  %113 = call i1 @tokenizer_accept_string(ptr %112, ptr @63)
+  br i1 %113, label %then_block57, label %merge_block59
 
-then_block59:                                     ; preds = %merge_block58
+then_block57:                                     ; preds = %merge_block56
+  %114 = load ptr, ptr %to, align 8
+  %type58 = getelementptr %token, ptr %114, i32 0, i32 0
+  %115 = load i64, ptr @TOKEN_COMMA, align 4
+  store i64 %115, ptr %type58, align 4
   %116 = load ptr, ptr %to, align 8
-  %type60 = getelementptr %token, ptr %116, i32 0, i32 0
-  %117 = load i64, ptr @TOKEN_COLON, align 4
-  store i64 %117, ptr %type60, align 4
-  %118 = load ptr, ptr %to, align 8
-  ret ptr %118
+  ret ptr %116
 
-merge_block61:                                    ; preds = %merge_block58
-  %119 = load ptr, ptr %t, align 8
-  %120 = call i1 @tokenizer_accept_string(ptr %119, ptr @65)
-  br i1 %120, label %then_block62, label %merge_block64
+merge_block59:                                    ; preds = %merge_block56
+  %117 = load ptr, ptr %t, align 8
+  %118 = call i1 @tokenizer_accept_string(ptr %117, ptr @64)
+  br i1 %118, label %then_block60, label %merge_block62
 
-then_block62:                                     ; preds = %merge_block61
+then_block60:                                     ; preds = %merge_block59
+  %119 = load ptr, ptr %to, align 8
+  %type61 = getelementptr %token, ptr %119, i32 0, i32 0
+  %120 = load i64, ptr @TOKEN_COLON, align 4
+  store i64 %120, ptr %type61, align 4
   %121 = load ptr, ptr %to, align 8
-  %type63 = getelementptr %token, ptr %121, i32 0, i32 0
-  %122 = load i64, ptr @TOKEN_LPAREN, align 4
-  store i64 %122, ptr %type63, align 4
-  %123 = load ptr, ptr %to, align 8
-  ret ptr %123
+  ret ptr %121
 
-merge_block64:                                    ; preds = %merge_block61
-  %124 = load ptr, ptr %t, align 8
-  %125 = call i1 @tokenizer_accept_string(ptr %124, ptr @66)
-  br i1 %125, label %then_block65, label %merge_block67
+merge_block62:                                    ; preds = %merge_block59
+  %122 = load ptr, ptr %t, align 8
+  %123 = call i1 @tokenizer_accept_string(ptr %122, ptr @65)
+  br i1 %123, label %then_block63, label %merge_block65
 
-then_block65:                                     ; preds = %merge_block64
+then_block63:                                     ; preds = %merge_block62
+  %124 = load ptr, ptr %to, align 8
+  %type64 = getelementptr %token, ptr %124, i32 0, i32 0
+  %125 = load i64, ptr @TOKEN_LPAREN, align 4
+  store i64 %125, ptr %type64, align 4
   %126 = load ptr, ptr %to, align 8
-  %type66 = getelementptr %token, ptr %126, i32 0, i32 0
-  %127 = load i64, ptr @TOKEN_RPAREN, align 4
-  store i64 %127, ptr %type66, align 4
-  %128 = load ptr, ptr %to, align 8
-  ret ptr %128
+  ret ptr %126
 
-merge_block67:                                    ; preds = %merge_block64
-  %129 = load ptr, ptr %t, align 8
-  %130 = call i1 @tokenizer_accept_string(ptr %129, ptr @67)
-  br i1 %130, label %then_block68, label %merge_block70
+merge_block65:                                    ; preds = %merge_block62
+  %127 = load ptr, ptr %t, align 8
+  %128 = call i1 @tokenizer_accept_string(ptr %127, ptr @66)
+  br i1 %128, label %then_block66, label %merge_block68
 
-then_block68:                                     ; preds = %merge_block67
+then_block66:                                     ; preds = %merge_block65
+  %129 = load ptr, ptr %to, align 8
+  %type67 = getelementptr %token, ptr %129, i32 0, i32 0
+  %130 = load i64, ptr @TOKEN_RPAREN, align 4
+  store i64 %130, ptr %type67, align 4
   %131 = load ptr, ptr %to, align 8
-  %type69 = getelementptr %token, ptr %131, i32 0, i32 0
-  %132 = load i64, ptr @TOKEN_LBRACE, align 4
-  store i64 %132, ptr %type69, align 4
-  %133 = load ptr, ptr %to, align 8
-  ret ptr %133
+  ret ptr %131
 
-merge_block70:                                    ; preds = %merge_block67
-  %134 = load ptr, ptr %t, align 8
-  %135 = call i1 @tokenizer_accept_string(ptr %134, ptr @68)
-  br i1 %135, label %then_block71, label %merge_block73
+merge_block68:                                    ; preds = %merge_block65
+  %132 = load ptr, ptr %t, align 8
+  %133 = call i1 @tokenizer_accept_string(ptr %132, ptr @67)
+  br i1 %133, label %then_block69, label %merge_block71
 
-then_block71:                                     ; preds = %merge_block70
+then_block69:                                     ; preds = %merge_block68
+  %134 = load ptr, ptr %to, align 8
+  %type70 = getelementptr %token, ptr %134, i32 0, i32 0
+  %135 = load i64, ptr @TOKEN_LBRACE, align 4
+  store i64 %135, ptr %type70, align 4
   %136 = load ptr, ptr %to, align 8
-  %type72 = getelementptr %token, ptr %136, i32 0, i32 0
-  %137 = load i64, ptr @TOKEN_RBRACE, align 4
-  store i64 %137, ptr %type72, align 4
-  %138 = load ptr, ptr %to, align 8
-  ret ptr %138
+  ret ptr %136
 
-merge_block73:                                    ; preds = %merge_block70
-  %139 = load ptr, ptr %t, align 8
-  %140 = call i1 @tokenizer_accept_string(ptr %139, ptr @69)
-  br i1 %140, label %then_block74, label %merge_block76
+merge_block71:                                    ; preds = %merge_block68
+  %137 = load ptr, ptr %t, align 8
+  %138 = call i1 @tokenizer_accept_string(ptr %137, ptr @68)
+  br i1 %138, label %then_block72, label %merge_block74
 
-then_block74:                                     ; preds = %merge_block73
+then_block72:                                     ; preds = %merge_block71
+  %139 = load ptr, ptr %to, align 8
+  %type73 = getelementptr %token, ptr %139, i32 0, i32 0
+  %140 = load i64, ptr @TOKEN_RBRACE, align 4
+  store i64 %140, ptr %type73, align 4
   %141 = load ptr, ptr %to, align 8
-  %type75 = getelementptr %token, ptr %141, i32 0, i32 0
-  %142 = load i64, ptr @TOKEN_EQUALS, align 4
-  store i64 %142, ptr %type75, align 4
-  %143 = load ptr, ptr %to, align 8
-  ret ptr %143
+  ret ptr %141
 
-merge_block76:                                    ; preds = %merge_block73
-  %144 = load ptr, ptr %t, align 8
-  %145 = call i1 @tokenizer_accept_string(ptr %144, ptr @70)
-  br i1 %145, label %then_block77, label %merge_block79
+merge_block74:                                    ; preds = %merge_block71
+  %142 = load ptr, ptr %t, align 8
+  %143 = call i1 @tokenizer_accept_string(ptr %142, ptr @69)
+  br i1 %143, label %then_block75, label %merge_block77
 
-then_block77:                                     ; preds = %merge_block76
+then_block75:                                     ; preds = %merge_block74
+  %144 = load ptr, ptr %to, align 8
+  %type76 = getelementptr %token, ptr %144, i32 0, i32 0
+  %145 = load i64, ptr @TOKEN_EQUALS, align 4
+  store i64 %145, ptr %type76, align 4
   %146 = load ptr, ptr %to, align 8
-  %type78 = getelementptr %token, ptr %146, i32 0, i32 0
-  %147 = load i64, ptr @TOKEN_PLUS, align 4
-  store i64 %147, ptr %type78, align 4
-  %148 = load ptr, ptr %to, align 8
-  ret ptr %148
+  ret ptr %146
 
-merge_block79:                                    ; preds = %merge_block76
-  %149 = load ptr, ptr %t, align 8
-  %150 = call i1 @tokenizer_accept_string(ptr %149, ptr @71)
-  br i1 %150, label %then_block80, label %merge_block82
+merge_block77:                                    ; preds = %merge_block74
+  %147 = load ptr, ptr %t, align 8
+  %148 = call i1 @tokenizer_accept_string(ptr %147, ptr @70)
+  br i1 %148, label %then_block78, label %merge_block80
 
-then_block80:                                     ; preds = %merge_block79
+then_block78:                                     ; preds = %merge_block77
+  %149 = load ptr, ptr %to, align 8
+  %type79 = getelementptr %token, ptr %149, i32 0, i32 0
+  %150 = load i64, ptr @TOKEN_PLUS, align 4
+  store i64 %150, ptr %type79, align 4
   %151 = load ptr, ptr %to, align 8
-  %type81 = getelementptr %token, ptr %151, i32 0, i32 0
-  %152 = load i64, ptr @TOKEN_MINUS, align 4
-  store i64 %152, ptr %type81, align 4
-  %153 = load ptr, ptr %to, align 8
-  ret ptr %153
+  ret ptr %151
 
-merge_block82:                                    ; preds = %merge_block79
-  %154 = load ptr, ptr %t, align 8
-  %155 = call i1 @tokenizer_accept_string(ptr %154, ptr @72)
-  br i1 %155, label %then_block83, label %merge_block85
+merge_block80:                                    ; preds = %merge_block77
+  %152 = load ptr, ptr %t, align 8
+  %153 = call i1 @tokenizer_accept_string(ptr %152, ptr @71)
+  br i1 %153, label %then_block81, label %merge_block83
 
-then_block83:                                     ; preds = %merge_block82
+then_block81:                                     ; preds = %merge_block80
+  %154 = load ptr, ptr %to, align 8
+  %type82 = getelementptr %token, ptr %154, i32 0, i32 0
+  %155 = load i64, ptr @TOKEN_MINUS, align 4
+  store i64 %155, ptr %type82, align 4
   %156 = load ptr, ptr %to, align 8
-  %type84 = getelementptr %token, ptr %156, i32 0, i32 0
-  %157 = load i64, ptr @TOKEN_MUL, align 4
-  store i64 %157, ptr %type84, align 4
-  %158 = load ptr, ptr %to, align 8
-  ret ptr %158
+  ret ptr %156
 
-merge_block85:                                    ; preds = %merge_block82
-  %159 = load ptr, ptr %t, align 8
-  %160 = call i1 @tokenizer_accept_string(ptr %159, ptr @73)
-  br i1 %160, label %then_block86, label %merge_block88
+merge_block83:                                    ; preds = %merge_block80
+  %157 = load ptr, ptr %t, align 8
+  %158 = call i1 @tokenizer_accept_string(ptr %157, ptr @72)
+  br i1 %158, label %then_block84, label %merge_block86
 
-then_block86:                                     ; preds = %merge_block85
+then_block84:                                     ; preds = %merge_block83
+  %159 = load ptr, ptr %to, align 8
+  %type85 = getelementptr %token, ptr %159, i32 0, i32 0
+  %160 = load i64, ptr @TOKEN_MUL, align 4
+  store i64 %160, ptr %type85, align 4
   %161 = load ptr, ptr %to, align 8
-  %type87 = getelementptr %token, ptr %161, i32 0, i32 0
-  %162 = load i64, ptr @TOKEN_DIV, align 4
-  store i64 %162, ptr %type87, align 4
-  %163 = load ptr, ptr %to, align 8
-  ret ptr %163
+  ret ptr %161
 
-merge_block88:                                    ; preds = %merge_block85
-  %164 = load ptr, ptr %t, align 8
-  %165 = call i1 @tokenizer_accept_string(ptr %164, ptr @74)
-  br i1 %165, label %then_block89, label %merge_block91
+merge_block86:                                    ; preds = %merge_block83
+  %162 = load ptr, ptr %t, align 8
+  %163 = call i1 @tokenizer_accept_string(ptr %162, ptr @73)
+  br i1 %163, label %then_block87, label %merge_block89
 
-then_block89:                                     ; preds = %merge_block88
+then_block87:                                     ; preds = %merge_block86
+  %164 = load ptr, ptr %to, align 8
+  %type88 = getelementptr %token, ptr %164, i32 0, i32 0
+  %165 = load i64, ptr @TOKEN_DIV, align 4
+  store i64 %165, ptr %type88, align 4
   %166 = load ptr, ptr %to, align 8
-  %type90 = getelementptr %token, ptr %166, i32 0, i32 0
-  %167 = load i64, ptr @TOKEN_MOD, align 4
-  store i64 %167, ptr %type90, align 4
-  %168 = load ptr, ptr %to, align 8
-  ret ptr %168
+  ret ptr %166
 
-merge_block91:                                    ; preds = %merge_block88
-  %169 = load ptr, ptr %t, align 8
-  %170 = call i1 @tokenizer_accept_string(ptr %169, ptr @75)
-  br i1 %170, label %then_block92, label %merge_block94
+merge_block89:                                    ; preds = %merge_block86
+  %167 = load ptr, ptr %t, align 8
+  %168 = call i1 @tokenizer_accept_string(ptr %167, ptr @74)
+  br i1 %168, label %then_block90, label %merge_block92
 
-then_block92:                                     ; preds = %merge_block91
+then_block90:                                     ; preds = %merge_block89
+  %169 = load ptr, ptr %to, align 8
+  %type91 = getelementptr %token, ptr %169, i32 0, i32 0
+  %170 = load i64, ptr @TOKEN_MOD, align 4
+  store i64 %170, ptr %type91, align 4
   %171 = load ptr, ptr %to, align 8
-  %type93 = getelementptr %token, ptr %171, i32 0, i32 0
-  %172 = load i64, ptr @TOKEN_BANG, align 4
-  store i64 %172, ptr %type93, align 4
-  %173 = load ptr, ptr %to, align 8
-  ret ptr %173
+  ret ptr %171
 
-merge_block94:                                    ; preds = %merge_block91
-  %174 = load ptr, ptr %t, align 8
-  %175 = call i1 @tokenizer_accept_string(ptr %174, ptr @76)
-  br i1 %175, label %then_block95, label %merge_block97
+merge_block92:                                    ; preds = %merge_block89
+  %172 = load ptr, ptr %t, align 8
+  %173 = call i1 @tokenizer_accept_string(ptr %172, ptr @75)
+  br i1 %173, label %then_block93, label %merge_block95
 
-then_block95:                                     ; preds = %merge_block94
+then_block93:                                     ; preds = %merge_block92
+  %174 = load ptr, ptr %to, align 8
+  %type94 = getelementptr %token, ptr %174, i32 0, i32 0
+  %175 = load i64, ptr @TOKEN_BANG, align 4
+  store i64 %175, ptr %type94, align 4
   %176 = load ptr, ptr %to, align 8
-  %type96 = getelementptr %token, ptr %176, i32 0, i32 0
-  %177 = load i64, ptr @TOKEN_LESS, align 4
-  store i64 %177, ptr %type96, align 4
-  %178 = load ptr, ptr %to, align 8
-  ret ptr %178
+  ret ptr %176
 
-merge_block97:                                    ; preds = %merge_block94
-  %179 = load ptr, ptr %t, align 8
-  %180 = call i1 @tokenizer_accept_string(ptr %179, ptr @77)
-  br i1 %180, label %then_block98, label %merge_block100
+merge_block95:                                    ; preds = %merge_block92
+  %177 = load ptr, ptr %t, align 8
+  %178 = call i1 @tokenizer_accept_string(ptr %177, ptr @76)
+  br i1 %178, label %then_block96, label %merge_block98
 
-then_block98:                                     ; preds = %merge_block97
+then_block96:                                     ; preds = %merge_block95
+  %179 = load ptr, ptr %to, align 8
+  %type97 = getelementptr %token, ptr %179, i32 0, i32 0
+  %180 = load i64, ptr @TOKEN_LESS, align 4
+  store i64 %180, ptr %type97, align 4
   %181 = load ptr, ptr %to, align 8
-  %type99 = getelementptr %token, ptr %181, i32 0, i32 0
-  %182 = load i64, ptr @TOKEN_GREATER, align 4
-  store i64 %182, ptr %type99, align 4
-  %183 = load ptr, ptr %to, align 8
-  ret ptr %183
+  ret ptr %181
 
-merge_block100:                                   ; preds = %merge_block97
-  %184 = load ptr, ptr %t, align 8
-  %185 = call i1 @tokenizer_accept_string(ptr %184, ptr @78)
-  br i1 %185, label %then_block101, label %merge_block103
+merge_block98:                                    ; preds = %merge_block95
+  %182 = load ptr, ptr %t, align 8
+  %183 = call i1 @tokenizer_accept_string(ptr %182, ptr @77)
+  br i1 %183, label %then_block99, label %merge_block101
 
-then_block101:                                    ; preds = %merge_block100
+then_block99:                                     ; preds = %merge_block98
+  %184 = load ptr, ptr %to, align 8
+  %type100 = getelementptr %token, ptr %184, i32 0, i32 0
+  %185 = load i64, ptr @TOKEN_GREATER, align 4
+  store i64 %185, ptr %type100, align 4
   %186 = load ptr, ptr %to, align 8
-  %type102 = getelementptr %token, ptr %186, i32 0, i32 0
-  %187 = load i64, ptr @TOKEN_DOT, align 4
-  store i64 %187, ptr %type102, align 4
-  %188 = load ptr, ptr %to, align 8
-  ret ptr %188
+  ret ptr %186
 
-merge_block103:                                   ; preds = %merge_block100
-  %189 = load ptr, ptr %t, align 8
-  %190 = call ptr @tokenizer_accept_int_type(ptr %189)
+merge_block101:                                   ; preds = %merge_block98
+  %187 = load ptr, ptr %t, align 8
+  %188 = call i1 @tokenizer_accept_string(ptr %187, ptr @78)
+  br i1 %188, label %then_block102, label %merge_block104
+
+then_block102:                                    ; preds = %merge_block101
+  %189 = load ptr, ptr %to, align 8
+  %type103 = getelementptr %token, ptr %189, i32 0, i32 0
+  %190 = load i64, ptr @TOKEN_DOT, align 4
+  store i64 %190, ptr %type103, align 4
+  %191 = load ptr, ptr %to, align 8
+  ret ptr %191
+
+merge_block104:                                   ; preds = %merge_block101
+  %192 = load ptr, ptr %t, align 8
+  %193 = call ptr @tokenizer_accept_int_type(ptr %192)
   %maybe_int = alloca ptr, align 8
-  store ptr %190, ptr %maybe_int, align 8
-  %191 = load ptr, ptr %maybe_int, align 8
-  %192 = icmp ne ptr %191, null
-  br i1 %192, label %then_block104, label %merge_block107
+  store ptr %193, ptr %maybe_int, align 8
+  %194 = load ptr, ptr %maybe_int, align 8
+  %195 = icmp ne ptr %194, null
+  br i1 %195, label %then_block105, label %merge_block108
 
-then_block104:                                    ; preds = %merge_block103
-  %193 = load ptr, ptr %to, align 8
-  %type105 = getelementptr %token, ptr %193, i32 0, i32 0
-  %194 = load i64, ptr @TOKEN_NUMBER, align 4
-  store i64 %194, ptr %type105, align 4
-  %195 = load ptr, ptr %to, align 8
-  %data106 = getelementptr %token, ptr %195, i32 0, i32 1
-  %196 = load ptr, ptr %maybe_int, align 8
-  store ptr %196, ptr %data106, align 8
-  %197 = load ptr, ptr %to, align 8
-  ret ptr %197
+then_block105:                                    ; preds = %merge_block104
+  %196 = load ptr, ptr %to, align 8
+  %type106 = getelementptr %token, ptr %196, i32 0, i32 0
+  %197 = load i64, ptr @TOKEN_NUMBER, align 4
+  store i64 %197, ptr %type106, align 4
+  %198 = load ptr, ptr %to, align 8
+  %data107 = getelementptr %token, ptr %198, i32 0, i32 1
+  %199 = load ptr, ptr %maybe_int, align 8
+  store ptr %199, ptr %data107, align 8
+  %200 = load ptr, ptr %to, align 8
+  ret ptr %200
 
-merge_block107:                                   ; preds = %merge_block103
-  %198 = load ptr, ptr %t, align 8
-  %199 = call ptr @tokenizer_accept_char_type(ptr %198)
+merge_block108:                                   ; preds = %merge_block104
+  %201 = load ptr, ptr %t, align 8
+  %202 = call ptr @tokenizer_accept_char_type(ptr %201)
   %maybe_char = alloca ptr, align 8
-  store ptr %199, ptr %maybe_char, align 8
-  %200 = load ptr, ptr %maybe_char, align 8
-  %201 = icmp ne ptr %200, null
-  br i1 %201, label %then_block108, label %merge_block111
+  store ptr %202, ptr %maybe_char, align 8
+  %203 = load ptr, ptr %maybe_char, align 8
+  %204 = icmp ne ptr %203, null
+  br i1 %204, label %then_block109, label %merge_block112
 
-then_block108:                                    ; preds = %merge_block107
-  %202 = load ptr, ptr %to, align 8
-  %type109 = getelementptr %token, ptr %202, i32 0, i32 0
-  %203 = load i64, ptr @TOKEN_CHAR, align 4
-  store i64 %203, ptr %type109, align 4
-  %204 = load ptr, ptr %to, align 8
-  %data110 = getelementptr %token, ptr %204, i32 0, i32 1
-  %205 = load ptr, ptr %maybe_char, align 8
-  store ptr %205, ptr %data110, align 8
-  %206 = load ptr, ptr %to, align 8
-  ret ptr %206
+then_block109:                                    ; preds = %merge_block108
+  %205 = load ptr, ptr %to, align 8
+  %type110 = getelementptr %token, ptr %205, i32 0, i32 0
+  %206 = load i64, ptr @TOKEN_CHAR, align 4
+  store i64 %206, ptr %type110, align 4
+  %207 = load ptr, ptr %to, align 8
+  %data111 = getelementptr %token, ptr %207, i32 0, i32 1
+  %208 = load ptr, ptr %maybe_char, align 8
+  store ptr %208, ptr %data111, align 8
+  %209 = load ptr, ptr %to, align 8
+  ret ptr %209
 
-merge_block111:                                   ; preds = %merge_block107
-  %207 = load ptr, ptr %t, align 8
-  %208 = call ptr @tokenizer_accept_string_type(ptr %207)
+merge_block112:                                   ; preds = %merge_block108
+  %210 = load ptr, ptr %t, align 8
+  %211 = call ptr @tokenizer_accept_string_type(ptr %210)
   %maybe_string = alloca ptr, align 8
-  store ptr %208, ptr %maybe_string, align 8
-  %209 = load ptr, ptr %maybe_string, align 8
-  %210 = icmp ne ptr %209, null
-  br i1 %210, label %then_block112, label %merge_block115
+  store ptr %211, ptr %maybe_string, align 8
+  %212 = load ptr, ptr %maybe_string, align 8
+  %213 = icmp ne ptr %212, null
+  br i1 %213, label %then_block113, label %merge_block116
 
-then_block112:                                    ; preds = %merge_block111
-  %211 = load ptr, ptr %to, align 8
-  %type113 = getelementptr %token, ptr %211, i32 0, i32 0
-  %212 = load i64, ptr @TOKEN_STRING, align 4
-  store i64 %212, ptr %type113, align 4
-  %213 = load ptr, ptr %to, align 8
-  %data114 = getelementptr %token, ptr %213, i32 0, i32 1
-  %214 = load ptr, ptr %maybe_string, align 8
-  store ptr %214, ptr %data114, align 8
-  %215 = load ptr, ptr %to, align 8
-  ret ptr %215
+then_block113:                                    ; preds = %merge_block112
+  %214 = load ptr, ptr %to, align 8
+  %type114 = getelementptr %token, ptr %214, i32 0, i32 0
+  %215 = load i64, ptr @TOKEN_STRING, align 4
+  store i64 %215, ptr %type114, align 4
+  %216 = load ptr, ptr %to, align 8
+  %data115 = getelementptr %token, ptr %216, i32 0, i32 1
+  %217 = load ptr, ptr %maybe_string, align 8
+  store ptr %217, ptr %data115, align 8
+  %218 = load ptr, ptr %to, align 8
+  ret ptr %218
 
-merge_block115:                                   ; preds = %merge_block111
-  %216 = load ptr, ptr %t, align 8
-  %217 = call ptr @tokenizer_consume_until_condition(ptr %216, ptr @unnamed_func.3)
+merge_block116:                                   ; preds = %merge_block112
+  %219 = load ptr, ptr %t, align 8
+  %220 = call ptr @tokenizer_consume_until_condition(ptr %219, ptr @unnamed_func.3)
   %string = alloca ptr, align 8
-  store ptr %217, ptr %string, align 8
-  %218 = load ptr, ptr %string, align 8
-  %219 = call i64 @strlen(ptr %218)
-  %220 = icmp eq i64 %219, 0
-  br i1 %220, label %then_block116, label %merge_block117
+  store ptr %220, ptr %string, align 8
+  %221 = load ptr, ptr %string, align 8
+  %222 = call i64 @strlen(ptr %221)
+  %223 = icmp eq i64 %222, 0
+  br i1 %223, label %then_block117, label %merge_block119
 
-then_block116:                                    ; preds = %merge_block115
-  call void (ptr, ...) @printf(ptr @79)
+then_block117:                                    ; preds = %merge_block116
+  %224 = load ptr, ptr %t, align 8
+  %line118 = getelementptr %tokenizer, ptr %224, i32 0, i32 3
+  %225 = load i64, ptr %line118, align 4
+  call void (ptr, ...) @printf(ptr @79, i64 %225)
   ret ptr null
 
-merge_block117:                                   ; preds = %merge_block115
-  %221 = load ptr, ptr %to, align 8
-  %type118 = getelementptr %token, ptr %221, i32 0, i32 0
-  %222 = load i64, ptr @TOKEN_IDENTIFIER, align 4
-  store i64 %222, ptr %type118, align 4
-  %223 = load ptr, ptr %to, align 8
-  %data119 = getelementptr %token, ptr %223, i32 0, i32 1
-  %224 = load ptr, ptr %string, align 8
-  store ptr %224, ptr %data119, align 8
-  %225 = load ptr, ptr %to, align 8
-  ret ptr %225
+merge_block119:                                   ; preds = %merge_block116
+  %226 = load ptr, ptr %to, align 8
+  %type120 = getelementptr %token, ptr %226, i32 0, i32 0
+  %227 = load i64, ptr @TOKEN_IDENTIFIER, align 4
+  store i64 %227, ptr %type120, align 4
+  %228 = load ptr, ptr %to, align 8
+  %data121 = getelementptr %token, ptr %228, i32 0, i32 1
+  %229 = load ptr, ptr %string, align 8
+  store ptr %229, ptr %data121, align 8
+  %230 = load ptr, ptr %to, align 8
+  ret ptr %230
 
-entrypoint120:                                    ; No predecessors!
-  %t121 = alloca ptr, align 8
-  store ptr %0, ptr %t121, align 8
-  %226 = load ptr, ptr %t121, align 8
-  call void @tokenizer_skip_whitespace(ptr %226)
-  %227 = load ptr, ptr %t121, align 8
-  call void @tokenizer_skip_comments(ptr %227)
-  %228 = load ptr, ptr %t121, align 8
-  call void @tokenizer_skip_whitespace(ptr %228)
-  %229 = load ptr, ptr %t121, align 8
-  %offset122 = getelementptr %tokenizer.3, ptr %229, i32 0, i32 2
-  %230 = load i64, ptr %offset122, align 4
-  %231 = load ptr, ptr %t121, align 8
-  %buf_len123 = getelementptr %tokenizer.3, ptr %231, i32 0, i32 1
-  %232 = load i64, ptr %buf_len123, align 4
-  %233 = icmp sge i64 %230, %232
-  br i1 %233, label %then_block124, label %merge_block125
+entrypoint122:                                    ; No predecessors!
+  %t123 = alloca ptr, align 8
+  store ptr %0, ptr %t123, align 8
+  %231 = load ptr, ptr %t123, align 8
+  call void @tokenizer_skip_whitespace(ptr %231)
+  %232 = load ptr, ptr %t123, align 8
+  call void @tokenizer_skip_comments(ptr %232)
+  %233 = load ptr, ptr %t123, align 8
+  call void @tokenizer_skip_whitespace(ptr %233)
+  %234 = load ptr, ptr %t123, align 8
+  %offset124 = getelementptr %tokenizer.3, ptr %234, i32 0, i32 2
+  %235 = load i64, ptr %offset124, align 4
+  %236 = load ptr, ptr %t123, align 8
+  %buf_len125 = getelementptr %tokenizer.3, ptr %236, i32 0, i32 1
+  %237 = load i64, ptr %buf_len125, align 4
+  %238 = icmp sge i64 %235, %237
+  br i1 %238, label %then_block126, label %merge_block127
 
-then_block124:                                    ; preds = %entrypoint120
+then_block126:                                    ; preds = %entrypoint122
   ret ptr null
 
-merge_block125:                                   ; preds = %entrypoint120
-  %234 = load ptr, ptr %t121, align 8
-  %arena126 = getelementptr %tokenizer.3, ptr %234, i32 0, i32 3
-  %235 = load ptr, ptr %arena126, align 8
-  %236 = call ptr @arena_alloc(ptr %235, i64 16)
-  %to127 = alloca ptr, align 8
-  store ptr %236, ptr %to127, align 8
-  %237 = load ptr, ptr %t121, align 8
-  %238 = call i1 @tokenizer_accept_keyword(ptr %237, ptr @128)
-  br i1 %238, label %then_block128, label %merge_block130
-
-then_block128:                                    ; preds = %merge_block125
-  %239 = load ptr, ptr %to127, align 8
-  %type129 = getelementptr %token.2, ptr %239, i32 0, i32 0
-  %240 = load i64, ptr @TOKEN_IMPORT.4, align 4
-  store i64 %240, ptr %type129, align 4
-  %241 = load ptr, ptr %to127, align 8
-  ret ptr %241
-
-merge_block130:                                   ; preds = %merge_block125
-  %242 = load ptr, ptr %t121, align 8
-  %243 = call i1 @tokenizer_accept_keyword(ptr %242, ptr @129)
-  br i1 %243, label %then_block131, label %merge_block133
-
-then_block131:                                    ; preds = %merge_block130
-  %244 = load ptr, ptr %to127, align 8
-  %type132 = getelementptr %token.2, ptr %244, i32 0, i32 0
-  %245 = load i64, ptr @TOKEN_LET.5, align 4
-  store i64 %245, ptr %type132, align 4
-  %246 = load ptr, ptr %to127, align 8
-  ret ptr %246
-
-merge_block133:                                   ; preds = %merge_block130
-  %247 = load ptr, ptr %t121, align 8
-  %248 = call i1 @tokenizer_accept_keyword(ptr %247, ptr @130)
-  br i1 %248, label %then_block134, label %merge_block136
-
-then_block134:                                    ; preds = %merge_block133
-  %249 = load ptr, ptr %to127, align 8
-  %type135 = getelementptr %token.2, ptr %249, i32 0, i32 0
-  %250 = load i64, ptr @TOKEN_EXTERN.6, align 4
-  store i64 %250, ptr %type135, align 4
-  %251 = load ptr, ptr %to127, align 8
-  ret ptr %251
-
-merge_block136:                                   ; preds = %merge_block133
-  %252 = load ptr, ptr %t121, align 8
-  %253 = call i1 @tokenizer_accept_keyword(ptr %252, ptr @131)
-  br i1 %253, label %then_block137, label %merge_block139
-
-then_block137:                                    ; preds = %merge_block136
-  %254 = load ptr, ptr %to127, align 8
-  %type138 = getelementptr %token.2, ptr %254, i32 0, i32 0
-  %255 = load i64, ptr @TOKEN_IF.7, align 4
-  store i64 %255, ptr %type138, align 4
-  %256 = load ptr, ptr %to127, align 8
-  ret ptr %256
-
-merge_block139:                                   ; preds = %merge_block136
-  %257 = load ptr, ptr %t121, align 8
-  %258 = call i1 @tokenizer_accept_keyword(ptr %257, ptr @132)
-  br i1 %258, label %then_block140, label %merge_block142
-
-then_block140:                                    ; preds = %merge_block139
-  %259 = load ptr, ptr %to127, align 8
-  %type141 = getelementptr %token.2, ptr %259, i32 0, i32 0
-  %260 = load i64, ptr @TOKEN_WHILE.8, align 4
-  store i64 %260, ptr %type141, align 4
-  %261 = load ptr, ptr %to127, align 8
-  ret ptr %261
-
-merge_block142:                                   ; preds = %merge_block139
-  %262 = load ptr, ptr %t121, align 8
-  %263 = call i1 @tokenizer_accept_keyword(ptr %262, ptr @133)
-  br i1 %263, label %then_block143, label %merge_block145
-
-then_block143:                                    ; preds = %merge_block142
-  %264 = load ptr, ptr %to127, align 8
-  %type144 = getelementptr %token.2, ptr %264, i32 0, i32 0
-  %265 = load i64, ptr @TOKEN_RETURN.9, align 4
-  store i64 %265, ptr %type144, align 4
-  %266 = load ptr, ptr %to127, align 8
-  ret ptr %266
-
-merge_block145:                                   ; preds = %merge_block142
-  %267 = load ptr, ptr %t121, align 8
-  %268 = call i1 @tokenizer_accept_keyword(ptr %267, ptr @134)
-  br i1 %268, label %then_block146, label %merge_block148
-
-then_block146:                                    ; preds = %merge_block145
-  %269 = load ptr, ptr %to127, align 8
-  %type147 = getelementptr %token.2, ptr %269, i32 0, i32 0
-  %270 = load i64, ptr @TOKEN_BREAK.10, align 4
-  store i64 %270, ptr %type147, align 4
-  %271 = load ptr, ptr %to127, align 8
-  ret ptr %271
-
-merge_block148:                                   ; preds = %merge_block145
-  %272 = load ptr, ptr %t121, align 8
-  %273 = call i1 @tokenizer_accept_keyword(ptr %272, ptr @135)
-  br i1 %273, label %then_block149, label %merge_block151
-
-then_block149:                                    ; preds = %merge_block148
-  %274 = load ptr, ptr %to127, align 8
-  %type150 = getelementptr %token.2, ptr %274, i32 0, i32 0
-  %275 = load i64, ptr @TOKEN_CONTINUE.11, align 4
-  store i64 %275, ptr %type150, align 4
-  %276 = load ptr, ptr %to127, align 8
-  ret ptr %276
-
-merge_block151:                                   ; preds = %merge_block148
-  %277 = load ptr, ptr %t121, align 8
-  %278 = call i1 @tokenizer_accept_keyword(ptr %277, ptr @136)
-  br i1 %278, label %then_block152, label %merge_block157
-
-then_block152:                                    ; preds = %merge_block151
-  %279 = load ptr, ptr %to127, align 8
-  %type153 = getelementptr %token.2, ptr %279, i32 0, i32 0
-  %280 = load i64, ptr @TOKEN_BOOLEAN.19, align 4
-  store i64 %280, ptr %type153, align 4
-  %281 = load ptr, ptr %t121, align 8
-  %arena154 = getelementptr %tokenizer.3, ptr %281, i32 0, i32 3
-  %282 = load ptr, ptr %arena154, align 8
-  %283 = call ptr @arena_alloc(ptr %282, i64 1)
-  %data155 = alloca ptr, align 8
-  store ptr %283, ptr %data155, align 8
-  %284 = load ptr, ptr %data155, align 8
-  store i1 true, ptr %284, align 1
-  %285 = load ptr, ptr %to127, align 8
-  %data156 = getelementptr %token.2, ptr %285, i32 0, i32 1
-  %286 = load ptr, ptr %data155, align 8
-  store ptr %286, ptr %data156, align 8
-  %287 = load ptr, ptr %to127, align 8
-  ret ptr %287
-
-merge_block157:                                   ; preds = %merge_block151
-  %288 = load ptr, ptr %t121, align 8
-  %289 = call i1 @tokenizer_accept_keyword(ptr %288, ptr @137)
-  br i1 %289, label %then_block158, label %merge_block163
-
-then_block158:                                    ; preds = %merge_block157
-  %290 = load ptr, ptr %to127, align 8
-  %type159 = getelementptr %token.2, ptr %290, i32 0, i32 0
-  %291 = load i64, ptr @TOKEN_BOOLEAN.19, align 4
-  store i64 %291, ptr %type159, align 4
-  %292 = load ptr, ptr %t121, align 8
-  %arena160 = getelementptr %tokenizer.3, ptr %292, i32 0, i32 3
-  %293 = load ptr, ptr %arena160, align 8
-  %294 = call ptr @arena_alloc(ptr %293, i64 1)
-  %data161 = alloca ptr, align 8
-  store ptr %294, ptr %data161, align 8
-  %295 = load ptr, ptr %data161, align 8
-  store i1 false, ptr %295, align 1
-  %296 = load ptr, ptr %to127, align 8
-  %data162 = getelementptr %token.2, ptr %296, i32 0, i32 1
-  %297 = load ptr, ptr %data161, align 8
-  store ptr %297, ptr %data162, align 8
-  %298 = load ptr, ptr %to127, align 8
-  ret ptr %298
-
-merge_block163:                                   ; preds = %merge_block157
-  %299 = load ptr, ptr %t121, align 8
-  %300 = call i1 @tokenizer_accept_keyword(ptr %299, ptr @138)
-  br i1 %300, label %then_block164, label %merge_block166
-
-then_block164:                                    ; preds = %merge_block163
-  %301 = load ptr, ptr %to127, align 8
-  %type165 = getelementptr %token.2, ptr %301, i32 0, i32 0
-  %302 = load i64, ptr @TOKEN_NULL.20, align 4
-  store i64 %302, ptr %type165, align 4
-  %303 = load ptr, ptr %to127, align 8
-  ret ptr %303
-
-merge_block166:                                   ; preds = %merge_block163
-  %304 = load ptr, ptr %t121, align 8
-  %305 = call i1 @tokenizer_accept_keyword(ptr %304, ptr @139)
-  br i1 %305, label %then_block167, label %merge_block169
-
-then_block167:                                    ; preds = %merge_block166
-  %306 = load ptr, ptr %to127, align 8
-  %type168 = getelementptr %token.2, ptr %306, i32 0, i32 0
-  %307 = load i64, ptr @TOKEN_STRUCT.13, align 4
-  store i64 %307, ptr %type168, align 4
-  %308 = load ptr, ptr %to127, align 8
-  ret ptr %308
-
-merge_block169:                                   ; preds = %merge_block166
-  %309 = load ptr, ptr %t121, align 8
-  %310 = call i1 @tokenizer_accept_keyword(ptr %309, ptr @140)
-  br i1 %310, label %then_block170, label %merge_block172
-
-then_block170:                                    ; preds = %merge_block169
-  %311 = load ptr, ptr %to127, align 8
-  %type171 = getelementptr %token.2, ptr %311, i32 0, i32 0
-  %312 = load i64, ptr @TOKEN_TYPE.14, align 4
-  store i64 %312, ptr %type171, align 4
-  %313 = load ptr, ptr %to127, align 8
-  ret ptr %313
-
-merge_block172:                                   ; preds = %merge_block169
-  %314 = load ptr, ptr %t121, align 8
-  %315 = call i1 @tokenizer_accept_keyword(ptr %314, ptr @141)
-  br i1 %315, label %then_block173, label %merge_block175
-
-then_block173:                                    ; preds = %merge_block172
-  %316 = load ptr, ptr %to127, align 8
-  %type174 = getelementptr %token.2, ptr %316, i32 0, i32 0
-  %317 = load i64, ptr @TOKEN_AND.15, align 4
-  store i64 %317, ptr %type174, align 4
-  %318 = load ptr, ptr %to127, align 8
-  ret ptr %318
-
-merge_block175:                                   ; preds = %merge_block172
-  %319 = load ptr, ptr %t121, align 8
-  %320 = call i1 @tokenizer_accept_keyword(ptr %319, ptr @142)
-  br i1 %320, label %then_block176, label %merge_block178
-
-then_block176:                                    ; preds = %merge_block175
-  %321 = load ptr, ptr %to127, align 8
-  %type177 = getelementptr %token.2, ptr %321, i32 0, i32 0
-  %322 = load i64, ptr @TOKEN_OR.16, align 4
-  store i64 %322, ptr %type177, align 4
-  %323 = load ptr, ptr %to127, align 8
-  ret ptr %323
-
-merge_block178:                                   ; preds = %merge_block175
-  %324 = load ptr, ptr %t121, align 8
-  %325 = call i1 @tokenizer_accept_string(ptr %324, ptr @143)
-  br i1 %325, label %then_block179, label %merge_block181
-
-then_block179:                                    ; preds = %merge_block178
-  %326 = load ptr, ptr %to127, align 8
-  %type180 = getelementptr %token.2, ptr %326, i32 0, i32 0
-  %327 = load i64, ptr @TOKEN_ARROW.12, align 4
-  store i64 %327, ptr %type180, align 4
-  %328 = load ptr, ptr %to127, align 8
-  ret ptr %328
-
-merge_block181:                                   ; preds = %merge_block178
-  %329 = load ptr, ptr %t121, align 8
-  %330 = call i1 @tokenizer_accept_string(ptr %329, ptr @144)
-  br i1 %330, label %then_block182, label %merge_block184
-
-then_block182:                                    ; preds = %merge_block181
-  %331 = load ptr, ptr %to127, align 8
-  %type183 = getelementptr %token.2, ptr %331, i32 0, i32 0
-  %332 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
-  store i64 %332, ptr %type183, align 4
-  %333 = load ptr, ptr %to127, align 8
-  ret ptr %333
-
-merge_block184:                                   ; preds = %merge_block181
-  %334 = load ptr, ptr %t121, align 8
-  %335 = call i1 @tokenizer_accept_string(ptr %334, ptr @145)
-  br i1 %335, label %then_block185, label %merge_block187
-
-then_block185:                                    ; preds = %merge_block184
-  %336 = load ptr, ptr %to127, align 8
-  %type186 = getelementptr %token.2, ptr %336, i32 0, i32 0
-  %337 = load i64, ptr @TOKEN_COMMA.34, align 4
-  store i64 %337, ptr %type186, align 4
-  %338 = load ptr, ptr %to127, align 8
-  ret ptr %338
-
-merge_block187:                                   ; preds = %merge_block184
-  %339 = load ptr, ptr %t121, align 8
-  %340 = call i1 @tokenizer_accept_string(ptr %339, ptr @146)
-  br i1 %340, label %then_block188, label %merge_block190
-
-then_block188:                                    ; preds = %merge_block187
-  %341 = load ptr, ptr %to127, align 8
-  %type189 = getelementptr %token.2, ptr %341, i32 0, i32 0
-  %342 = load i64, ptr @TOKEN_COLON.35, align 4
-  store i64 %342, ptr %type189, align 4
-  %343 = load ptr, ptr %to127, align 8
-  ret ptr %343
-
-merge_block190:                                   ; preds = %merge_block187
-  %344 = load ptr, ptr %t121, align 8
-  %345 = call i1 @tokenizer_accept_string(ptr %344, ptr @147)
-  br i1 %345, label %then_block191, label %merge_block193
-
-then_block191:                                    ; preds = %merge_block190
-  %346 = load ptr, ptr %to127, align 8
-  %type192 = getelementptr %token.2, ptr %346, i32 0, i32 0
-  %347 = load i64, ptr @TOKEN_LPAREN.36, align 4
-  store i64 %347, ptr %type192, align 4
-  %348 = load ptr, ptr %to127, align 8
-  ret ptr %348
-
-merge_block193:                                   ; preds = %merge_block190
-  %349 = load ptr, ptr %t121, align 8
-  %350 = call i1 @tokenizer_accept_string(ptr %349, ptr @148)
-  br i1 %350, label %then_block194, label %merge_block196
-
-then_block194:                                    ; preds = %merge_block193
-  %351 = load ptr, ptr %to127, align 8
-  %type195 = getelementptr %token.2, ptr %351, i32 0, i32 0
-  %352 = load i64, ptr @TOKEN_RPAREN.37, align 4
-  store i64 %352, ptr %type195, align 4
-  %353 = load ptr, ptr %to127, align 8
-  ret ptr %353
-
-merge_block196:                                   ; preds = %merge_block193
-  %354 = load ptr, ptr %t121, align 8
-  %355 = call i1 @tokenizer_accept_string(ptr %354, ptr @149)
-  br i1 %355, label %then_block197, label %merge_block199
-
-then_block197:                                    ; preds = %merge_block196
-  %356 = load ptr, ptr %to127, align 8
-  %type198 = getelementptr %token.2, ptr %356, i32 0, i32 0
-  %357 = load i64, ptr @TOKEN_LBRACE.38, align 4
-  store i64 %357, ptr %type198, align 4
-  %358 = load ptr, ptr %to127, align 8
-  ret ptr %358
-
-merge_block199:                                   ; preds = %merge_block196
-  %359 = load ptr, ptr %t121, align 8
-  %360 = call i1 @tokenizer_accept_string(ptr %359, ptr @150)
-  br i1 %360, label %then_block200, label %merge_block202
-
-then_block200:                                    ; preds = %merge_block199
-  %361 = load ptr, ptr %to127, align 8
-  %type201 = getelementptr %token.2, ptr %361, i32 0, i32 0
-  %362 = load i64, ptr @TOKEN_RBRACE.39, align 4
-  store i64 %362, ptr %type201, align 4
-  %363 = load ptr, ptr %to127, align 8
-  ret ptr %363
-
-merge_block202:                                   ; preds = %merge_block199
-  %364 = load ptr, ptr %t121, align 8
-  %365 = call i1 @tokenizer_accept_string(ptr %364, ptr @151)
-  br i1 %365, label %then_block203, label %merge_block205
-
-then_block203:                                    ; preds = %merge_block202
-  %366 = load ptr, ptr %to127, align 8
-  %type204 = getelementptr %token.2, ptr %366, i32 0, i32 0
-  %367 = load i64, ptr @TOKEN_EQUALS.23, align 4
-  store i64 %367, ptr %type204, align 4
-  %368 = load ptr, ptr %to127, align 8
-  ret ptr %368
-
-merge_block205:                                   ; preds = %merge_block202
-  %369 = load ptr, ptr %t121, align 8
-  %370 = call i1 @tokenizer_accept_string(ptr %369, ptr @152)
-  br i1 %370, label %then_block206, label %merge_block208
-
-then_block206:                                    ; preds = %merge_block205
-  %371 = load ptr, ptr %to127, align 8
-  %type207 = getelementptr %token.2, ptr %371, i32 0, i32 0
-  %372 = load i64, ptr @TOKEN_PLUS.24, align 4
-  store i64 %372, ptr %type207, align 4
-  %373 = load ptr, ptr %to127, align 8
-  ret ptr %373
-
-merge_block208:                                   ; preds = %merge_block205
-  %374 = load ptr, ptr %t121, align 8
-  %375 = call i1 @tokenizer_accept_string(ptr %374, ptr @153)
-  br i1 %375, label %then_block209, label %merge_block211
-
-then_block209:                                    ; preds = %merge_block208
-  %376 = load ptr, ptr %to127, align 8
-  %type210 = getelementptr %token.2, ptr %376, i32 0, i32 0
-  %377 = load i64, ptr @TOKEN_MINUS.25, align 4
-  store i64 %377, ptr %type210, align 4
-  %378 = load ptr, ptr %to127, align 8
-  ret ptr %378
-
-merge_block211:                                   ; preds = %merge_block208
-  %379 = load ptr, ptr %t121, align 8
-  %380 = call i1 @tokenizer_accept_string(ptr %379, ptr @154)
-  br i1 %380, label %then_block212, label %merge_block214
-
-then_block212:                                    ; preds = %merge_block211
-  %381 = load ptr, ptr %to127, align 8
-  %type213 = getelementptr %token.2, ptr %381, i32 0, i32 0
-  %382 = load i64, ptr @TOKEN_MUL.26, align 4
-  store i64 %382, ptr %type213, align 4
-  %383 = load ptr, ptr %to127, align 8
-  ret ptr %383
-
-merge_block214:                                   ; preds = %merge_block211
-  %384 = load ptr, ptr %t121, align 8
-  %385 = call i1 @tokenizer_accept_string(ptr %384, ptr @155)
-  br i1 %385, label %then_block215, label %merge_block217
-
-then_block215:                                    ; preds = %merge_block214
-  %386 = load ptr, ptr %to127, align 8
-  %type216 = getelementptr %token.2, ptr %386, i32 0, i32 0
-  %387 = load i64, ptr @TOKEN_DIV.27, align 4
-  store i64 %387, ptr %type216, align 4
-  %388 = load ptr, ptr %to127, align 8
-  ret ptr %388
-
-merge_block217:                                   ; preds = %merge_block214
-  %389 = load ptr, ptr %t121, align 8
-  %390 = call i1 @tokenizer_accept_string(ptr %389, ptr @156)
-  br i1 %390, label %then_block218, label %merge_block220
-
-then_block218:                                    ; preds = %merge_block217
-  %391 = load ptr, ptr %to127, align 8
-  %type219 = getelementptr %token.2, ptr %391, i32 0, i32 0
-  %392 = load i64, ptr @TOKEN_MOD.28, align 4
-  store i64 %392, ptr %type219, align 4
-  %393 = load ptr, ptr %to127, align 8
-  ret ptr %393
-
-merge_block220:                                   ; preds = %merge_block217
-  %394 = load ptr, ptr %t121, align 8
-  %395 = call i1 @tokenizer_accept_string(ptr %394, ptr @157)
-  br i1 %395, label %then_block221, label %merge_block223
-
-then_block221:                                    ; preds = %merge_block220
-  %396 = load ptr, ptr %to127, align 8
-  %type222 = getelementptr %token.2, ptr %396, i32 0, i32 0
-  %397 = load i64, ptr @TOKEN_BANG.29, align 4
-  store i64 %397, ptr %type222, align 4
-  %398 = load ptr, ptr %to127, align 8
-  ret ptr %398
-
-merge_block223:                                   ; preds = %merge_block220
-  %399 = load ptr, ptr %t121, align 8
-  %400 = call i1 @tokenizer_accept_string(ptr %399, ptr @158)
-  br i1 %400, label %then_block224, label %merge_block226
-
-then_block224:                                    ; preds = %merge_block223
-  %401 = load ptr, ptr %to127, align 8
-  %type225 = getelementptr %token.2, ptr %401, i32 0, i32 0
-  %402 = load i64, ptr @TOKEN_LESS.30, align 4
-  store i64 %402, ptr %type225, align 4
-  %403 = load ptr, ptr %to127, align 8
-  ret ptr %403
-
-merge_block226:                                   ; preds = %merge_block223
-  %404 = load ptr, ptr %t121, align 8
-  %405 = call i1 @tokenizer_accept_string(ptr %404, ptr @159)
-  br i1 %405, label %then_block227, label %merge_block229
-
-then_block227:                                    ; preds = %merge_block226
-  %406 = load ptr, ptr %to127, align 8
-  %type228 = getelementptr %token.2, ptr %406, i32 0, i32 0
-  %407 = load i64, ptr @TOKEN_GREATER.31, align 4
-  store i64 %407, ptr %type228, align 4
-  %408 = load ptr, ptr %to127, align 8
-  ret ptr %408
-
-merge_block229:                                   ; preds = %merge_block226
-  %409 = load ptr, ptr %t121, align 8
-  %410 = call i1 @tokenizer_accept_string(ptr %409, ptr @160)
-  br i1 %410, label %then_block230, label %merge_block232
-
-then_block230:                                    ; preds = %merge_block229
-  %411 = load ptr, ptr %to127, align 8
-  %type231 = getelementptr %token.2, ptr %411, i32 0, i32 0
-  %412 = load i64, ptr @TOKEN_DOT.32, align 4
-  store i64 %412, ptr %type231, align 4
-  %413 = load ptr, ptr %to127, align 8
-  ret ptr %413
-
-merge_block232:                                   ; preds = %merge_block229
-  %414 = load ptr, ptr %t121, align 8
-  %415 = call ptr @tokenizer_accept_int_type(ptr %414)
-  %maybe_int233 = alloca ptr, align 8
-  store ptr %415, ptr %maybe_int233, align 8
-  %416 = load ptr, ptr %maybe_int233, align 8
-  %417 = icmp ne ptr %416, null
-  br i1 %417, label %then_block234, label %merge_block237
-
-then_block234:                                    ; preds = %merge_block232
-  %418 = load ptr, ptr %to127, align 8
-  %type235 = getelementptr %token.2, ptr %418, i32 0, i32 0
-  %419 = load i64, ptr @TOKEN_NUMBER.18, align 4
-  store i64 %419, ptr %type235, align 4
-  %420 = load ptr, ptr %to127, align 8
-  %data236 = getelementptr %token.2, ptr %420, i32 0, i32 1
-  %421 = load ptr, ptr %maybe_int233, align 8
-  store ptr %421, ptr %data236, align 8
-  %422 = load ptr, ptr %to127, align 8
-  ret ptr %422
-
-merge_block237:                                   ; preds = %merge_block232
-  %423 = load ptr, ptr %t121, align 8
-  %424 = call ptr @tokenizer_accept_char_type(ptr %423)
-  %maybe_char238 = alloca ptr, align 8
-  store ptr %424, ptr %maybe_char238, align 8
-  %425 = load ptr, ptr %maybe_char238, align 8
-  %426 = icmp ne ptr %425, null
-  br i1 %426, label %then_block239, label %merge_block242
-
-then_block239:                                    ; preds = %merge_block237
-  %427 = load ptr, ptr %to127, align 8
-  %type240 = getelementptr %token.2, ptr %427, i32 0, i32 0
-  %428 = load i64, ptr @TOKEN_CHAR.21, align 4
-  store i64 %428, ptr %type240, align 4
-  %429 = load ptr, ptr %to127, align 8
-  %data241 = getelementptr %token.2, ptr %429, i32 0, i32 1
-  %430 = load ptr, ptr %maybe_char238, align 8
-  store ptr %430, ptr %data241, align 8
-  %431 = load ptr, ptr %to127, align 8
-  ret ptr %431
-
-merge_block242:                                   ; preds = %merge_block237
-  %432 = load ptr, ptr %t121, align 8
-  %433 = call ptr @tokenizer_accept_string_type(ptr %432)
-  %maybe_string243 = alloca ptr, align 8
-  store ptr %433, ptr %maybe_string243, align 8
-  %434 = load ptr, ptr %maybe_string243, align 8
-  %435 = icmp ne ptr %434, null
-  br i1 %435, label %then_block244, label %merge_block247
-
-then_block244:                                    ; preds = %merge_block242
-  %436 = load ptr, ptr %to127, align 8
-  %type245 = getelementptr %token.2, ptr %436, i32 0, i32 0
-  %437 = load i64, ptr @TOKEN_STRING.22, align 4
-  store i64 %437, ptr %type245, align 4
-  %438 = load ptr, ptr %to127, align 8
-  %data246 = getelementptr %token.2, ptr %438, i32 0, i32 1
-  %439 = load ptr, ptr %maybe_string243, align 8
-  store ptr %439, ptr %data246, align 8
-  %440 = load ptr, ptr %to127, align 8
-  ret ptr %440
-
-merge_block247:                                   ; preds = %merge_block242
-  %441 = load ptr, ptr %t121, align 8
-  %442 = call ptr @tokenizer_consume_until_condition(ptr %441, ptr @unnamed_func.43)
-  %string248 = alloca ptr, align 8
-  store ptr %442, ptr %string248, align 8
-  %443 = load ptr, ptr %string248, align 8
-  %444 = call i64 @strlen(ptr %443)
-  %445 = icmp eq i64 %444, 0
-  br i1 %445, label %then_block249, label %merge_block250
-
-then_block249:                                    ; preds = %merge_block247
-  call void (ptr, ...) @printf(ptr @161)
+merge_block127:                                   ; preds = %entrypoint122
+  %239 = load ptr, ptr %t123, align 8
+  %arena128 = getelementptr %tokenizer.3, ptr %239, i32 0, i32 4
+  %240 = load ptr, ptr %arena128, align 8
+  %241 = call ptr @arena_alloc(ptr %240, i64 24)
+  %to129 = alloca ptr, align 8
+  store ptr %241, ptr %to129, align 8
+  %242 = load ptr, ptr %to129, align 8
+  %line130 = getelementptr %token.2, ptr %242, i32 0, i32 2
+  %243 = load ptr, ptr %t123, align 8
+  %line131 = getelementptr %tokenizer.3, ptr %243, i32 0, i32 3
+  %244 = load i64, ptr %line131, align 4
+  store i64 %244, ptr %line130, align 4
+  %245 = load ptr, ptr %t123, align 8
+  %246 = call i1 @tokenizer_accept_keyword(ptr %245, ptr @128)
+  br i1 %246, label %then_block132, label %merge_block134
+
+then_block132:                                    ; preds = %merge_block127
+  %247 = load ptr, ptr %to129, align 8
+  %type133 = getelementptr %token.2, ptr %247, i32 0, i32 0
+  %248 = load i64, ptr @TOKEN_IMPORT.4, align 4
+  store i64 %248, ptr %type133, align 4
+  %249 = load ptr, ptr %to129, align 8
+  ret ptr %249
+
+merge_block134:                                   ; preds = %merge_block127
+  %250 = load ptr, ptr %t123, align 8
+  %251 = call i1 @tokenizer_accept_keyword(ptr %250, ptr @129)
+  br i1 %251, label %then_block135, label %merge_block137
+
+then_block135:                                    ; preds = %merge_block134
+  %252 = load ptr, ptr %to129, align 8
+  %type136 = getelementptr %token.2, ptr %252, i32 0, i32 0
+  %253 = load i64, ptr @TOKEN_LET.5, align 4
+  store i64 %253, ptr %type136, align 4
+  %254 = load ptr, ptr %to129, align 8
+  ret ptr %254
+
+merge_block137:                                   ; preds = %merge_block134
+  %255 = load ptr, ptr %t123, align 8
+  %256 = call i1 @tokenizer_accept_keyword(ptr %255, ptr @130)
+  br i1 %256, label %then_block138, label %merge_block140
+
+then_block138:                                    ; preds = %merge_block137
+  %257 = load ptr, ptr %to129, align 8
+  %type139 = getelementptr %token.2, ptr %257, i32 0, i32 0
+  %258 = load i64, ptr @TOKEN_EXTERN.6, align 4
+  store i64 %258, ptr %type139, align 4
+  %259 = load ptr, ptr %to129, align 8
+  ret ptr %259
+
+merge_block140:                                   ; preds = %merge_block137
+  %260 = load ptr, ptr %t123, align 8
+  %261 = call i1 @tokenizer_accept_keyword(ptr %260, ptr @131)
+  br i1 %261, label %then_block141, label %merge_block143
+
+then_block141:                                    ; preds = %merge_block140
+  %262 = load ptr, ptr %to129, align 8
+  %type142 = getelementptr %token.2, ptr %262, i32 0, i32 0
+  %263 = load i64, ptr @TOKEN_IF.7, align 4
+  store i64 %263, ptr %type142, align 4
+  %264 = load ptr, ptr %to129, align 8
+  ret ptr %264
+
+merge_block143:                                   ; preds = %merge_block140
+  %265 = load ptr, ptr %t123, align 8
+  %266 = call i1 @tokenizer_accept_keyword(ptr %265, ptr @132)
+  br i1 %266, label %then_block144, label %merge_block146
+
+then_block144:                                    ; preds = %merge_block143
+  %267 = load ptr, ptr %to129, align 8
+  %type145 = getelementptr %token.2, ptr %267, i32 0, i32 0
+  %268 = load i64, ptr @TOKEN_WHILE.8, align 4
+  store i64 %268, ptr %type145, align 4
+  %269 = load ptr, ptr %to129, align 8
+  ret ptr %269
+
+merge_block146:                                   ; preds = %merge_block143
+  %270 = load ptr, ptr %t123, align 8
+  %271 = call i1 @tokenizer_accept_keyword(ptr %270, ptr @133)
+  br i1 %271, label %then_block147, label %merge_block149
+
+then_block147:                                    ; preds = %merge_block146
+  %272 = load ptr, ptr %to129, align 8
+  %type148 = getelementptr %token.2, ptr %272, i32 0, i32 0
+  %273 = load i64, ptr @TOKEN_RETURN.9, align 4
+  store i64 %273, ptr %type148, align 4
+  %274 = load ptr, ptr %to129, align 8
+  ret ptr %274
+
+merge_block149:                                   ; preds = %merge_block146
+  %275 = load ptr, ptr %t123, align 8
+  %276 = call i1 @tokenizer_accept_keyword(ptr %275, ptr @134)
+  br i1 %276, label %then_block150, label %merge_block152
+
+then_block150:                                    ; preds = %merge_block149
+  %277 = load ptr, ptr %to129, align 8
+  %type151 = getelementptr %token.2, ptr %277, i32 0, i32 0
+  %278 = load i64, ptr @TOKEN_BREAK.10, align 4
+  store i64 %278, ptr %type151, align 4
+  %279 = load ptr, ptr %to129, align 8
+  ret ptr %279
+
+merge_block152:                                   ; preds = %merge_block149
+  %280 = load ptr, ptr %t123, align 8
+  %281 = call i1 @tokenizer_accept_keyword(ptr %280, ptr @135)
+  br i1 %281, label %then_block153, label %merge_block155
+
+then_block153:                                    ; preds = %merge_block152
+  %282 = load ptr, ptr %to129, align 8
+  %type154 = getelementptr %token.2, ptr %282, i32 0, i32 0
+  %283 = load i64, ptr @TOKEN_CONTINUE.11, align 4
+  store i64 %283, ptr %type154, align 4
+  %284 = load ptr, ptr %to129, align 8
+  ret ptr %284
+
+merge_block155:                                   ; preds = %merge_block152
+  %285 = load ptr, ptr %t123, align 8
+  %286 = call i1 @tokenizer_accept_keyword(ptr %285, ptr @136)
+  br i1 %286, label %then_block156, label %merge_block161
+
+then_block156:                                    ; preds = %merge_block155
+  %287 = load ptr, ptr %to129, align 8
+  %type157 = getelementptr %token.2, ptr %287, i32 0, i32 0
+  %288 = load i64, ptr @TOKEN_BOOLEAN.19, align 4
+  store i64 %288, ptr %type157, align 4
+  %289 = load ptr, ptr %t123, align 8
+  %arena158 = getelementptr %tokenizer.3, ptr %289, i32 0, i32 4
+  %290 = load ptr, ptr %arena158, align 8
+  %291 = call ptr @arena_alloc(ptr %290, i64 1)
+  %data159 = alloca ptr, align 8
+  store ptr %291, ptr %data159, align 8
+  %292 = load ptr, ptr %data159, align 8
+  store i1 true, ptr %292, align 1
+  %293 = load ptr, ptr %to129, align 8
+  %data160 = getelementptr %token.2, ptr %293, i32 0, i32 1
+  %294 = load ptr, ptr %data159, align 8
+  store ptr %294, ptr %data160, align 8
+  %295 = load ptr, ptr %to129, align 8
+  ret ptr %295
+
+merge_block161:                                   ; preds = %merge_block155
+  %296 = load ptr, ptr %t123, align 8
+  %297 = call i1 @tokenizer_accept_keyword(ptr %296, ptr @137)
+  br i1 %297, label %then_block162, label %merge_block167
+
+then_block162:                                    ; preds = %merge_block161
+  %298 = load ptr, ptr %to129, align 8
+  %type163 = getelementptr %token.2, ptr %298, i32 0, i32 0
+  %299 = load i64, ptr @TOKEN_BOOLEAN.19, align 4
+  store i64 %299, ptr %type163, align 4
+  %300 = load ptr, ptr %t123, align 8
+  %arena164 = getelementptr %tokenizer.3, ptr %300, i32 0, i32 4
+  %301 = load ptr, ptr %arena164, align 8
+  %302 = call ptr @arena_alloc(ptr %301, i64 1)
+  %data165 = alloca ptr, align 8
+  store ptr %302, ptr %data165, align 8
+  %303 = load ptr, ptr %data165, align 8
+  store i1 false, ptr %303, align 1
+  %304 = load ptr, ptr %to129, align 8
+  %data166 = getelementptr %token.2, ptr %304, i32 0, i32 1
+  %305 = load ptr, ptr %data165, align 8
+  store ptr %305, ptr %data166, align 8
+  %306 = load ptr, ptr %to129, align 8
+  ret ptr %306
+
+merge_block167:                                   ; preds = %merge_block161
+  %307 = load ptr, ptr %t123, align 8
+  %308 = call i1 @tokenizer_accept_keyword(ptr %307, ptr @138)
+  br i1 %308, label %then_block168, label %merge_block170
+
+then_block168:                                    ; preds = %merge_block167
+  %309 = load ptr, ptr %to129, align 8
+  %type169 = getelementptr %token.2, ptr %309, i32 0, i32 0
+  %310 = load i64, ptr @TOKEN_NULL.20, align 4
+  store i64 %310, ptr %type169, align 4
+  %311 = load ptr, ptr %to129, align 8
+  ret ptr %311
+
+merge_block170:                                   ; preds = %merge_block167
+  %312 = load ptr, ptr %t123, align 8
+  %313 = call i1 @tokenizer_accept_keyword(ptr %312, ptr @139)
+  br i1 %313, label %then_block171, label %merge_block173
+
+then_block171:                                    ; preds = %merge_block170
+  %314 = load ptr, ptr %to129, align 8
+  %type172 = getelementptr %token.2, ptr %314, i32 0, i32 0
+  %315 = load i64, ptr @TOKEN_STRUCT.13, align 4
+  store i64 %315, ptr %type172, align 4
+  %316 = load ptr, ptr %to129, align 8
+  ret ptr %316
+
+merge_block173:                                   ; preds = %merge_block170
+  %317 = load ptr, ptr %t123, align 8
+  %318 = call i1 @tokenizer_accept_keyword(ptr %317, ptr @140)
+  br i1 %318, label %then_block174, label %merge_block176
+
+then_block174:                                    ; preds = %merge_block173
+  %319 = load ptr, ptr %to129, align 8
+  %type175 = getelementptr %token.2, ptr %319, i32 0, i32 0
+  %320 = load i64, ptr @TOKEN_TYPE.14, align 4
+  store i64 %320, ptr %type175, align 4
+  %321 = load ptr, ptr %to129, align 8
+  ret ptr %321
+
+merge_block176:                                   ; preds = %merge_block173
+  %322 = load ptr, ptr %t123, align 8
+  %323 = call i1 @tokenizer_accept_keyword(ptr %322, ptr @141)
+  br i1 %323, label %then_block177, label %merge_block179
+
+then_block177:                                    ; preds = %merge_block176
+  %324 = load ptr, ptr %to129, align 8
+  %type178 = getelementptr %token.2, ptr %324, i32 0, i32 0
+  %325 = load i64, ptr @TOKEN_AND.15, align 4
+  store i64 %325, ptr %type178, align 4
+  %326 = load ptr, ptr %to129, align 8
+  ret ptr %326
+
+merge_block179:                                   ; preds = %merge_block176
+  %327 = load ptr, ptr %t123, align 8
+  %328 = call i1 @tokenizer_accept_keyword(ptr %327, ptr @142)
+  br i1 %328, label %then_block180, label %merge_block182
+
+then_block180:                                    ; preds = %merge_block179
+  %329 = load ptr, ptr %to129, align 8
+  %type181 = getelementptr %token.2, ptr %329, i32 0, i32 0
+  %330 = load i64, ptr @TOKEN_OR.16, align 4
+  store i64 %330, ptr %type181, align 4
+  %331 = load ptr, ptr %to129, align 8
+  ret ptr %331
+
+merge_block182:                                   ; preds = %merge_block179
+  %332 = load ptr, ptr %t123, align 8
+  %333 = call i1 @tokenizer_accept_string(ptr %332, ptr @143)
+  br i1 %333, label %then_block183, label %merge_block185
+
+then_block183:                                    ; preds = %merge_block182
+  %334 = load ptr, ptr %to129, align 8
+  %type184 = getelementptr %token.2, ptr %334, i32 0, i32 0
+  %335 = load i64, ptr @TOKEN_ARROW.12, align 4
+  store i64 %335, ptr %type184, align 4
+  %336 = load ptr, ptr %to129, align 8
+  ret ptr %336
+
+merge_block185:                                   ; preds = %merge_block182
+  %337 = load ptr, ptr %t123, align 8
+  %338 = call i1 @tokenizer_accept_string(ptr %337, ptr @144)
+  br i1 %338, label %then_block186, label %merge_block188
+
+then_block186:                                    ; preds = %merge_block185
+  %339 = load ptr, ptr %to129, align 8
+  %type187 = getelementptr %token.2, ptr %339, i32 0, i32 0
+  %340 = load i64, ptr @TOKEN_SEMICOLON.33, align 4
+  store i64 %340, ptr %type187, align 4
+  %341 = load ptr, ptr %to129, align 8
+  ret ptr %341
+
+merge_block188:                                   ; preds = %merge_block185
+  %342 = load ptr, ptr %t123, align 8
+  %343 = call i1 @tokenizer_accept_string(ptr %342, ptr @145)
+  br i1 %343, label %then_block189, label %merge_block191
+
+then_block189:                                    ; preds = %merge_block188
+  %344 = load ptr, ptr %to129, align 8
+  %type190 = getelementptr %token.2, ptr %344, i32 0, i32 0
+  %345 = load i64, ptr @TOKEN_COMMA.34, align 4
+  store i64 %345, ptr %type190, align 4
+  %346 = load ptr, ptr %to129, align 8
+  ret ptr %346
+
+merge_block191:                                   ; preds = %merge_block188
+  %347 = load ptr, ptr %t123, align 8
+  %348 = call i1 @tokenizer_accept_string(ptr %347, ptr @146)
+  br i1 %348, label %then_block192, label %merge_block194
+
+then_block192:                                    ; preds = %merge_block191
+  %349 = load ptr, ptr %to129, align 8
+  %type193 = getelementptr %token.2, ptr %349, i32 0, i32 0
+  %350 = load i64, ptr @TOKEN_COLON.35, align 4
+  store i64 %350, ptr %type193, align 4
+  %351 = load ptr, ptr %to129, align 8
+  ret ptr %351
+
+merge_block194:                                   ; preds = %merge_block191
+  %352 = load ptr, ptr %t123, align 8
+  %353 = call i1 @tokenizer_accept_string(ptr %352, ptr @147)
+  br i1 %353, label %then_block195, label %merge_block197
+
+then_block195:                                    ; preds = %merge_block194
+  %354 = load ptr, ptr %to129, align 8
+  %type196 = getelementptr %token.2, ptr %354, i32 0, i32 0
+  %355 = load i64, ptr @TOKEN_LPAREN.36, align 4
+  store i64 %355, ptr %type196, align 4
+  %356 = load ptr, ptr %to129, align 8
+  ret ptr %356
+
+merge_block197:                                   ; preds = %merge_block194
+  %357 = load ptr, ptr %t123, align 8
+  %358 = call i1 @tokenizer_accept_string(ptr %357, ptr @148)
+  br i1 %358, label %then_block198, label %merge_block200
+
+then_block198:                                    ; preds = %merge_block197
+  %359 = load ptr, ptr %to129, align 8
+  %type199 = getelementptr %token.2, ptr %359, i32 0, i32 0
+  %360 = load i64, ptr @TOKEN_RPAREN.37, align 4
+  store i64 %360, ptr %type199, align 4
+  %361 = load ptr, ptr %to129, align 8
+  ret ptr %361
+
+merge_block200:                                   ; preds = %merge_block197
+  %362 = load ptr, ptr %t123, align 8
+  %363 = call i1 @tokenizer_accept_string(ptr %362, ptr @149)
+  br i1 %363, label %then_block201, label %merge_block203
+
+then_block201:                                    ; preds = %merge_block200
+  %364 = load ptr, ptr %to129, align 8
+  %type202 = getelementptr %token.2, ptr %364, i32 0, i32 0
+  %365 = load i64, ptr @TOKEN_LBRACE.38, align 4
+  store i64 %365, ptr %type202, align 4
+  %366 = load ptr, ptr %to129, align 8
+  ret ptr %366
+
+merge_block203:                                   ; preds = %merge_block200
+  %367 = load ptr, ptr %t123, align 8
+  %368 = call i1 @tokenizer_accept_string(ptr %367, ptr @150)
+  br i1 %368, label %then_block204, label %merge_block206
+
+then_block204:                                    ; preds = %merge_block203
+  %369 = load ptr, ptr %to129, align 8
+  %type205 = getelementptr %token.2, ptr %369, i32 0, i32 0
+  %370 = load i64, ptr @TOKEN_RBRACE.39, align 4
+  store i64 %370, ptr %type205, align 4
+  %371 = load ptr, ptr %to129, align 8
+  ret ptr %371
+
+merge_block206:                                   ; preds = %merge_block203
+  %372 = load ptr, ptr %t123, align 8
+  %373 = call i1 @tokenizer_accept_string(ptr %372, ptr @151)
+  br i1 %373, label %then_block207, label %merge_block209
+
+then_block207:                                    ; preds = %merge_block206
+  %374 = load ptr, ptr %to129, align 8
+  %type208 = getelementptr %token.2, ptr %374, i32 0, i32 0
+  %375 = load i64, ptr @TOKEN_EQUALS.23, align 4
+  store i64 %375, ptr %type208, align 4
+  %376 = load ptr, ptr %to129, align 8
+  ret ptr %376
+
+merge_block209:                                   ; preds = %merge_block206
+  %377 = load ptr, ptr %t123, align 8
+  %378 = call i1 @tokenizer_accept_string(ptr %377, ptr @152)
+  br i1 %378, label %then_block210, label %merge_block212
+
+then_block210:                                    ; preds = %merge_block209
+  %379 = load ptr, ptr %to129, align 8
+  %type211 = getelementptr %token.2, ptr %379, i32 0, i32 0
+  %380 = load i64, ptr @TOKEN_PLUS.24, align 4
+  store i64 %380, ptr %type211, align 4
+  %381 = load ptr, ptr %to129, align 8
+  ret ptr %381
+
+merge_block212:                                   ; preds = %merge_block209
+  %382 = load ptr, ptr %t123, align 8
+  %383 = call i1 @tokenizer_accept_string(ptr %382, ptr @153)
+  br i1 %383, label %then_block213, label %merge_block215
+
+then_block213:                                    ; preds = %merge_block212
+  %384 = load ptr, ptr %to129, align 8
+  %type214 = getelementptr %token.2, ptr %384, i32 0, i32 0
+  %385 = load i64, ptr @TOKEN_MINUS.25, align 4
+  store i64 %385, ptr %type214, align 4
+  %386 = load ptr, ptr %to129, align 8
+  ret ptr %386
+
+merge_block215:                                   ; preds = %merge_block212
+  %387 = load ptr, ptr %t123, align 8
+  %388 = call i1 @tokenizer_accept_string(ptr %387, ptr @154)
+  br i1 %388, label %then_block216, label %merge_block218
+
+then_block216:                                    ; preds = %merge_block215
+  %389 = load ptr, ptr %to129, align 8
+  %type217 = getelementptr %token.2, ptr %389, i32 0, i32 0
+  %390 = load i64, ptr @TOKEN_MUL.26, align 4
+  store i64 %390, ptr %type217, align 4
+  %391 = load ptr, ptr %to129, align 8
+  ret ptr %391
+
+merge_block218:                                   ; preds = %merge_block215
+  %392 = load ptr, ptr %t123, align 8
+  %393 = call i1 @tokenizer_accept_string(ptr %392, ptr @155)
+  br i1 %393, label %then_block219, label %merge_block221
+
+then_block219:                                    ; preds = %merge_block218
+  %394 = load ptr, ptr %to129, align 8
+  %type220 = getelementptr %token.2, ptr %394, i32 0, i32 0
+  %395 = load i64, ptr @TOKEN_DIV.27, align 4
+  store i64 %395, ptr %type220, align 4
+  %396 = load ptr, ptr %to129, align 8
+  ret ptr %396
+
+merge_block221:                                   ; preds = %merge_block218
+  %397 = load ptr, ptr %t123, align 8
+  %398 = call i1 @tokenizer_accept_string(ptr %397, ptr @156)
+  br i1 %398, label %then_block222, label %merge_block224
+
+then_block222:                                    ; preds = %merge_block221
+  %399 = load ptr, ptr %to129, align 8
+  %type223 = getelementptr %token.2, ptr %399, i32 0, i32 0
+  %400 = load i64, ptr @TOKEN_MOD.28, align 4
+  store i64 %400, ptr %type223, align 4
+  %401 = load ptr, ptr %to129, align 8
+  ret ptr %401
+
+merge_block224:                                   ; preds = %merge_block221
+  %402 = load ptr, ptr %t123, align 8
+  %403 = call i1 @tokenizer_accept_string(ptr %402, ptr @157)
+  br i1 %403, label %then_block225, label %merge_block227
+
+then_block225:                                    ; preds = %merge_block224
+  %404 = load ptr, ptr %to129, align 8
+  %type226 = getelementptr %token.2, ptr %404, i32 0, i32 0
+  %405 = load i64, ptr @TOKEN_BANG.29, align 4
+  store i64 %405, ptr %type226, align 4
+  %406 = load ptr, ptr %to129, align 8
+  ret ptr %406
+
+merge_block227:                                   ; preds = %merge_block224
+  %407 = load ptr, ptr %t123, align 8
+  %408 = call i1 @tokenizer_accept_string(ptr %407, ptr @158)
+  br i1 %408, label %then_block228, label %merge_block230
+
+then_block228:                                    ; preds = %merge_block227
+  %409 = load ptr, ptr %to129, align 8
+  %type229 = getelementptr %token.2, ptr %409, i32 0, i32 0
+  %410 = load i64, ptr @TOKEN_LESS.30, align 4
+  store i64 %410, ptr %type229, align 4
+  %411 = load ptr, ptr %to129, align 8
+  ret ptr %411
+
+merge_block230:                                   ; preds = %merge_block227
+  %412 = load ptr, ptr %t123, align 8
+  %413 = call i1 @tokenizer_accept_string(ptr %412, ptr @159)
+  br i1 %413, label %then_block231, label %merge_block233
+
+then_block231:                                    ; preds = %merge_block230
+  %414 = load ptr, ptr %to129, align 8
+  %type232 = getelementptr %token.2, ptr %414, i32 0, i32 0
+  %415 = load i64, ptr @TOKEN_GREATER.31, align 4
+  store i64 %415, ptr %type232, align 4
+  %416 = load ptr, ptr %to129, align 8
+  ret ptr %416
+
+merge_block233:                                   ; preds = %merge_block230
+  %417 = load ptr, ptr %t123, align 8
+  %418 = call i1 @tokenizer_accept_string(ptr %417, ptr @160)
+  br i1 %418, label %then_block234, label %merge_block236
+
+then_block234:                                    ; preds = %merge_block233
+  %419 = load ptr, ptr %to129, align 8
+  %type235 = getelementptr %token.2, ptr %419, i32 0, i32 0
+  %420 = load i64, ptr @TOKEN_DOT.32, align 4
+  store i64 %420, ptr %type235, align 4
+  %421 = load ptr, ptr %to129, align 8
+  ret ptr %421
+
+merge_block236:                                   ; preds = %merge_block233
+  %422 = load ptr, ptr %t123, align 8
+  %423 = call ptr @tokenizer_accept_int_type(ptr %422)
+  %maybe_int237 = alloca ptr, align 8
+  store ptr %423, ptr %maybe_int237, align 8
+  %424 = load ptr, ptr %maybe_int237, align 8
+  %425 = icmp ne ptr %424, null
+  br i1 %425, label %then_block238, label %merge_block241
+
+then_block238:                                    ; preds = %merge_block236
+  %426 = load ptr, ptr %to129, align 8
+  %type239 = getelementptr %token.2, ptr %426, i32 0, i32 0
+  %427 = load i64, ptr @TOKEN_NUMBER.18, align 4
+  store i64 %427, ptr %type239, align 4
+  %428 = load ptr, ptr %to129, align 8
+  %data240 = getelementptr %token.2, ptr %428, i32 0, i32 1
+  %429 = load ptr, ptr %maybe_int237, align 8
+  store ptr %429, ptr %data240, align 8
+  %430 = load ptr, ptr %to129, align 8
+  ret ptr %430
+
+merge_block241:                                   ; preds = %merge_block236
+  %431 = load ptr, ptr %t123, align 8
+  %432 = call ptr @tokenizer_accept_char_type(ptr %431)
+  %maybe_char242 = alloca ptr, align 8
+  store ptr %432, ptr %maybe_char242, align 8
+  %433 = load ptr, ptr %maybe_char242, align 8
+  %434 = icmp ne ptr %433, null
+  br i1 %434, label %then_block243, label %merge_block246
+
+then_block243:                                    ; preds = %merge_block241
+  %435 = load ptr, ptr %to129, align 8
+  %type244 = getelementptr %token.2, ptr %435, i32 0, i32 0
+  %436 = load i64, ptr @TOKEN_CHAR.21, align 4
+  store i64 %436, ptr %type244, align 4
+  %437 = load ptr, ptr %to129, align 8
+  %data245 = getelementptr %token.2, ptr %437, i32 0, i32 1
+  %438 = load ptr, ptr %maybe_char242, align 8
+  store ptr %438, ptr %data245, align 8
+  %439 = load ptr, ptr %to129, align 8
+  ret ptr %439
+
+merge_block246:                                   ; preds = %merge_block241
+  %440 = load ptr, ptr %t123, align 8
+  %441 = call ptr @tokenizer_accept_string_type(ptr %440)
+  %maybe_string247 = alloca ptr, align 8
+  store ptr %441, ptr %maybe_string247, align 8
+  %442 = load ptr, ptr %maybe_string247, align 8
+  %443 = icmp ne ptr %442, null
+  br i1 %443, label %then_block248, label %merge_block251
+
+then_block248:                                    ; preds = %merge_block246
+  %444 = load ptr, ptr %to129, align 8
+  %type249 = getelementptr %token.2, ptr %444, i32 0, i32 0
+  %445 = load i64, ptr @TOKEN_STRING.22, align 4
+  store i64 %445, ptr %type249, align 4
+  %446 = load ptr, ptr %to129, align 8
+  %data250 = getelementptr %token.2, ptr %446, i32 0, i32 1
+  %447 = load ptr, ptr %maybe_string247, align 8
+  store ptr %447, ptr %data250, align 8
+  %448 = load ptr, ptr %to129, align 8
+  ret ptr %448
+
+merge_block251:                                   ; preds = %merge_block246
+  %449 = load ptr, ptr %t123, align 8
+  %450 = call ptr @tokenizer_consume_until_condition(ptr %449, ptr @unnamed_func.43)
+  %string252 = alloca ptr, align 8
+  store ptr %450, ptr %string252, align 8
+  %451 = load ptr, ptr %string252, align 8
+  %452 = call i64 @strlen(ptr %451)
+  %453 = icmp eq i64 %452, 0
+  br i1 %453, label %then_block253, label %merge_block255
+
+then_block253:                                    ; preds = %merge_block251
+  %454 = load ptr, ptr %t123, align 8
+  %line254 = getelementptr %tokenizer.3, ptr %454, i32 0, i32 3
+  %455 = load i64, ptr %line254, align 4
+  call void (ptr, ...) @printf(ptr @161, i64 %455)
   ret ptr null
 
-merge_block250:                                   ; preds = %merge_block247
-  %446 = load ptr, ptr %to127, align 8
-  %type251 = getelementptr %token.2, ptr %446, i32 0, i32 0
-  %447 = load i64, ptr @TOKEN_IDENTIFIER.17, align 4
-  store i64 %447, ptr %type251, align 4
-  %448 = load ptr, ptr %to127, align 8
-  %data252 = getelementptr %token.2, ptr %448, i32 0, i32 1
-  %449 = load ptr, ptr %string248, align 8
-  store ptr %449, ptr %data252, align 8
-  %450 = load ptr, ptr %to127, align 8
-  ret ptr %450
+merge_block255:                                   ; preds = %merge_block251
+  %456 = load ptr, ptr %to129, align 8
+  %type256 = getelementptr %token.2, ptr %456, i32 0, i32 0
+  %457 = load i64, ptr @TOKEN_IDENTIFIER.17, align 4
+  store i64 %457, ptr %type256, align 4
+  %458 = load ptr, ptr %to129, align 8
+  %data257 = getelementptr %token.2, ptr %458, i32 0, i32 1
+  %459 = load ptr, ptr %string252, align 8
+  store ptr %459, ptr %data257, align 8
+  %460 = load ptr, ptr %to129, align 8
+  ret ptr %460
 }
 
 define i1 @unnamed_func.3(i8 %0) {
@@ -5500,73 +5598,79 @@ entrypoint:
   %file = alloca %slice, align 8
   store %slice %1, ptr %file, align 8
   %2 = load ptr, ptr %alloc, align 8
-  %3 = call ptr @arena_alloc(ptr %2, i64 32)
+  %3 = call ptr @arena_alloc(ptr %2, i64 40)
   %t = alloca ptr, align 8
   store ptr %3, ptr %t, align 8
   %4 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %4, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %4, i32 0, i32 4
   %5 = load ptr, ptr %alloc, align 8
   store ptr %5, ptr %arena, align 8
   %6 = load ptr, ptr %t, align 8
   %offset = getelementptr %tokenizer, ptr %6, i32 0, i32 2
   store i64 0, ptr %offset, align 4
   %7 = load ptr, ptr %t, align 8
-  %buf = getelementptr %tokenizer, ptr %7, i32 0, i32 0
+  %line = getelementptr %tokenizer, ptr %7, i32 0, i32 3
+  store i64 1, ptr %line, align 4
+  %8 = load ptr, ptr %t, align 8
+  %buf = getelementptr %tokenizer, ptr %8, i32 0, i32 0
   %data = getelementptr %slice, ptr %file, i32 0, i32 0
-  %8 = load ptr, ptr %data, align 8
-  store ptr %8, ptr %buf, align 8
-  %9 = load ptr, ptr %t, align 8
-  %buf_len = getelementptr %tokenizer, ptr %9, i32 0, i32 1
+  %9 = load ptr, ptr %data, align 8
+  store ptr %9, ptr %buf, align 8
+  %10 = load ptr, ptr %t, align 8
+  %buf_len = getelementptr %tokenizer, ptr %10, i32 0, i32 1
   %data_len = getelementptr %slice, ptr %file, i32 0, i32 1
-  %10 = load i64, ptr %data_len, align 4
-  store i64 %10, ptr %buf_len, align 4
-  %11 = load ptr, ptr %t, align 8
-  %buf_len1 = getelementptr %tokenizer, ptr %11, i32 0, i32 1
-  %12 = load i64, ptr %buf_len1, align 4
-  call void (ptr, ...) @printf(ptr @80, i64 %12)
-  %13 = load ptr, ptr %t, align 8
-  %buf2 = getelementptr %tokenizer, ptr %13, i32 0, i32 0
-  %14 = load ptr, ptr %buf2, align 8
-  call void (ptr, ...) @printf(ptr @81, ptr %14)
-  %15 = load ptr, ptr %t, align 8
-  ret ptr %15
+  %11 = load i64, ptr %data_len, align 4
+  store i64 %11, ptr %buf_len, align 4
+  %12 = load ptr, ptr %t, align 8
+  %buf_len1 = getelementptr %tokenizer, ptr %12, i32 0, i32 1
+  %13 = load i64, ptr %buf_len1, align 4
+  call void (ptr, ...) @printf(ptr @80, i64 %13)
+  %14 = load ptr, ptr %t, align 8
+  %buf2 = getelementptr %tokenizer, ptr %14, i32 0, i32 0
+  %15 = load ptr, ptr %buf2, align 8
+  call void (ptr, ...) @printf(ptr @81, ptr %15)
+  %16 = load ptr, ptr %t, align 8
+  ret ptr %16
 
 entrypoint3:                                      ; No predecessors!
   %alloc4 = alloca ptr, align 8
   store ptr %0, ptr %alloc4, align 8
   %file5 = alloca %slice, align 8
   store %slice %1, ptr %file5, align 8
-  %16 = load ptr, ptr %alloc4, align 8
-  %17 = call ptr @arena_alloc(ptr %16, i64 32)
+  %17 = load ptr, ptr %alloc4, align 8
+  %18 = call ptr @arena_alloc(ptr %17, i64 40)
   %t6 = alloca ptr, align 8
-  store ptr %17, ptr %t6, align 8
-  %18 = load ptr, ptr %t6, align 8
-  %arena7 = getelementptr %tokenizer.3, ptr %18, i32 0, i32 3
-  %19 = load ptr, ptr %alloc4, align 8
-  store ptr %19, ptr %arena7, align 8
-  %20 = load ptr, ptr %t6, align 8
-  %offset8 = getelementptr %tokenizer.3, ptr %20, i32 0, i32 2
-  store i64 0, ptr %offset8, align 4
+  store ptr %18, ptr %t6, align 8
+  %19 = load ptr, ptr %t6, align 8
+  %arena7 = getelementptr %tokenizer.3, ptr %19, i32 0, i32 4
+  %20 = load ptr, ptr %alloc4, align 8
+  store ptr %20, ptr %arena7, align 8
   %21 = load ptr, ptr %t6, align 8
-  %buf9 = getelementptr %tokenizer.3, ptr %21, i32 0, i32 0
-  %data10 = getelementptr %slice, ptr %file5, i32 0, i32 0
-  %22 = load ptr, ptr %data10, align 8
-  store ptr %22, ptr %buf9, align 8
+  %offset8 = getelementptr %tokenizer.3, ptr %21, i32 0, i32 2
+  store i64 0, ptr %offset8, align 4
+  %22 = load ptr, ptr %t6, align 8
+  %line9 = getelementptr %tokenizer.3, ptr %22, i32 0, i32 3
+  store i64 1, ptr %line9, align 4
   %23 = load ptr, ptr %t6, align 8
-  %buf_len11 = getelementptr %tokenizer.3, ptr %23, i32 0, i32 1
-  %data_len12 = getelementptr %slice, ptr %file5, i32 0, i32 1
-  %24 = load i64, ptr %data_len12, align 4
-  store i64 %24, ptr %buf_len11, align 4
+  %buf10 = getelementptr %tokenizer.3, ptr %23, i32 0, i32 0
+  %data11 = getelementptr %slice, ptr %file5, i32 0, i32 0
+  %24 = load ptr, ptr %data11, align 8
+  store ptr %24, ptr %buf10, align 8
   %25 = load ptr, ptr %t6, align 8
-  %buf_len13 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 1
-  %26 = load i64, ptr %buf_len13, align 4
-  call void (ptr, ...) @printf(ptr @162, i64 %26)
+  %buf_len12 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 1
+  %data_len13 = getelementptr %slice, ptr %file5, i32 0, i32 1
+  %26 = load i64, ptr %data_len13, align 4
+  store i64 %26, ptr %buf_len12, align 4
   %27 = load ptr, ptr %t6, align 8
-  %buf14 = getelementptr %tokenizer.3, ptr %27, i32 0, i32 0
-  %28 = load ptr, ptr %buf14, align 8
-  call void (ptr, ...) @printf(ptr @163, ptr %28)
+  %buf_len14 = getelementptr %tokenizer.3, ptr %27, i32 0, i32 1
+  %28 = load i64, ptr %buf_len14, align 4
+  call void (ptr, ...) @printf(ptr @162, i64 %28)
   %29 = load ptr, ptr %t6, align 8
-  ret ptr %29
+  %buf15 = getelementptr %tokenizer.3, ptr %29, i32 0, i32 0
+  %30 = load ptr, ptr %buf15, align 8
+  call void (ptr, ...) @printf(ptr @163, ptr %30)
+  %31 = load ptr, ptr %t6, align 8
+  ret ptr %31
 }
 
 define %slice @tokenizer_tokenize(ptr %0) {
@@ -5574,9 +5678,9 @@ entrypoint:
   %t = alloca ptr, align 8
   store ptr %0, ptr %t, align 8
   %1 = load ptr, ptr %t, align 8
-  %arena = getelementptr %tokenizer, ptr %1, i32 0, i32 3
+  %arena = getelementptr %tokenizer, ptr %1, i32 0, i32 4
   %2 = load ptr, ptr %arena, align 8
-  %3 = call ptr @arena_alloc(ptr %2, i64 640000)
+  %3 = call ptr @arena_alloc(ptr %2, i64 960000)
   %tokens = alloca ptr, align 8
   store ptr %3, ptr %tokens, align 8
   %tokens_len = alloca i64, align 8
@@ -5637,9 +5741,9 @@ entrypoint1:                                      ; No predecessors!
   %t2 = alloca ptr, align 8
   store ptr %0, ptr %t2, align 8
   %25 = load ptr, ptr %t2, align 8
-  %arena3 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 3
+  %arena3 = getelementptr %tokenizer.3, ptr %25, i32 0, i32 4
   %26 = load ptr, ptr %arena3, align 8
-  %27 = call ptr @arena_alloc(ptr %26, i64 640000)
+  %27 = call ptr @arena_alloc(ptr %26, i64 960000)
   %tokens4 = alloca ptr, align 8
   store ptr %27, ptr %tokens4, align 8
   %tokens_len5 = alloca i64, align 8

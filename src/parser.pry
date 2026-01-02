@@ -692,7 +692,7 @@ let parser_parse_struct_definition = (p: *parser) => *Node {
 			if typ_annotation == null {
 				return null;
 			};
-			printf("STRUCT TYP: %d\n" (*typ_annotation).type);
+			printf("STRUCT TYP: %d\n", (*typ_annotation).type);
 			let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*ip).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
 			(*d).name = cast(*i8, (*ident).data);
 			(*d).type = typ_annotation;
