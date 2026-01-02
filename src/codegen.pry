@@ -469,7 +469,10 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 		i = i + 1;
 	};
 
-	assert(fieldIndex != null);
+	if fieldIndex == null {
+		printf("Error at line %d: Field not found in struct\n", (*node).line);
+		exit(1);
+	};
 
 	let zero = LLVMConstInt(LLVMInt32Type(), 0, 0);
 	let llvmFieldIndex = LLVMConstInt(LLVMInt32Type(), *fieldIndex, 0);

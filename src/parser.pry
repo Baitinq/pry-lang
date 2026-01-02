@@ -1383,7 +1383,10 @@ let parser_parse_import_declaration = (p: *parser) => *Node {
 		return null;
 	};
 
-	assert((*expr).type == NODE_PRIMARY_EXPRESSION_STRING);
+	if (*expr).type != NODE_PRIMARY_EXPRESSION_STRING {
+		printf("Error at line %d: Import path must be a string\n", parser_current_line(p));
+		exit(1);
+	};
 
 	let impor_filename = (*cast(*NODE_PRIMARY_EXPRESSION_STRING_DATA, (*expr).data)).value;
 	let current_file = cast(*i8, arena_alloc((*p).arena, sizeof(i8) * 70));
@@ -1399,10 +1402,16 @@ let parser_parse_import_declaration = (p: *parser) => *Node {
 
 	let dirpath = dirname(current_file);
 	let dir = open(dirpath, 0);
-	assert(dir != -1);
+	if dir == -1 {
+		printf("Error at line %d: Cannot open directory for import\n", parser_current_line(p));
+		exit(1);
+	};
 
 	let file = openat(dir, impor_filename, 0);
-	assert(file != -1);
+	if file == -1 {
+		printf("Error at line %d: Cannot open imported file\n", parser_current_line(p));
+		exit(1);
+	};
 	
 	let file_size = lseek(file, 0, 2);
 	lseek(file, 0, 0);
@@ -1631,7 +1640,10 @@ let parse_program = (p: *parser) => *Node {
 	let i = 0;
 	while (*p).offset < (*p).tokens_len {
 		let s = parser_parse_statement(p);
-		assert(s != null);
+		if s == null {
+			printf("Error at line %d: Failed to parse statement\n", parser_current_line(p));
+			exit(1);
+		};
 		(*(nodes + cast(**Node, i))) = s;
 		i = i + 1;
 	};
