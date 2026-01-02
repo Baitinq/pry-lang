@@ -103,6 +103,21 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 		assert((*b).type == NODE_TYPE_POINTER_TYPE);
 		let pointer_type_a = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*a).data);
 		let pointer_type_b = *cast(*NODE_TYPE_POINTER_TYPE_DATA, (*b).data);
+
+		/* Allow implicit casting of *void (null) to any other pointer type */
+		if (*pointer_type_b.type).type == NODE_TYPE_SIMPLE_TYPE {
+			let simple_type_b = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*pointer_type_b.type).data);
+			if strcmp(simple_type_b.name, "void") {
+				return true;
+			};
+		};
+		if (*pointer_type_a.type).type == NODE_TYPE_SIMPLE_TYPE {
+			let simple_type_a = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*pointer_type_a.type).data);
+			if strcmp(simple_type_a.name, "void") {
+				return true;
+			};
+		};
+
 		if !compare_types(c, pointer_type_a.type, pointer_type_b.type, false) {
 			printf("Pointer types do not match\n");
 			return false;
