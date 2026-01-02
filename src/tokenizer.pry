@@ -213,6 +213,33 @@ let tokenizer_accept_string = (t: *tokenizer, str: *i8) => bool {
 	return false;
 };
 
+/* Accept a keyword only if followed by a non-alphanumeric character (word boundary) */
+let tokenizer_accept_keyword = (t: *tokenizer, str: *i8) => bool {
+	let str_len = strlen(str);
+	if (*t).offset + str_len > (*t).buf_len { return false; };
+
+	let s = cast(*i8, arena_alloc((*t).arena, 1000));
+	memcpy(cast(*void, s), cast(*void, (*t).buf + cast(*i8, (*t).offset)), str_len);
+
+	if strcmp(s, str) {
+		/* Check that next char is not alphanumeric or underscore */
+		let next_offset = (*t).offset + str_len;
+		if next_offset < (*t).buf_len {
+			let next_char = (*((*t).buf + cast(*i8, next_offset)));
+			if isalphanum(next_char) {
+				return false;
+			};
+			if next_char == '_' {
+				return false;
+			};
+		};
+		(*t).offset = (*t).offset + str_len;
+		return true;
+	};
+
+	return false;
+};
+
 let tokenizer_consume_until_condition = (t: *tokenizer, condition: (i8) => bool) => *i8 {
 	let start = (*t).offset;
 	let res = cast(*i8, arena_alloc((*t).arena, 1000));
@@ -351,69 +378,69 @@ let tokenizer_next = (t: *tokenizer) => *token {
 	
 	let to = cast(*token, arena_alloc((*t).arena, sizeof(token)));
 
-	if tokenizer_accept_string(t, "import") {
+	if tokenizer_accept_keyword(t, "import") {
 	    (*to).type = TOKEN_IMPORT;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "let") {
+	if tokenizer_accept_keyword(t, "let") {
 	    (*to).type = TOKEN_LET;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "extern") {
+	if tokenizer_accept_keyword(t, "extern") {
 	    (*to).type = TOKEN_EXTERN;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "if") {
+	if tokenizer_accept_keyword(t, "if") {
 	    (*to).type = TOKEN_IF;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "while") {
+	if tokenizer_accept_keyword(t, "while") {
 	    (*to).type = TOKEN_WHILE;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "return") {
+	if tokenizer_accept_keyword(t, "return") {
 	    (*to).type = TOKEN_RETURN;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "break") {
+	if tokenizer_accept_keyword(t, "break") {
 	    (*to).type = TOKEN_BREAK;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "continue") {
+	if tokenizer_accept_keyword(t, "continue") {
 	    (*to).type = TOKEN_CONTINUE;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "true") {
+	if tokenizer_accept_keyword(t, "true") {
 	    (*to).type = TOKEN_BOOLEAN;
 	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
 	    *data = true;
 	    (*to).data = cast(*void, data);
 	    return to;
 	};
-	if tokenizer_accept_string(t, "false") {
+	if tokenizer_accept_keyword(t, "false") {
 	    (*to).type = TOKEN_BOOLEAN;
 	    let data = cast(*bool, arena_alloc((*t).arena, sizeof(bool)));
 	    *data = false;
 	    (*to).data = cast(*void, data);
 	    return to;
 	};
-	if tokenizer_accept_string(t, "null") {
+	if tokenizer_accept_keyword(t, "null") {
 	    (*to).type = TOKEN_NULL;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "struct") {
+	if tokenizer_accept_keyword(t, "struct") {
 	    (*to).type = TOKEN_STRUCT;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "newtype") {
+	if tokenizer_accept_keyword(t, "newtype") {
 	    (*to).type = TOKEN_TYPE;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "and") {
+	if tokenizer_accept_keyword(t, "and") {
 	    (*to).type = TOKEN_AND;
 	    return to;
 	};
-	if tokenizer_accept_string(t, "or") {
+	if tokenizer_accept_keyword(t, "or") {
 	    (*to).type = TOKEN_OR;
 	    return to;
 	};

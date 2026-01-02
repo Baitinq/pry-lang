@@ -3342,6 +3342,210 @@ merge_block21:                                    ; preds = %merge_block13
   ret i1 false
 }
 
+define i1 @tokenizer_accept_keyword(ptr %0, ptr %1) {
+entrypoint:
+  %t = alloca ptr, align 8
+  store ptr %0, ptr %t, align 8
+  %str = alloca ptr, align 8
+  store ptr %1, ptr %str, align 8
+  %2 = load ptr, ptr %str, align 8
+  %3 = call i64 @strlen(ptr %2)
+  %str_len = alloca i64, align 8
+  store i64 %3, ptr %str_len, align 4
+  %4 = load ptr, ptr %t, align 8
+  %offset = getelementptr %tokenizer, ptr %4, i32 0, i32 2
+  %5 = load i64, ptr %offset, align 4
+  %6 = load i64, ptr %str_len, align 4
+  %7 = add i64 %5, %6
+  %8 = load ptr, ptr %t, align 8
+  %buf_len = getelementptr %tokenizer, ptr %8, i32 0, i32 1
+  %9 = load i64, ptr %buf_len, align 4
+  %10 = icmp sgt i64 %7, %9
+  br i1 %10, label %then_block, label %merge_block
+
+then_block:                                       ; preds = %entrypoint
+  ret i1 false
+
+merge_block:                                      ; preds = %entrypoint
+  %11 = load ptr, ptr %t, align 8
+  %arena = getelementptr %tokenizer, ptr %11, i32 0, i32 3
+  %12 = load ptr, ptr %arena, align 8
+  %13 = call ptr @arena_alloc(ptr %12, i64 1000)
+  %s = alloca ptr, align 8
+  store ptr %13, ptr %s, align 8
+  %14 = load ptr, ptr %s, align 8
+  %15 = load ptr, ptr %t, align 8
+  %buf = getelementptr %tokenizer, ptr %15, i32 0, i32 0
+  %16 = load ptr, ptr %buf, align 8
+  %17 = load ptr, ptr %t, align 8
+  %offset1 = getelementptr %tokenizer, ptr %17, i32 0, i32 2
+  %18 = load i64, ptr %offset1, align 4
+  %19 = getelementptr i8, ptr %16, i64 %18
+  %20 = load i64, ptr %str_len, align 4
+  call void @memcpy(ptr %14, ptr %19, i64 %20)
+  %21 = load ptr, ptr %s, align 8
+  %22 = load ptr, ptr %str, align 8
+  %23 = call i1 @strcmp(ptr %21, ptr %22)
+  br i1 %23, label %then_block2, label %merge_block14
+
+then_block2:                                      ; preds = %merge_block
+  %24 = load ptr, ptr %t, align 8
+  %offset3 = getelementptr %tokenizer, ptr %24, i32 0, i32 2
+  %25 = load i64, ptr %offset3, align 4
+  %26 = load i64, ptr %str_len, align 4
+  %27 = add i64 %25, %26
+  %next_offset = alloca i64, align 8
+  store i64 %27, ptr %next_offset, align 4
+  %28 = load i64, ptr %next_offset, align 4
+  %29 = load ptr, ptr %t, align 8
+  %buf_len4 = getelementptr %tokenizer, ptr %29, i32 0, i32 1
+  %30 = load i64, ptr %buf_len4, align 4
+  %31 = icmp slt i64 %28, %30
+  br i1 %31, label %then_block5, label %merge_block11
+
+then_block5:                                      ; preds = %then_block2
+  %32 = load ptr, ptr %t, align 8
+  %buf6 = getelementptr %tokenizer, ptr %32, i32 0, i32 0
+  %33 = load ptr, ptr %buf6, align 8
+  %34 = load i64, ptr %next_offset, align 4
+  %35 = getelementptr i8, ptr %33, i64 %34
+  %36 = load i8, ptr %35, align 1
+  %next_char = alloca i8, align 1
+  store i8 %36, ptr %next_char, align 1
+  %37 = load i8, ptr %next_char, align 1
+  %38 = call i1 @isalphanum(i8 %37)
+  br i1 %38, label %then_block7, label %merge_block8
+
+then_block7:                                      ; preds = %then_block5
+  ret i1 false
+
+merge_block8:                                     ; preds = %then_block5
+  %39 = load i8, ptr %next_char, align 1
+  %40 = icmp eq i8 %39, 95
+  br i1 %40, label %then_block9, label %merge_block10
+
+then_block9:                                      ; preds = %merge_block8
+  ret i1 false
+
+merge_block10:                                    ; preds = %merge_block8
+  br label %merge_block11
+
+merge_block11:                                    ; preds = %then_block2, %merge_block10
+  %41 = load ptr, ptr %t, align 8
+  %offset12 = getelementptr %tokenizer, ptr %41, i32 0, i32 2
+  %42 = load ptr, ptr %t, align 8
+  %offset13 = getelementptr %tokenizer, ptr %42, i32 0, i32 2
+  %43 = load i64, ptr %offset13, align 4
+  %44 = load i64, ptr %str_len, align 4
+  %45 = add i64 %43, %44
+  store i64 %45, ptr %offset12, align 4
+  ret i1 true
+
+merge_block14:                                    ; preds = %merge_block
+  ret i1 false
+
+entrypoint15:                                     ; No predecessors!
+  %t16 = alloca ptr, align 8
+  store ptr %0, ptr %t16, align 8
+  %str17 = alloca ptr, align 8
+  store ptr %1, ptr %str17, align 8
+  %46 = load ptr, ptr %str17, align 8
+  %47 = call i64 @strlen(ptr %46)
+  %str_len18 = alloca i64, align 8
+  store i64 %47, ptr %str_len18, align 4
+  %48 = load ptr, ptr %t16, align 8
+  %offset19 = getelementptr %tokenizer.3, ptr %48, i32 0, i32 2
+  %49 = load i64, ptr %offset19, align 4
+  %50 = load i64, ptr %str_len18, align 4
+  %51 = add i64 %49, %50
+  %52 = load ptr, ptr %t16, align 8
+  %buf_len20 = getelementptr %tokenizer.3, ptr %52, i32 0, i32 1
+  %53 = load i64, ptr %buf_len20, align 4
+  %54 = icmp sgt i64 %51, %53
+  br i1 %54, label %then_block21, label %merge_block22
+
+then_block21:                                     ; preds = %entrypoint15
+  ret i1 false
+
+merge_block22:                                    ; preds = %entrypoint15
+  %55 = load ptr, ptr %t16, align 8
+  %arena23 = getelementptr %tokenizer.3, ptr %55, i32 0, i32 3
+  %56 = load ptr, ptr %arena23, align 8
+  %57 = call ptr @arena_alloc(ptr %56, i64 1000)
+  %s24 = alloca ptr, align 8
+  store ptr %57, ptr %s24, align 8
+  %58 = load ptr, ptr %s24, align 8
+  %59 = load ptr, ptr %t16, align 8
+  %buf25 = getelementptr %tokenizer.3, ptr %59, i32 0, i32 0
+  %60 = load ptr, ptr %buf25, align 8
+  %61 = load ptr, ptr %t16, align 8
+  %offset26 = getelementptr %tokenizer.3, ptr %61, i32 0, i32 2
+  %62 = load i64, ptr %offset26, align 4
+  %63 = getelementptr i8, ptr %60, i64 %62
+  %64 = load i64, ptr %str_len18, align 4
+  call void @memcpy(ptr %58, ptr %63, i64 %64)
+  %65 = load ptr, ptr %s24, align 8
+  %66 = load ptr, ptr %str17, align 8
+  %67 = call i1 @strcmp(ptr %65, ptr %66)
+  br i1 %67, label %then_block27, label %merge_block41
+
+then_block27:                                     ; preds = %merge_block22
+  %68 = load ptr, ptr %t16, align 8
+  %offset28 = getelementptr %tokenizer.3, ptr %68, i32 0, i32 2
+  %69 = load i64, ptr %offset28, align 4
+  %70 = load i64, ptr %str_len18, align 4
+  %71 = add i64 %69, %70
+  %next_offset29 = alloca i64, align 8
+  store i64 %71, ptr %next_offset29, align 4
+  %72 = load i64, ptr %next_offset29, align 4
+  %73 = load ptr, ptr %t16, align 8
+  %buf_len30 = getelementptr %tokenizer.3, ptr %73, i32 0, i32 1
+  %74 = load i64, ptr %buf_len30, align 4
+  %75 = icmp slt i64 %72, %74
+  br i1 %75, label %then_block31, label %merge_block38
+
+then_block31:                                     ; preds = %then_block27
+  %76 = load ptr, ptr %t16, align 8
+  %buf32 = getelementptr %tokenizer.3, ptr %76, i32 0, i32 0
+  %77 = load ptr, ptr %buf32, align 8
+  %78 = load i64, ptr %next_offset29, align 4
+  %79 = getelementptr i8, ptr %77, i64 %78
+  %80 = load i8, ptr %79, align 1
+  %next_char33 = alloca i8, align 1
+  store i8 %80, ptr %next_char33, align 1
+  %81 = load i8, ptr %next_char33, align 1
+  %82 = call i1 @isalphanum(i8 %81)
+  br i1 %82, label %then_block34, label %merge_block35
+
+then_block34:                                     ; preds = %then_block31
+  ret i1 false
+
+merge_block35:                                    ; preds = %then_block31
+  %83 = load i8, ptr %next_char33, align 1
+  %84 = icmp eq i8 %83, 95
+  br i1 %84, label %then_block36, label %merge_block37
+
+then_block36:                                     ; preds = %merge_block35
+  ret i1 false
+
+merge_block37:                                    ; preds = %merge_block35
+  br label %merge_block38
+
+merge_block38:                                    ; preds = %then_block27, %merge_block37
+  %85 = load ptr, ptr %t16, align 8
+  %offset39 = getelementptr %tokenizer.3, ptr %85, i32 0, i32 2
+  %86 = load ptr, ptr %t16, align 8
+  %offset40 = getelementptr %tokenizer.3, ptr %86, i32 0, i32 2
+  %87 = load i64, ptr %offset40, align 4
+  %88 = load i64, ptr %str_len18, align 4
+  %89 = add i64 %87, %88
+  store i64 %89, ptr %offset39, align 4
+  ret i1 true
+
+merge_block41:                                    ; preds = %merge_block22
+  ret i1 false
+}
+
 define ptr @tokenizer_consume_until_condition(ptr %0, ptr %1) {
 entrypoint:
   %t = alloca ptr, align 8
@@ -4150,7 +4354,7 @@ merge_block:                                      ; preds = %entrypoint
   %to = alloca ptr, align 8
   store ptr %11, ptr %to, align 8
   %12 = load ptr, ptr %t, align 8
-  %13 = call i1 @tokenizer_accept_string(ptr %12, ptr @46)
+  %13 = call i1 @tokenizer_accept_keyword(ptr %12, ptr @46)
   br i1 %13, label %then_block1, label %merge_block2
 
 then_block1:                                      ; preds = %merge_block
@@ -4163,7 +4367,7 @@ then_block1:                                      ; preds = %merge_block
 
 merge_block2:                                     ; preds = %merge_block
   %17 = load ptr, ptr %t, align 8
-  %18 = call i1 @tokenizer_accept_string(ptr %17, ptr @47)
+  %18 = call i1 @tokenizer_accept_keyword(ptr %17, ptr @47)
   br i1 %18, label %then_block3, label %merge_block5
 
 then_block3:                                      ; preds = %merge_block2
@@ -4176,7 +4380,7 @@ then_block3:                                      ; preds = %merge_block2
 
 merge_block5:                                     ; preds = %merge_block2
   %22 = load ptr, ptr %t, align 8
-  %23 = call i1 @tokenizer_accept_string(ptr %22, ptr @48)
+  %23 = call i1 @tokenizer_accept_keyword(ptr %22, ptr @48)
   br i1 %23, label %then_block6, label %merge_block8
 
 then_block6:                                      ; preds = %merge_block5
@@ -4189,7 +4393,7 @@ then_block6:                                      ; preds = %merge_block5
 
 merge_block8:                                     ; preds = %merge_block5
   %27 = load ptr, ptr %t, align 8
-  %28 = call i1 @tokenizer_accept_string(ptr %27, ptr @49)
+  %28 = call i1 @tokenizer_accept_keyword(ptr %27, ptr @49)
   br i1 %28, label %then_block9, label %merge_block11
 
 then_block9:                                      ; preds = %merge_block8
@@ -4202,7 +4406,7 @@ then_block9:                                      ; preds = %merge_block8
 
 merge_block11:                                    ; preds = %merge_block8
   %32 = load ptr, ptr %t, align 8
-  %33 = call i1 @tokenizer_accept_string(ptr %32, ptr @50)
+  %33 = call i1 @tokenizer_accept_keyword(ptr %32, ptr @50)
   br i1 %33, label %then_block12, label %merge_block14
 
 then_block12:                                     ; preds = %merge_block11
@@ -4215,7 +4419,7 @@ then_block12:                                     ; preds = %merge_block11
 
 merge_block14:                                    ; preds = %merge_block11
   %37 = load ptr, ptr %t, align 8
-  %38 = call i1 @tokenizer_accept_string(ptr %37, ptr @51)
+  %38 = call i1 @tokenizer_accept_keyword(ptr %37, ptr @51)
   br i1 %38, label %then_block15, label %merge_block17
 
 then_block15:                                     ; preds = %merge_block14
@@ -4228,7 +4432,7 @@ then_block15:                                     ; preds = %merge_block14
 
 merge_block17:                                    ; preds = %merge_block14
   %42 = load ptr, ptr %t, align 8
-  %43 = call i1 @tokenizer_accept_string(ptr %42, ptr @52)
+  %43 = call i1 @tokenizer_accept_keyword(ptr %42, ptr @52)
   br i1 %43, label %then_block18, label %merge_block20
 
 then_block18:                                     ; preds = %merge_block17
@@ -4241,7 +4445,7 @@ then_block18:                                     ; preds = %merge_block17
 
 merge_block20:                                    ; preds = %merge_block17
   %47 = load ptr, ptr %t, align 8
-  %48 = call i1 @tokenizer_accept_string(ptr %47, ptr @53)
+  %48 = call i1 @tokenizer_accept_keyword(ptr %47, ptr @53)
   br i1 %48, label %then_block21, label %merge_block23
 
 then_block21:                                     ; preds = %merge_block20
@@ -4254,7 +4458,7 @@ then_block21:                                     ; preds = %merge_block20
 
 merge_block23:                                    ; preds = %merge_block20
   %52 = load ptr, ptr %t, align 8
-  %53 = call i1 @tokenizer_accept_string(ptr %52, ptr @54)
+  %53 = call i1 @tokenizer_accept_keyword(ptr %52, ptr @54)
   br i1 %53, label %then_block24, label %merge_block28
 
 then_block24:                                     ; preds = %merge_block23
@@ -4279,7 +4483,7 @@ then_block24:                                     ; preds = %merge_block23
 
 merge_block28:                                    ; preds = %merge_block23
   %63 = load ptr, ptr %t, align 8
-  %64 = call i1 @tokenizer_accept_string(ptr %63, ptr @55)
+  %64 = call i1 @tokenizer_accept_keyword(ptr %63, ptr @55)
   br i1 %64, label %then_block29, label %merge_block34
 
 then_block29:                                     ; preds = %merge_block28
@@ -4304,7 +4508,7 @@ then_block29:                                     ; preds = %merge_block28
 
 merge_block34:                                    ; preds = %merge_block28
   %74 = load ptr, ptr %t, align 8
-  %75 = call i1 @tokenizer_accept_string(ptr %74, ptr @56)
+  %75 = call i1 @tokenizer_accept_keyword(ptr %74, ptr @56)
   br i1 %75, label %then_block35, label %merge_block37
 
 then_block35:                                     ; preds = %merge_block34
@@ -4317,7 +4521,7 @@ then_block35:                                     ; preds = %merge_block34
 
 merge_block37:                                    ; preds = %merge_block34
   %79 = load ptr, ptr %t, align 8
-  %80 = call i1 @tokenizer_accept_string(ptr %79, ptr @57)
+  %80 = call i1 @tokenizer_accept_keyword(ptr %79, ptr @57)
   br i1 %80, label %then_block38, label %merge_block40
 
 then_block38:                                     ; preds = %merge_block37
@@ -4330,7 +4534,7 @@ then_block38:                                     ; preds = %merge_block37
 
 merge_block40:                                    ; preds = %merge_block37
   %84 = load ptr, ptr %t, align 8
-  %85 = call i1 @tokenizer_accept_string(ptr %84, ptr @58)
+  %85 = call i1 @tokenizer_accept_keyword(ptr %84, ptr @58)
   br i1 %85, label %then_block41, label %merge_block43
 
 then_block41:                                     ; preds = %merge_block40
@@ -4343,7 +4547,7 @@ then_block41:                                     ; preds = %merge_block40
 
 merge_block43:                                    ; preds = %merge_block40
   %89 = load ptr, ptr %t, align 8
-  %90 = call i1 @tokenizer_accept_string(ptr %89, ptr @59)
+  %90 = call i1 @tokenizer_accept_keyword(ptr %89, ptr @59)
   br i1 %90, label %then_block44, label %merge_block46
 
 then_block44:                                     ; preds = %merge_block43
@@ -4356,7 +4560,7 @@ then_block44:                                     ; preds = %merge_block43
 
 merge_block46:                                    ; preds = %merge_block43
   %94 = load ptr, ptr %t, align 8
-  %95 = call i1 @tokenizer_accept_string(ptr %94, ptr @60)
+  %95 = call i1 @tokenizer_accept_keyword(ptr %94, ptr @60)
   br i1 %95, label %then_block47, label %merge_block49
 
 then_block47:                                     ; preds = %merge_block46
@@ -4719,7 +4923,7 @@ merge_block125:                                   ; preds = %entrypoint120
   %to127 = alloca ptr, align 8
   store ptr %236, ptr %to127, align 8
   %237 = load ptr, ptr %t121, align 8
-  %238 = call i1 @tokenizer_accept_string(ptr %237, ptr @128)
+  %238 = call i1 @tokenizer_accept_keyword(ptr %237, ptr @128)
   br i1 %238, label %then_block128, label %merge_block130
 
 then_block128:                                    ; preds = %merge_block125
@@ -4732,7 +4936,7 @@ then_block128:                                    ; preds = %merge_block125
 
 merge_block130:                                   ; preds = %merge_block125
   %242 = load ptr, ptr %t121, align 8
-  %243 = call i1 @tokenizer_accept_string(ptr %242, ptr @129)
+  %243 = call i1 @tokenizer_accept_keyword(ptr %242, ptr @129)
   br i1 %243, label %then_block131, label %merge_block133
 
 then_block131:                                    ; preds = %merge_block130
@@ -4745,7 +4949,7 @@ then_block131:                                    ; preds = %merge_block130
 
 merge_block133:                                   ; preds = %merge_block130
   %247 = load ptr, ptr %t121, align 8
-  %248 = call i1 @tokenizer_accept_string(ptr %247, ptr @130)
+  %248 = call i1 @tokenizer_accept_keyword(ptr %247, ptr @130)
   br i1 %248, label %then_block134, label %merge_block136
 
 then_block134:                                    ; preds = %merge_block133
@@ -4758,7 +4962,7 @@ then_block134:                                    ; preds = %merge_block133
 
 merge_block136:                                   ; preds = %merge_block133
   %252 = load ptr, ptr %t121, align 8
-  %253 = call i1 @tokenizer_accept_string(ptr %252, ptr @131)
+  %253 = call i1 @tokenizer_accept_keyword(ptr %252, ptr @131)
   br i1 %253, label %then_block137, label %merge_block139
 
 then_block137:                                    ; preds = %merge_block136
@@ -4771,7 +4975,7 @@ then_block137:                                    ; preds = %merge_block136
 
 merge_block139:                                   ; preds = %merge_block136
   %257 = load ptr, ptr %t121, align 8
-  %258 = call i1 @tokenizer_accept_string(ptr %257, ptr @132)
+  %258 = call i1 @tokenizer_accept_keyword(ptr %257, ptr @132)
   br i1 %258, label %then_block140, label %merge_block142
 
 then_block140:                                    ; preds = %merge_block139
@@ -4784,7 +4988,7 @@ then_block140:                                    ; preds = %merge_block139
 
 merge_block142:                                   ; preds = %merge_block139
   %262 = load ptr, ptr %t121, align 8
-  %263 = call i1 @tokenizer_accept_string(ptr %262, ptr @133)
+  %263 = call i1 @tokenizer_accept_keyword(ptr %262, ptr @133)
   br i1 %263, label %then_block143, label %merge_block145
 
 then_block143:                                    ; preds = %merge_block142
@@ -4797,7 +5001,7 @@ then_block143:                                    ; preds = %merge_block142
 
 merge_block145:                                   ; preds = %merge_block142
   %267 = load ptr, ptr %t121, align 8
-  %268 = call i1 @tokenizer_accept_string(ptr %267, ptr @134)
+  %268 = call i1 @tokenizer_accept_keyword(ptr %267, ptr @134)
   br i1 %268, label %then_block146, label %merge_block148
 
 then_block146:                                    ; preds = %merge_block145
@@ -4810,7 +5014,7 @@ then_block146:                                    ; preds = %merge_block145
 
 merge_block148:                                   ; preds = %merge_block145
   %272 = load ptr, ptr %t121, align 8
-  %273 = call i1 @tokenizer_accept_string(ptr %272, ptr @135)
+  %273 = call i1 @tokenizer_accept_keyword(ptr %272, ptr @135)
   br i1 %273, label %then_block149, label %merge_block151
 
 then_block149:                                    ; preds = %merge_block148
@@ -4823,7 +5027,7 @@ then_block149:                                    ; preds = %merge_block148
 
 merge_block151:                                   ; preds = %merge_block148
   %277 = load ptr, ptr %t121, align 8
-  %278 = call i1 @tokenizer_accept_string(ptr %277, ptr @136)
+  %278 = call i1 @tokenizer_accept_keyword(ptr %277, ptr @136)
   br i1 %278, label %then_block152, label %merge_block157
 
 then_block152:                                    ; preds = %merge_block151
@@ -4848,7 +5052,7 @@ then_block152:                                    ; preds = %merge_block151
 
 merge_block157:                                   ; preds = %merge_block151
   %288 = load ptr, ptr %t121, align 8
-  %289 = call i1 @tokenizer_accept_string(ptr %288, ptr @137)
+  %289 = call i1 @tokenizer_accept_keyword(ptr %288, ptr @137)
   br i1 %289, label %then_block158, label %merge_block163
 
 then_block158:                                    ; preds = %merge_block157
@@ -4873,7 +5077,7 @@ then_block158:                                    ; preds = %merge_block157
 
 merge_block163:                                   ; preds = %merge_block157
   %299 = load ptr, ptr %t121, align 8
-  %300 = call i1 @tokenizer_accept_string(ptr %299, ptr @138)
+  %300 = call i1 @tokenizer_accept_keyword(ptr %299, ptr @138)
   br i1 %300, label %then_block164, label %merge_block166
 
 then_block164:                                    ; preds = %merge_block163
@@ -4886,7 +5090,7 @@ then_block164:                                    ; preds = %merge_block163
 
 merge_block166:                                   ; preds = %merge_block163
   %304 = load ptr, ptr %t121, align 8
-  %305 = call i1 @tokenizer_accept_string(ptr %304, ptr @139)
+  %305 = call i1 @tokenizer_accept_keyword(ptr %304, ptr @139)
   br i1 %305, label %then_block167, label %merge_block169
 
 then_block167:                                    ; preds = %merge_block166
@@ -4899,7 +5103,7 @@ then_block167:                                    ; preds = %merge_block166
 
 merge_block169:                                   ; preds = %merge_block166
   %309 = load ptr, ptr %t121, align 8
-  %310 = call i1 @tokenizer_accept_string(ptr %309, ptr @140)
+  %310 = call i1 @tokenizer_accept_keyword(ptr %309, ptr @140)
   br i1 %310, label %then_block170, label %merge_block172
 
 then_block170:                                    ; preds = %merge_block169
@@ -4912,7 +5116,7 @@ then_block170:                                    ; preds = %merge_block169
 
 merge_block172:                                   ; preds = %merge_block169
   %314 = load ptr, ptr %t121, align 8
-  %315 = call i1 @tokenizer_accept_string(ptr %314, ptr @141)
+  %315 = call i1 @tokenizer_accept_keyword(ptr %314, ptr @141)
   br i1 %315, label %then_block173, label %merge_block175
 
 then_block173:                                    ; preds = %merge_block172
@@ -4925,7 +5129,7 @@ then_block173:                                    ; preds = %merge_block172
 
 merge_block175:                                   ; preds = %merge_block172
   %319 = load ptr, ptr %t121, align 8
-  %320 = call i1 @tokenizer_accept_string(ptr %319, ptr @142)
+  %320 = call i1 @tokenizer_accept_keyword(ptr %319, ptr @142)
   br i1 %320, label %then_block176, label %merge_block178
 
 then_block176:                                    ; preds = %merge_block175
