@@ -1165,9 +1165,22 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	
 	if ((*expression).type == NODE_STRUCT_INSTANCIATION) {
 		let struc_data = *cast(*NODE_STRUCT_INSTANCIATION_DATA, (*expression).data);
-		let v = environment_get_variable((*c).environment, struc_data.typ);
-		assert(v != cast(*Variable, null));
-		return v;
+		let type_var = environment_get_variable((*c).environment, struc_data.typ);
+		assert(type_var != cast(*Variable, null));
+
+		/* Allocate the struct on the stack and load it for use as a value */
+		let llvm_type = codegen_get_llvm_type(c, (*type_var).node_type);
+		assert(llvm_type != cast(*LLVMTypeRef, null));
+		let alloca = LLVMBuildAlloca((*c).builder, *llvm_type, struc_data.typ);
+		let loaded = LLVMBuildLoad2((*c).builder, *llvm_type, alloca, "");
+
+		let v = Variable{};
+		v.value = loaded;
+		v.type = *llvm_type;
+		v.stack_level = cast(*i64, null);
+		v.node = expression;
+		v.node_type = (*type_var).node_type;
+		return codegen_create_variable(c, v);
 	};
 
 	if ((*expression).type == NODE_FIELD_ACCESS) {
