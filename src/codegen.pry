@@ -390,6 +390,22 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 		ptr = codegen_generate_expression_value(c, xd, "");
 		is_explicit_deref = true;
 	};
+	if (*node).type == NODE_FIELD_ACCESS {
+		/* Handle chained field access by recursively getting the parent field */
+		let field_access = *cast(*NODE_FIELD_ACCESS_DATA, (*node).data);
+		let x = codegen_get_struct_field(c, field_access.expression, field_access.name);
+		assert(x != cast(*StructField, null));
+		let t = codegen_get_llvm_type(c, (*x).type);
+		assert(t != cast(*LLVMTypeRef, null));
+		let loaded = LLVMBuildLoad2((*c).builder, *t, (*x).value, "");
+		let v = Variable{};
+		v.value = loaded;
+		v.type = cast(LLVMTypeRef, null);
+		v.stack_level = cast(*i64, null);
+		v.node = node;
+		v.node_type = (*x).type;
+		ptr = codegen_create_variable(c, v);
+	};
 
 	assert(ptr != cast(*Variable, null));
 

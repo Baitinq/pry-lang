@@ -831,7 +831,27 @@ let parser_parse_field_access = (p: *parser) => *Node {
 	n.type = NODE_FIELD_ACCESS;
 	n.data = cast(*void, d);
 
-	return parser_create_node(p, n); 
+	let result = parser_create_node(p, n);
+
+	/* Handle chained field access (a.b.c.d) */
+	while parser_accept_token(p, TOKEN_DOT) != cast(*token, null) {
+		let next_ident = parser_accept_token(p, TOKEN_IDENTIFIER);
+		if next_ident == cast(*token, null) {
+			return cast(*Node, null);
+		};
+
+		let next_d = cast(*NODE_FIELD_ACCESS_DATA, arena_alloc((*p).arena, sizeof(NODE_FIELD_ACCESS_DATA)));
+		(*next_d).expression = result;
+		(*next_d).name = cast(*i8, (*next_ident).data);
+
+		let next_n = Node{};
+		next_n.type = NODE_FIELD_ACCESS;
+		next_n.data = cast(*void, next_d);
+
+		result = parser_create_node(p, next_n);
+	};
+
+	return result;
 };
 
 /* PrimaryExpression ::= NULL | NUMBER | BOOLEAN | CHAR | STRING | IDENTIFIER | FunctionDefinition | StructDefinition | StructInstantiation | FieldAccess | LPAREN Expression RPAREN */
