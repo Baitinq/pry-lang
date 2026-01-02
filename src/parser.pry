@@ -31,8 +31,10 @@ let NODE_IMPORT_DECLARATION = 4;
 let NODE_FUNCTION_CALL_STATEMENT = 5;
 let NODE_IF_STATEMENT = 6;
 let NODE_WHILE_STATEMENT = 7;
-let NODE_LOGICAL_EXPRESSION = 31;
+let NODE_LOGICAL_OR_EXPRESSION = 31;
+let NODE_LOGICAL_AND_EXPRESSION = 32;
 let NODE_EQUALITY_EXPRESSION = 8;
+let NODE_RELATIONAL_EXPRESSION = 33;
 let NODE_ADDITIVE_EXPRESSION = 9;
 let NODE_MULTIPLICATIVE_EXPRESSION = 10;
 let NODE_UNARY_EXPRESSION = 11;
@@ -58,10 +60,6 @@ let NODE_CONTINUE_STATEMENT = 30;
 
 let EQUALITY_EXPRESSION_TYPE_EQ = 0;
 let EQUALITY_EXPRESSION_TYPE_NE = 1;
-let EQUALITY_EXPRESSION_TYPE_GE = 2;
-let EQUALITY_EXPRESSION_TYPE_LE = 3;
-let EQUALITY_EXPRESSION_TYPE_LT = 4;
-let EQUALITY_EXPRESSION_TYPE_GT = 5;
 
 let MULTIPLICATIVE_EXPRESSION_TYPE_MUL = 0;
 let MULTIPLICATIVE_EXPRESSION_TYPE_DIV = 1;
@@ -110,13 +108,28 @@ let NODE_WHILE_STATEMENT_DATA = struct {
     statements_len: i64,
 };
 
-let NODE_LOGICAL_EXPRESSION_DATA = struct {
+let NODE_LOGICAL_OR_EXPRESSION_DATA = struct {
     lhs: *Node,
     rhs: *Node,
-    an: bool,
+};
+
+let NODE_LOGICAL_AND_EXPRESSION_DATA = struct {
+    lhs: *Node,
+    rhs: *Node,
 };
 
 let NODE_EQUALITY_EXPRESSION_DATA = struct {
+    lhs: *Node,
+    rhs: *Node,
+    typ: i64,
+};
+
+let RELATIONAL_EXPRESSION_TYPE_GE = 0;
+let RELATIONAL_EXPRESSION_TYPE_LE = 1;
+let RELATIONAL_EXPRESSION_TYPE_LT = 2;
+let RELATIONAL_EXPRESSION_TYPE_GT = 3;
+
+let NODE_RELATIONAL_EXPRESSION_DATA = struct {
     lhs: *Node,
     rhs: *Node,
     typ: i64,
@@ -912,12 +925,14 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	return cast(*Node, null);
 };
 
-/* EqualityExpression ::= AdditiveExpression (("==" | "!=" | "<=" | ">=" | "<" | ">") AdditiveExpression)* */
+extern parser_parse_relational_expression = (*parser) => *Node;
+
+/* EqualityExpression ::= RelationalExpression (("==" | "!=") RelationalExpression)* */
 let parser_parse_equality_expression = (p: *parser) => *Node {
-	let lhs = parser_parse_additive_expression(p);
+	let lhs = parser_parse_relational_expression(p);
 	if lhs == cast(*Node, null) {
 	    return cast(*Node, null);
-	};	
+	};
 
 	while true {
 		let typ = -1;
@@ -951,20 +966,51 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 			};
 		};
 
-		if (typ == -1) {
-			ex = parser_accept_parse(p, (ip: *parser) => *Node {
-				if (parser_accept_token(ip, TOKEN_LESS) == cast(*token, null)) {
-					return cast(*Node, null);
-				};
-				if (parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null)) {
-					return cast(*Node, null);
-				};
-				let n = Node{};
-				return parser_create_node(ip, n);
-			});
-			if (ex != cast(*Node, null)) {
-				typ = EQUALITY_EXPRESSION_TYPE_LE;
+		if typ == -1 {
+			break;
+		};
+
+		let rhs = parser_parse_relational_expression(p);
+		if rhs == cast(*Node, null) {
+		    return cast(*Node, null);
+		};
+
+		let d = cast(*NODE_EQUALITY_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_EQUALITY_EXPRESSION_DATA)));
+		(*d).lhs = lhs;
+		(*d).rhs = rhs;
+		(*d).typ = typ;
+
+		let n = Node{};
+		n.type = NODE_EQUALITY_EXPRESSION;
+		n.data = cast(*void, d);
+
+		lhs = parser_create_node(p, n);
+	};
+
+	return lhs;
+};
+
+/* RelationalExpression ::= AdditiveExpression (("<=" | ">=" | "<" | ">") AdditiveExpression)* */
+let parser_parse_relational_expression = (p: *parser) => *Node {
+	let lhs = parser_parse_additive_expression(p);
+	if lhs == cast(*Node, null) {
+	    return cast(*Node, null);
+	};
+
+	while true {
+		let typ = -1;
+		let ex = parser_accept_parse(p, (ip: *parser) => *Node {
+			if (parser_accept_token(ip, TOKEN_LESS) == cast(*token, null)) {
+				return cast(*Node, null);
 			};
+			if (parser_accept_token(ip, TOKEN_EQUALS) == cast(*token, null)) {
+				return cast(*Node, null);
+			};
+			let n = Node{};
+			return parser_create_node(ip, n);
+		});
+		if (ex != cast(*Node, null)) {
+			typ = RELATIONAL_EXPRESSION_TYPE_LE;
 		};
 
 		if (typ == -1) {
@@ -979,40 +1025,40 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 				return parser_create_node(ip, n);
 			});
 			if (ex != cast(*Node, null)) {
-				typ = EQUALITY_EXPRESSION_TYPE_GE;
+				typ = RELATIONAL_EXPRESSION_TYPE_GE;
 			};
 		};
 
 		if (typ == -1 and parser_accept_token(p, TOKEN_LESS) != cast(*token, null)) {
-			typ = EQUALITY_EXPRESSION_TYPE_LT;
+			typ = RELATIONAL_EXPRESSION_TYPE_LT;
 		};
 
 		if (typ == -1 and parser_accept_token(p, TOKEN_GREATER) != cast(*token, null)) {
-			typ = EQUALITY_EXPRESSION_TYPE_GT;
+			typ = RELATIONAL_EXPRESSION_TYPE_GT;
 		};
 
 		if typ == -1 {
 			break;
 		};
-		
+
 		let rhs = parser_parse_additive_expression(p);
 		if rhs == cast(*Node, null) {
 		    return cast(*Node, null);
-		};	
-		
-		let d = cast(*NODE_EQUALITY_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_EQUALITY_EXPRESSION_DATA)));
+		};
+
+		let d = cast(*NODE_RELATIONAL_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_RELATIONAL_EXPRESSION_DATA)));
 		(*d).lhs = lhs;
 		(*d).rhs = rhs;
 		(*d).typ = typ;
 
 		let n = Node{};
-		n.type = NODE_EQUALITY_EXPRESSION ;
+		n.type = NODE_RELATIONAL_EXPRESSION;
 		n.data = cast(*void, d);
 
 		lhs = parser_create_node(p, n);
 	};
 
-	return lhs; 
+	return lhs;
 };
 
 /* PostfixExpression ::= PrimaryExpression (CastStatement | SizeOfStatement | FunctionCallStatement | FieldAccess )* */
@@ -1136,8 +1182,40 @@ let parser_parse_additive_expression = (p: *parser) => *Node {
 	return lhs;
 };
 
-/* LogicalExpression ::= EqualityExpression (("and" | "or") EqualityExpression)* */
-let parser_parse_logical_expression = (p: *parser) => *Node {
+extern parser_parse_logical_and_expression = (*parser) => *Node;
+
+/* LogicalOrExpression ::= LogicalAndExpression ("or" LogicalAndExpression)* */
+let parser_parse_logical_or_expression = (p: *parser) => *Node {
+	let lhs = parser_parse_logical_and_expression(p);
+	if lhs == cast(*Node, null) {
+		return cast(*Node, null);
+	};
+
+	while true {
+		let o = parser_accept_token(p, TOKEN_OR);
+
+		if o == cast(*token, null) {
+			break;
+		};
+
+		let rhs = parser_parse_logical_and_expression(p);
+		if rhs == cast(*Node, null) {
+			return cast(*Node, null);
+		};
+
+		let new_lhs_data = cast(*NODE_LOGICAL_OR_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_LOGICAL_OR_EXPRESSION_DATA)));
+		((*new_lhs_data).lhs) = lhs;
+		((*new_lhs_data).rhs) = rhs;
+		let new_lhs = Node{};
+		new_lhs.type = NODE_LOGICAL_OR_EXPRESSION;
+		new_lhs.data = cast(*void, new_lhs_data);
+		lhs = parser_create_node(p, new_lhs);
+	};
+	return lhs;
+};
+
+/* LogicalAndExpression ::= EqualityExpression ("and" EqualityExpression)* */
+let parser_parse_logical_and_expression = (p: *parser) => *Node {
 	let lhs = parser_parse_equality_expression(p);
 	if lhs == cast(*Node, null) {
 		return cast(*Node, null);
@@ -1145,9 +1223,8 @@ let parser_parse_logical_expression = (p: *parser) => *Node {
 
 	while true {
 		let an = parser_accept_token(p, TOKEN_AND);
-		let o = parser_accept_token(p, TOKEN_OR);
 
-		if an == cast(*token, null) and o == cast(*token, null) {
+		if an == cast(*token, null) {
 			break;
 		};
 
@@ -1156,21 +1233,20 @@ let parser_parse_logical_expression = (p: *parser) => *Node {
 			return cast(*Node, null);
 		};
 
-		let new_lhs_data = cast(*NODE_LOGICAL_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_LOGICAL_EXPRESSION_DATA)));
-		((*new_lhs_data).an) = an != cast(*token, null);
+		let new_lhs_data = cast(*NODE_LOGICAL_AND_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_LOGICAL_AND_EXPRESSION_DATA)));
 		((*new_lhs_data).lhs) = lhs;
 		((*new_lhs_data).rhs) = rhs;
 		let new_lhs = Node{};
-		new_lhs.type = NODE_LOGICAL_EXPRESSION;
+		new_lhs.type = NODE_LOGICAL_AND_EXPRESSION;
 		new_lhs.data = cast(*void, new_lhs_data);
 		lhs = parser_create_node(p, new_lhs);
 	};
 	return lhs;
 };
 
-/* Expression ::= LogicalExpression */
+/* Expression ::= LogicalOrExpression */
 let parser_parse_expression = (p: *parser) => *Node {
-	return parser_parse_logical_expression(p);
+	return parser_parse_logical_or_expression(p);
 };
 
 /* AssignmentStatement ::= ("let")? ("*")? Expression EQUALS Expression */
