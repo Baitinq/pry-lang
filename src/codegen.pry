@@ -297,7 +297,7 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 			return r;
 		};
 
-		printf("NO SIMPLE TYPE %s!\n", simple_type.name);
+		printf("Error at line %d: Unknown type\n", (*node).line);
 		assert(false);
 	};
 	
@@ -351,7 +351,7 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 		return r;
 	};
 
-	printf("NO TYPEEE BOI %d\n", (*node).type);
+	printf("Error at line %d: Cannot determine type\n", (*node).line);
 	assert(false);
 
 	return null;
@@ -1380,7 +1380,7 @@ let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*fun).data);
 		let f = environment_get_variable((*ic).environment, (*d).name);
 		if f == null {
-			printf("NO variable 2: %s\n", (*d).name);
+			printf("Error at line %d: Undefined variable\n", (*fun).line);
 			assert(false);
 		};
 		let f_type = (*f).node_type;
@@ -1407,7 +1407,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 		let ident = (*cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*expression).data));
 		function = environment_get_variable((*c).environment, ident.name);
 		if function == null {
-			printf("NO variable 1: %s\n", ident.name);
+			printf("Error at line %d: Undefined function\n", (*expression).line);
 			assert(false);
 		};
 

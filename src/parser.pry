@@ -22,6 +22,7 @@ extern strlen = (*i8) => i64;
 let Node = struct {
 	type: i64,
 	data: *void,
+	line: i64,
 };
 
 let NODE_PROGRAM = 1;
@@ -262,6 +263,11 @@ let parser_init = (ts: *token, ts_len: i64, ar: *arena, filename: *i8) => *parse
 let parser_create_node = (p: *parser, n: Node) => *Node {
 	let res = cast(*Node, arena_alloc((*p).arena, sizeof(Node)));
 	*res = n;
+	/* Set line number from previous token (since we already consumed it) */
+	if (*p).offset > 0 {
+		let prev_tok = ((*p).tokens + cast(*token, (*p).offset - 1));
+		(*res).line = (*prev_tok).line;
+	};
 	return res;
 };
 
