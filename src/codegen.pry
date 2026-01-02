@@ -1168,10 +1168,56 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let type_var = environment_get_variable((*c).environment, struc_data.typ);
 		assert(type_var != null);
 
-		/* Allocate the struct on the stack and load it for use as a value */
+		/* Allocate the struct on the stack */
 		let llvm_type = codegen_get_llvm_type(c, (*type_var).node_type);
 		assert(llvm_type != null);
 		let alloca = LLVMBuildAlloca((*c).builder, *llvm_type, struc_data.typ);
+
+		/* Initialize fields if any */
+		if struc_data.fields_len > 0 {
+			/* Get struct type info to find field indices */
+			let node_type = (*type_var).node_type;
+			assert((*node_type).type == NODE_TYPE_SIMPLE_TYPE);
+			let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*node_type).data);
+			assert((*simple_type.underlying_type).type == NODE_TYPE_STRUCT_TYPE);
+			let struct_type_data = *cast(*NODE_TYPE_STRUCT_TYPE_DATA, (*simple_type.underlying_type).data);
+
+			let i = 0;
+			while i < struc_data.fields_len {
+				let field_name = *(struc_data.field_names + cast(**i8, i));
+				let field_value_expr = *(struc_data.field_values + cast(**Node, i));
+
+				/* Find field index in struct definition */
+				let field_idx = 0;
+				let found = false;
+				while field_idx < struct_type_data.fields_len {
+					let field = *(struct_type_data.fields + cast(**Node, field_idx));
+					assert((*field).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER);
+					let field_data = *cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*field).data);
+					if strcmp(field_name, field_data.name) {
+						found = true;
+						break;
+					};
+					field_idx = field_idx + 1;
+				};
+				assert(found);
+
+				/* Get pointer to field */
+				let indices = cast(*LLVMValueRef, arena_alloc((*c).arena, sizeof(LLVMValueRef) * 2));
+				(*(indices + cast(*LLVMValueRef, 0))) = LLVMConstInt(LLVMInt32Type(), 0, 0);
+				(*(indices + cast(*LLVMValueRef, 1))) = LLVMConstInt(LLVMInt32Type(), field_idx, 0);
+				let field_ptr = LLVMBuildGEP2((*c).builder, *llvm_type, alloca, indices, 2, "");
+
+				/* Generate field value and store it */
+				let field_value = codegen_generate_expression_value(c, field_value_expr, null);
+				assert(field_value != null);
+				LLVMBuildStore((*c).builder, (*field_value).value, field_ptr);
+
+				i = i + 1;
+			};
+		};
+
+		/* Load and return the struct value */
 		let loaded = LLVMBuildLoad2((*c).builder, *llvm_type, alloca, "");
 
 		let v = Variable{};

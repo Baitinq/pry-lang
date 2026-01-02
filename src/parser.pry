@@ -188,6 +188,9 @@ let NODE_FUNCTION_DEFINITION_DATA = struct {
 
 let NODE_STRUCT_INSTANCIATION_DATA = struct {
     typ: *i8,
+    field_names: **i8,
+    field_values: **Node,
+    fields_len: i64,
 };
 
 let NODE_FIELD_ACCESS_DATA = struct {
@@ -783,7 +786,7 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	return parser_create_node(p, n); 
 };
 
-/* StructInstantiation ::= IDENTIFIER LBRACE RBRACE */
+/* StructInstantiation ::= IDENTIFIER LBRACE (IDENTIFIER COLON Expression (COMMA IDENTIFIER COLON Expression)*)? RBRACE */
 let parser_parse_struct_instanciation = (p: *parser) => *Node {
 	let typ = parser_accept_token(p, TOKEN_IDENTIFIER);
 	if typ == null {
@@ -793,18 +796,61 @@ let parser_parse_struct_instanciation = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_LBRACE) == null {
 		return null;
 	};
+
+	/* Parse field initializers */
+	let field_names = cast(**i8, arena_alloc((*p).arena, sizeof(*i8) * 64));
+	let field_values = cast(**Node, arena_alloc((*p).arena, sizeof(*Node) * 64));
+	let fields_len = 0;
+
+	/* Check if there are field initializers or if it's an empty struct */
+	let first_field = parser_accept_token(p, TOKEN_IDENTIFIER);
+	if first_field != null {
+		/* We have at least one field initializer */
+		if parser_accept_token(p, TOKEN_COLON) == null {
+			return null;
+		};
+		let first_value = parser_parse_expression(p);
+		if first_value == null {
+			return null;
+		};
+		(*(field_names + cast(**i8, fields_len))) = cast(*i8, (*first_field).data);
+		(*(field_values + cast(**Node, fields_len))) = first_value;
+		fields_len = fields_len + 1;
+
+		/* Parse remaining field initializers */
+		while parser_accept_token(p, TOKEN_COMMA) != null {
+			let field_name = parser_accept_token(p, TOKEN_IDENTIFIER);
+			if field_name == null {
+				break;
+			};
+			if parser_accept_token(p, TOKEN_COLON) == null {
+				return null;
+			};
+			let field_value = parser_parse_expression(p);
+			if field_value == null {
+				return null;
+			};
+			(*(field_names + cast(**i8, fields_len))) = cast(*i8, (*field_name).data);
+			(*(field_values + cast(**Node, fields_len))) = field_value;
+			fields_len = fields_len + 1;
+		};
+	};
+
 	if parser_accept_token(p, TOKEN_RBRACE) == null {
 		return null;
 	};
 
 	let d = cast(*NODE_STRUCT_INSTANCIATION_DATA, arena_alloc((*p).arena, sizeof(NODE_STRUCT_INSTANCIATION_DATA)));
 	(*d).typ = cast(*i8, (*typ).data);
+	(*d).field_names = field_names;
+	(*d).field_values = field_values;
+	(*d).fields_len = fields_len;
 
 	let n = Node{};
 	n.type = NODE_STRUCT_INSTANCIATION;
 	n.data = cast(*void, d);
 
-	return parser_create_node(p, n); 
+	return parser_create_node(p, n);
 };
 
 extern parser_parse_primary_expression = (*parser) => *Node;
