@@ -10,12 +10,9 @@ let test = struct {
 };
 
 let main = () => i64 {
-	/* instanciate new struct. instanciating fields isn't supported here */
-	let inst = test{};
+	/* instanciate new struct with new initialization syntax */
+	let inst = test{x: 2, y: malloc(1), z: true};
 
-	inst.x = 2;
-	inst.z = true;
-	inst.y = malloc(1);
 	(*(inst.y)) = cast(i8, 5);
 
 	let x = 0;

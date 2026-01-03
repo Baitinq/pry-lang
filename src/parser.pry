@@ -334,9 +334,7 @@ let parser_parse_return_statement = (p: *parser) => *Node {
 	let d = cast(*NODE_RETURN_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_RETURN_STATEMENT_DATA )));
 	(*d).expression = maybe_expr;
 
-	let r = Node{};
-	r.type = NODE_RETURN_STATEMENT;
-	r.data = cast(*void, d);
+	let r = Node{type: NODE_RETURN_STATEMENT, data: cast(*void, d), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -380,9 +378,7 @@ let parser_parse_cast_statement = (p: *parser) => *Node {
 	(*d).typ = typ;
 	(*d).expression = expression;
 
-	let r = Node{};
-	r.type = NODE_CAST_STATEMENT;
-	r.data = cast(*void, d);
+	let r = Node{type: NODE_CAST_STATEMENT, data: cast(*void, d), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -414,9 +410,7 @@ let parser_parse_sizeof_statement = (p: *parser) => *Node {
 	let d = cast(*NODE_SIZEOF_STATEMENT_DATA , arena_alloc((*p).arena, sizeof(NODE_SIZEOF_STATEMENT_DATA )));
 	(*d).typ = typ;
 
-	let r = Node{};
-	r.type = NODE_SIZEOF_STATEMENT;
-	r.data = cast(*void, d);
+	let r = Node{type: NODE_SIZEOF_STATEMENT, data: cast(*void, d), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -461,9 +455,7 @@ let parser_parse_function_type = (p: *parser) => *Node {
 	(*d).parameters_len = parameters_len;
 	(*d).retur_type = retur_typ;
 
-	let r = Node{};
-	r.type = NODE_TYPE_FUNCTION_TYPE;
-	r.data = cast(*void, d);
+	let r = Node{type: NODE_TYPE_FUNCTION_TYPE, data: cast(*void, d), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -484,9 +476,7 @@ let parser_parse_type = (p: *parser) => *Node {
 		(*d).name = cast(*i8, (*to).data);
 		(*d).underlying_type = null;
 
-		let r = Node{};
-		r.type = NODE_TYPE_SIMPLE_TYPE;
-		r.data = cast(*void, d);
+		let r = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: parser_current_line(p)};
 
 		return parser_create_node(p, r);
 	};
@@ -495,9 +485,7 @@ let parser_parse_type = (p: *parser) => *Node {
 		let d = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
 		(*d).type = parser_parse_type(p);
 
-		let r = Node{};
-		r.type = NODE_TYPE_POINTER_TYPE;
-		r.data = cast(*void, d);
+		let r = Node{type: NODE_TYPE_POINTER_TYPE, data: cast(*void, d), line: parser_current_line(p)};
 
 		return parser_create_node(p, r);
 	};
@@ -540,9 +528,7 @@ let parser_parse_if_statement = (p: *parser) => *Node {
 	(*dd).statements = statements;
 	(*dd).statements_len = i;
 
-	let r = Node{};
-	r.type = NODE_IF_STATEMENT;
-	r.data = cast(*void, dd);
+	let r = Node{type: NODE_IF_STATEMENT, data: cast(*void, dd), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -582,9 +568,7 @@ let parser_parse_while_statement = (p: *parser) => *Node {
 	(*dd).statements = statements;
 	(*dd).statements_len = i;
 
-	let r = Node{};
-	r.type = NODE_WHILE_STATEMENT;
-	r.data = cast(*void, dd);
+	let r = Node{type: NODE_WHILE_STATEMENT, data: cast(*void, dd), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -611,9 +595,7 @@ let parser_parse_extern_declaration = (p: *parser) => *Node {
 	(*d).name = cast(*i8, (*ident).data);
 	(*d).type = null;
 
-	let n = Node{};
-	n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_PRIMARY_EXPRESSION_IDENTIFIER, data: cast(*void, d), line: parser_current_line(p)};
 
 	let dd = cast(*NODE_ASSIGNMENT_STATEMENT_DATA, arena_alloc((*p).arena, sizeof(NODE_ASSIGNMENT_STATEMENT_DATA)));
 	(*dd).is_declaration = false;
@@ -621,9 +603,7 @@ let parser_parse_extern_declaration = (p: *parser) => *Node {
 	(*dd).lhs = parser_create_node(p, n);
 	(*dd).rhs = typ;
 
-	let r = Node{};
-	r.type = NODE_ASSIGNMENT_STATEMENT;
-	r.data = cast(*void, dd);
+	let r = Node{type: NODE_ASSIGNMENT_STATEMENT, data: cast(*void, dd), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -651,9 +631,7 @@ let parser_parse_function_parameters = (p: *parser) => *slice {
 		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
 		(*d).name = cast(*i8, (*ident).data);
 		(*d).type = type_annotation;
-		let n = Node{};
-		n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
-		n.data = cast(*void, d);
+		let n = Node{type: NODE_PRIMARY_EXPRESSION_IDENTIFIER, data: cast(*void, d), line: parser_current_line(p)};
 		(*(node_list + cast(**Node, i))) = parser_create_node(p, n);
 
 		i = i + 1;
@@ -680,9 +658,7 @@ let parser_parse_type_definition = (p: *parser) => *Node {
 	(*d).name = "";
 	(*d).underlying_type = typ;
 
-	let r = Node{};
-	r.type = NODE_TYPE_SIMPLE_TYPE;
-	r.data = cast(*void, d);
+	let r = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: parser_current_line(p)};
 
 	return parser_create_node(p, r);
 };
@@ -714,9 +690,7 @@ let parser_parse_struct_definition = (p: *parser) => *Node {
 			let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*ip).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
 			(*d).name = cast(*i8, (*ident).data);
 			(*d).type = typ_annotation;
-			let n = Node{};
-			n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
-			n.data = cast(*void, d);
+			let n = Node{type: NODE_PRIMARY_EXPRESSION_IDENTIFIER, data: cast(*void, d), line: parser_current_line(ip)};
 			return parser_create_node(ip, n);
 		});
 		if field == null {
@@ -736,9 +710,7 @@ let parser_parse_struct_definition = (p: *parser) => *Node {
 	let d = cast(*NODE_TYPE_STRUCT_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_STRUCT_TYPE_DATA)));
 	(*d).fields = fields;
 	(*d).fields_len = i;
-	let n = Node{};
-	n.type = NODE_TYPE_STRUCT_TYPE;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_TYPE_STRUCT_TYPE, data: cast(*void, d), line: parser_current_line(p)};
 	return parser_create_node(p, n);
 };
 
@@ -797,11 +769,9 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	(*d).parameters_len = (*params).data_len;
 	(*d).retur_type = retur_type;
 
-	let n = Node{};
-	n.type = NODE_FUNCTION_DEFINITION;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_FUNCTION_DEFINITION, data: cast(*void, d), line: parser_current_line(p)};
 
-	return parser_create_node(p, n); 
+	return parser_create_node(p, n);
 };
 
 /* StructInstantiation ::= IDENTIFIER LBRACE (IDENTIFIER COLON Expression (COMMA IDENTIFIER COLON Expression)*)? RBRACE */
@@ -864,9 +834,7 @@ let parser_parse_struct_instanciation = (p: *parser) => *Node {
 	(*d).field_values = field_values;
 	(*d).fields_len = fields_len;
 
-	let n = Node{};
-	n.type = NODE_STRUCT_INSTANCIATION;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_STRUCT_INSTANCIATION, data: cast(*void, d), line: parser_current_line(p)};
 
 	return parser_create_node(p, n);
 };
@@ -891,9 +859,7 @@ let parser_parse_field_access = (p: *parser) => *Node {
 	(*d).expression = expression;
 	(*d).name = cast(*i8, (*ident).data);
 
-	let n = Node{};
-	n.type = NODE_FIELD_ACCESS;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_FIELD_ACCESS, data: cast(*void, d), line: parser_current_line(p)};
 
 	let result = parser_create_node(p, n);
 
@@ -908,9 +874,7 @@ let parser_parse_field_access = (p: *parser) => *Node {
 		(*next_d).expression = result;
 		(*next_d).name = cast(*i8, (*next_ident).data);
 
-		let next_n = Node{};
-		next_n.type = NODE_FIELD_ACCESS;
-		next_n.data = cast(*void, next_d);
+		let next_n = Node{type: NODE_FIELD_ACCESS, data: cast(*void, next_d), line: parser_current_line(p)};
 
 		result = parser_create_node(p, next_n);
 	};
@@ -955,8 +919,7 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	};
 	
 	if (*tok).type == TOKEN_NULL {
-	    let n = Node{};
-	    n.type = NODE_PRIMARY_EXPRESSION_NULL;
+	    let n = Node{type: NODE_PRIMARY_EXPRESSION_NULL, data: null, line: parser_current_line(p)};
 	    return parser_create_node(p, n);
 	};
 
@@ -964,45 +927,35 @@ let parser_parse_primary_expression = (p: *parser) => *Node {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA)));
 	    (*d).name = cast(*i8, (*tok).data);
 	    (*d).type = null;
-	    let n = Node{};
-	    n.type = NODE_PRIMARY_EXPRESSION_IDENTIFIER;
-	    n.data = cast(*void, d);
+	    let n = Node{type: NODE_PRIMARY_EXPRESSION_IDENTIFIER, data: cast(*void, d), line: parser_current_line(p)};
 	    return parser_create_node(p, n);
 	};
 
 	if (*tok).type == TOKEN_NUMBER {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_NUMBER_DATA)));
 	    (*d).value = *(cast(*i64, (*tok).data));
-	    let n = Node{};
-	    n.type = NODE_PRIMARY_EXPRESSION_NUMBER;
-	    n.data = cast(*void, d);
+	    let n = Node{type: NODE_PRIMARY_EXPRESSION_NUMBER, data: cast(*void, d), line: parser_current_line(p)};
 	    return parser_create_node(p, n);
 	};
-	
+
 	if (*tok).type == TOKEN_BOOLEAN {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA)));
 	    (*d).value = *(cast(*bool, (*tok).data));
-	    let n = Node{};
-	    n.type = NODE_PRIMARY_EXPRESSION_BOOLEAN;
-	    n.data = cast(*void, d);
+	    let n = Node{type: NODE_PRIMARY_EXPRESSION_BOOLEAN, data: cast(*void, d), line: parser_current_line(p)};
 	    return parser_create_node(p, n);
 	};
-	
+
 	if (*tok).type == TOKEN_CHAR {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_CHAR_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_CHAR_DATA)));
 	    (*d).value = *(cast(*i8, (*tok).data));
-	    let n = Node{};
-	    n.type = NODE_PRIMARY_EXPRESSION_CHAR;
-	    n.data = cast(*void, d);
+	    let n = Node{type: NODE_PRIMARY_EXPRESSION_CHAR, data: cast(*void, d), line: parser_current_line(p)};
 	    return parser_create_node(p, n);
 	};
-	
+
 	if (*tok).type == TOKEN_STRING {
 	    let d = cast(*NODE_PRIMARY_EXPRESSION_STRING_DATA, arena_alloc((*p).arena, sizeof(NODE_PRIMARY_EXPRESSION_STRING_DATA)));
 	    (*d).value = cast(*i8, (*tok).data);
-	    let n = Node{};
-	    n.type = NODE_PRIMARY_EXPRESSION_STRING;
-	    n.data = cast(*void, d);
+	    let n = Node{type: NODE_PRIMARY_EXPRESSION_STRING, data: cast(*void, d), line: parser_current_line(p)};
 	    return parser_create_node(p, n);
 	};
 
@@ -1027,7 +980,7 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 			if parser_accept_token(ip, TOKEN_EQUALS) == null {
 				return null;
 			};
-			let n = Node{};
+			let n = Node{type: 0, data: null, line: 0};
 			return parser_create_node(ip, n);
 		});
 		if ex != null {
@@ -1042,7 +995,7 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 				if (parser_accept_token(ip, TOKEN_EQUALS) == null) {
 					return null;
 				};
-				let n = Node{};
+				let n = Node{type: 0, data: null, line: 0};
 				return parser_create_node(ip, n);
 			});
 			if (ex != null) {
@@ -1064,9 +1017,7 @@ let parser_parse_equality_expression = (p: *parser) => *Node {
 		(*d).rhs = rhs;
 		(*d).typ = typ;
 
-		let n = Node{};
-		n.type = NODE_EQUALITY_EXPRESSION;
-		n.data = cast(*void, d);
+		let n = Node{type: NODE_EQUALITY_EXPRESSION, data: cast(*void, d), line: parser_current_line(p)};
 
 		lhs = parser_create_node(p, n);
 	};
@@ -1090,7 +1041,7 @@ let parser_parse_relational_expression = (p: *parser) => *Node {
 			if (parser_accept_token(ip, TOKEN_EQUALS) == null) {
 				return null;
 			};
-			let n = Node{};
+			let n = Node{type: 0, data: null, line: 0};
 			return parser_create_node(ip, n);
 		});
 		if (ex != null) {
@@ -1105,7 +1056,7 @@ let parser_parse_relational_expression = (p: *parser) => *Node {
 				if (parser_accept_token(ip, TOKEN_EQUALS) == null) {
 					return null;
 				};
-				let n = Node{};
+				let n = Node{type: 0, data: null, line: 0};
 				return parser_create_node(ip, n);
 			});
 			if (ex != null) {
@@ -1135,9 +1086,7 @@ let parser_parse_relational_expression = (p: *parser) => *Node {
 		(*d).rhs = rhs;
 		(*d).typ = typ;
 
-		let n = Node{};
-		n.type = NODE_RELATIONAL_EXPRESSION;
-		n.data = cast(*void, d);
+		let n = Node{type: NODE_RELATIONAL_EXPRESSION, data: cast(*void, d), line: parser_current_line(p)};
 
 		lhs = parser_create_node(p, n);
 	};
@@ -1189,9 +1138,7 @@ let parser_parse_unary_expression = (p: *parser) => *Node {
 		return null;
 	};
 	((*new_lhs_data).expression) = e;
-	let new_lhs = Node{};
-	new_lhs.type = NODE_UNARY_EXPRESSION;
-	new_lhs.data = cast(*void, new_lhs_data);
+	let new_lhs = Node{type: NODE_UNARY_EXPRESSION, data: cast(*void, new_lhs_data), line: parser_current_line(p)};
 	return parser_create_node(p, new_lhs);
 };
 
@@ -1226,9 +1173,7 @@ let parser_parse_multiplicative_expression = (p: *parser) => *Node {
 		((*new_lhs_data).lhs) = lhs;
 		((*new_lhs_data).rhs) = rhs;
 		((*new_lhs_data).typ) = typ;
-		let new_lhs = Node{};
-		new_lhs.type = NODE_MULTIPLICATIVE_EXPRESSION;
-		new_lhs.data = cast(*void, new_lhs_data);
+		let new_lhs = Node{type: NODE_MULTIPLICATIVE_EXPRESSION, data: cast(*void, new_lhs_data), line: parser_current_line(p)};
 		lhs = parser_create_node(p, new_lhs);
 	};
 	return lhs;
@@ -1258,9 +1203,7 @@ let parser_parse_additive_expression = (p: *parser) => *Node {
 		((*new_lhs_data).addition) = plus != null;
 		((*new_lhs_data).lhs) = lhs;
 		((*new_lhs_data).rhs) = rhs;
-		let new_lhs = Node{};
-		new_lhs.type = NODE_ADDITIVE_EXPRESSION;
-		new_lhs.data = cast(*void, new_lhs_data);
+		let new_lhs = Node{type: NODE_ADDITIVE_EXPRESSION, data: cast(*void, new_lhs_data), line: parser_current_line(p)};
 		lhs = parser_create_node(p, new_lhs);
 	};
 	return lhs;
@@ -1290,9 +1233,7 @@ let parser_parse_logical_or_expression = (p: *parser) => *Node {
 		let new_lhs_data = cast(*NODE_LOGICAL_OR_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_LOGICAL_OR_EXPRESSION_DATA)));
 		((*new_lhs_data).lhs) = lhs;
 		((*new_lhs_data).rhs) = rhs;
-		let new_lhs = Node{};
-		new_lhs.type = NODE_LOGICAL_OR_EXPRESSION;
-		new_lhs.data = cast(*void, new_lhs_data);
+		let new_lhs = Node{type: NODE_LOGICAL_OR_EXPRESSION, data: cast(*void, new_lhs_data), line: parser_current_line(p)};
 		lhs = parser_create_node(p, new_lhs);
 	};
 	return lhs;
@@ -1320,9 +1261,7 @@ let parser_parse_logical_and_expression = (p: *parser) => *Node {
 		let new_lhs_data = cast(*NODE_LOGICAL_AND_EXPRESSION_DATA, arena_alloc((*p).arena, sizeof(NODE_LOGICAL_AND_EXPRESSION_DATA)));
 		((*new_lhs_data).lhs) = lhs;
 		((*new_lhs_data).rhs) = rhs;
-		let new_lhs = Node{};
-		new_lhs.type = NODE_LOGICAL_AND_EXPRESSION;
-		new_lhs.data = cast(*void, new_lhs_data);
+		let new_lhs = Node{type: NODE_LOGICAL_AND_EXPRESSION, data: cast(*void, new_lhs_data), line: parser_current_line(p)};
 		lhs = parser_create_node(p, new_lhs);
 	};
 	return lhs;
@@ -1364,9 +1303,7 @@ let parse_assignment_statement = (p: *parser) => *Node {
 	(*d).is_dereference = is_dereference;
 	(*d).lhs = lhs;
 	(*d).rhs = rhs;
-	let n = Node{};
-	n.type = NODE_ASSIGNMENT_STATEMENT;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_ASSIGNMENT_STATEMENT, data: cast(*void, d), line: parser_current_line(p)};
 	return parser_create_node(p, n);
 };
 
@@ -1419,9 +1356,7 @@ let parser_parse_import_declaration = (p: *parser) => *Node {
 	let bytes_read = read(file, file_contents, file_size);
 	(*(file_contents + cast(*i8, bytes_read))) = '\0';
 
-	let f = slice{};
-	f.data = cast(*void, file_contents);
-	f.data_len = file_size;
+	let f = slice{data: cast(*void, file_contents), data_len: file_size};
 	let inner_tokenizer = tokenizer_init((*p).arena, f);
 	let tokens = tokenizer_tokenize(inner_tokenizer);
 
@@ -1438,9 +1373,7 @@ let parser_parse_import_declaration = (p: *parser) => *Node {
 	let d = cast(*NODE_IMPORT_DECLARATION_DATA , arena_alloc((*p).arena, sizeof(NODE_IMPORT_DECLARATION_DATA)));
 	(*d).filename = impor_filename;
 	(*d).program = ast;
-	let n = Node{};
-	n.type = NODE_IMPORT_DECLARATION;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_IMPORT_DECLARATION, data: cast(*void, d), line: parser_current_line(p)};
 	return parser_create_node(p, n);
 };
 
@@ -1513,9 +1446,7 @@ let parse_function_call_statement = (p: *parser) => *Node {
 		(*d).expression = expression;
 	};
 
-	let n = Node{};
-	n.type = NODE_FUNCTION_CALL_STATEMENT;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_FUNCTION_CALL_STATEMENT, data: cast(*void, d), line: parser_current_line(p)};
 	return parser_create_node(p, n);
 };
 
@@ -1590,8 +1521,7 @@ let parser_parse_statement = (p: *parser) => *Node {
 		    return null;
 		};
 
-		let n = Node{};
-		n.type = NODE_BREAK_STATEMENT;
+		let n = Node{type: NODE_BREAK_STATEMENT, data: null, line: parser_current_line(ip)};
 		return parser_create_node(ip, n);
 	});
 	if retu != null {
@@ -1604,8 +1534,7 @@ let parser_parse_statement = (p: *parser) => *Node {
 		    return null;
 		};
 
-		let n = Node{};
-		n.type = NODE_CONTINUE_STATEMENT;
+		let n = Node{type: NODE_CONTINUE_STATEMENT, data: null, line: parser_current_line(ip)};
 		return parser_create_node(ip, n);
 	});
 	if retu != null {
@@ -1634,9 +1563,7 @@ let parse_program = (p: *parser) => *Node {
 	let d = cast(*NODE_PROGRAM_DATA, arena_alloc((*p).arena, sizeof(NODE_PROGRAM_DATA)));
 	(*d).statements = nodes;
 	(*d).statements_len = i;
-	let n = Node{};
-	n.type = NODE_PROGRAM;
-	n.data = cast(*void, d);
+	let n = Node{type: NODE_PROGRAM, data: cast(*void, d), line: parser_current_line(p)};
 	return parser_create_node(p, n);
 };
 

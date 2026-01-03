@@ -24,9 +24,7 @@ let read_file = (filename: *i8, alloc: *arena) => slice {
 
 	fclose(file);
 
-	let sl = slice{};
-	sl.data = cast(*void, buf);
-	sl.data_len = file_size;
+	let sl = slice{data: cast(*void, buf), data_len: file_size};
 	return sl;
 };
 

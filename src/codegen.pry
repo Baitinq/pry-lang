@@ -363,24 +363,14 @@ let codegen_generate_literal = (c: *codegen, literal_val: LLVMValueRef, name: *i
 		if (*e).scope_stack_len == 1 {
 			let lt = codegen_get_llvm_type(c, node_type);
 			assert(lt != null);
-			let v = Variable{};
-			v.value = LLVMAddGlobal((*c).llvm_module, *lt, name);
-			v.type = cast(LLVMTypeRef, null);
-			v.stack_level = null;
-			v.node = node;
-			v.node_type = node_type;
+			let v = Variable{value: LLVMAddGlobal((*c).llvm_module, *lt, name), type: cast(LLVMTypeRef, null), node: node, node_type: node_type, stack_level: null};
 			LLVMSetInitializer(v.value, literal_val);
 			return codegen_create_variable(c, v);
 		};
 	};
 
 
-	let v = Variable{};
-	v.value = literal_val;
-	v.type = cast(LLVMTypeRef, null);
-	v.stack_level = null;
-	v.node = node;
-	v.node_type = node_type;
+	let v = Variable{value: literal_val, type: cast(LLVMTypeRef, null), node: node, node_type: node_type, stack_level: null};
 	return codegen_create_variable(c, v);
 };
 
@@ -413,12 +403,7 @@ let codegen_get_struct_field = (c: *codegen, node: *Node, name: *i8) => *StructF
 		let t = codegen_get_llvm_type(c, (*x).type);
 		assert(t != null);
 		let loaded = LLVMBuildLoad2((*c).builder, *t, (*x).value, "");
-		let v = Variable{};
-		v.value = loaded;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = node;
-		v.node_type = (*x).type;
+		let v = Variable{value: loaded, type: cast(LLVMTypeRef, null), node: node, node_type: (*x).type, stack_level: null};
 		ptr = codegen_create_variable(c, v);
 	};
 
@@ -506,89 +491,67 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NULL) {
 		let inner_type_data = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*inner_type_data).name = "void";
-		let inner_type = Node{};
-		inner_type.type = NODE_TYPE_SIMPLE_TYPE;
-		inner_type.data = cast(*void, inner_type_data);
+		let inner_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, inner_type_data), line: 0};
 
 		let node_type_data = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
 		(*node_type_data).type = codegen_create_node(c, inner_type);
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_POINTER_TYPE;
-		node_type.data = cast(*void, node_type_data);
+		let node_type = Node{type: NODE_TYPE_POINTER_TYPE, data: cast(*void, node_type_data), line: 0};
 
 		return codegen_generate_literal(c, LLVMConstNull(LLVMPointerType(LLVMInt8Type(), 0)), name, expression, codegen_create_node(c, node_type));
 	};
 
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_NUMBER) {
 		let n = (*cast(*NODE_PRIMARY_EXPRESSION_NUMBER_DATA, (*expression).data)).value;
-		
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
 
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "i64";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
-		
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
+
 		return codegen_generate_literal(c, LLVMConstInt(LLVMInt64Type(), n, 0), name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_BOOLEAN) {
 		let b = (*cast(*NODE_PRIMARY_EXPRESSION_BOOLEAN_DATA, (*expression).data)).value;
-		
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
 
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "bool";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
 		let int_value = 0;
 		if b == true {
 			int_value = 1;
 		};
-		
+
 		return codegen_generate_literal(c, LLVMConstInt(LLVMInt1Type(), int_value, 0), name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_CHAR) {
 		let ch = cast(i64, (*cast(*NODE_PRIMARY_EXPRESSION_CHAR_DATA, (*expression).data)).value);
 
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "i8";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
-		
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
+
 		return codegen_generate_literal(c, LLVMConstInt(LLVMInt8Type(), cast(i64, ch), 0), name, expression, codegen_create_node(c, node_type));
 	};
 	
 	if ((*expression).type == NODE_PRIMARY_EXPRESSION_STRING) {
 		let str = (*cast(*NODE_PRIMARY_EXPRESSION_STRING_DATA, (*expression).data)).value;
-		
+
 		let x = LLVMBuildGlobalStringPtr((*c).builder, str, "");
 
 		let inner_type_data = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*inner_type_data).name = "i8";
-		let inner_type = Node{};
-		inner_type.type = NODE_TYPE_SIMPLE_TYPE;
-		inner_type.data = cast(*void, inner_type_data);
+		let inner_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, inner_type_data), line: 0};
 
 		let node_type_data = cast(*NODE_TYPE_POINTER_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_POINTER_TYPE_DATA)));
 		(*node_type_data).type = codegen_create_node(c, inner_type);
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_POINTER_TYPE;
-		node_type.data = cast(*void, node_type_data);
+		let node_type = Node{type: NODE_TYPE_POINTER_TYPE, data: cast(*void, node_type_data), line: 0};
 
-		let v = Variable{};
-		v.value = x;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = codegen_create_node(c, node_type);
+		let v = Variable{value: x, type: cast(LLVMTypeRef, null), node: expression, node_type: codegen_create_node(c, node_type), stack_level: null};
 
 		return codegen_create_variable(c, v);
 	};
@@ -698,19 +661,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		(*d).parameters = param_types;
 		(*d).parameters_len = i;
 		(*d).retur_type = function_definition.retur_type;
-		let n = Node{};
+		let n = Node{type: NODE_TYPE_FUNCTION_TYPE, data: cast(*void, d), line: 0};
 		let node_type = codegen_create_node(c, n);
-		(*node_type).type = NODE_TYPE_FUNCTION_TYPE;
-		(*node_type).data = cast(*void, d);
 
                 /* Needed for recursive functions */
 		if name != null {
-			let v = Variable{};
-			v.value = function;
-			v.type = cast(LLVMTypeRef, null);
-			v.stack_level = null;
-			v.node = expression;
-			v.node_type = node_type;
+			let v = Variable{value: function, type: cast(LLVMTypeRef, null), node: expression, node_type: node_type, stack_level: null};
 			environment_add_variable((*c).environment, name, codegen_create_variable(c, v));
 		};
 
@@ -731,13 +687,8 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			};
 			let alloca = LLVMBuildAlloca((*c).builder, *llvm_param_type, param.name);
 			LLVMBuildStore((*c).builder, p, alloca);
-			
-			let v = Variable{};
-			v.value = alloca;
-			v.type = cast(LLVMTypeRef, null);
-			v.stack_level = null;
-			v.node = param_node;
-			v.node_type = param_type;
+
+			let v = Variable{value: alloca, type: cast(LLVMTypeRef, null), node: param_node, node_type: param_type, stack_level: null};
 			environment_add_variable((*c).environment, param.name, codegen_create_variable(c, v));
 			parameters_index = parameters_index + 1;
 		};
@@ -753,13 +704,8 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		};
 
 		LLVMPositionBuilderAtEnd((*c).builder, builder_pos);
-	
-		let v = Variable{};
-		v.value = function;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = node_type;
+
+		let v = Variable{value: function, type: cast(LLVMTypeRef, null), node: expression, node_type: node_type, stack_level: null};
 
 		/* TODO: Move to defer */
 		(*c).current_function = last_function;
@@ -775,12 +721,10 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let current_block = cast(*LLVMBasicBlockRef, arena_alloc((*c).arena, sizeof(LLVMBasicBlockRef)));
 		*current_block = LLVMGetInsertBlock((*c).builder);
 
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "bool";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
 		let rhs_block = LLVMAppendBasicBlock((*c).current_function, "and_rhs");
 		let merge_block = LLVMAppendBasicBlock((*c).current_function, "and_merge");
@@ -818,12 +762,10 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let current_block = cast(*LLVMBasicBlockRef, arena_alloc((*c).arena, sizeof(LLVMBasicBlockRef)));
 		*current_block = LLVMGetInsertBlock((*c).builder);
 
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "bool";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
 		let rhs_block = LLVMAppendBasicBlock((*c).current_function, "or_rhs");
 		let merge_block = LLVMAppendBasicBlock((*c).current_function, "or_merge");
@@ -881,13 +823,10 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		let cmp = LLVMBuildICmp((*c).builder, cast(LLVMIntPredicate, op), (*lhs_value).value, (*rhs_value).value, "");
 
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "bool";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
 		return codegen_generate_literal(c, cmp, name, expression, codegen_create_node(c, node_type));
 	};
@@ -920,17 +859,14 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		let cmp = LLVMBuildICmp((*c).builder, cast(LLVMIntPredicate, op), (*lhs_value).value, (*rhs_value).value, "");
 
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "bool";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
 		return codegen_generate_literal(c, cmp, name, expression, codegen_create_node(c, node_type));
 	};
-	
+
 	if ((*expression).type == NODE_ADDITIVE_EXPRESSION) {
 		let exp = (*(cast(*NODE_ADDITIVE_EXPRESSION_DATA, (*expression).data)));
 		let lhs_value = codegen_generate_expression_value(c, exp.lhs, null);
@@ -941,13 +877,10 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		assert(compare_types(c, (*lhs_value).node_type, (*rhs_value).node_type, false));
 
 		let result = cast(LLVMValueRef, null);
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "i64";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
 		let pnode_type = codegen_create_node(c, node_type);
 
@@ -1012,25 +945,19 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			let simple_type = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*typ).data);
 			assert(strcmp(simple_type.name, "bool"));
                         r = LLVMBuildICmp((*c).builder, cast(LLVMIntPredicate, LLVMIntEQ), (*k).value, LLVMConstInt(LLVMInt1Type(), 0, 0), "");
-			let node_type = Node{};
-			node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 			let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 			(*d).name = "bool";
 			(*d).underlying_type = null;
-			node_type.data = cast(*void, d);
+			let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 			typ = codegen_create_node(c, node_type);
 		};
-		
+
 		if exp.typ == UNARY_EXPRESSION_TYPE_MINUS {
                         r = LLVMBuildNeg((*c).builder, (*k).value, "");
-			let node_type = Node{};
-			node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 			let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 			(*d).name = "i64";
 			(*d).underlying_type = null;
-			node_type.data = cast(*void, d);
+			let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 			typ = codegen_create_node(c, node_type);
 		};
 		
@@ -1058,12 +985,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let function_type = codegen_get_llvm_type(c, expression);
 		assert(function_type != null);
 		let function = LLVMAddFunction((*c).llvm_module, name, *function_type);
-		let v = Variable{};
-		v.value = function;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = expression;
+		let v = Variable{value: function, type: cast(LLVMTypeRef, null), node: expression, node_type: expression, stack_level: null};
 		return codegen_create_variable(c, v);
 	};
 	
@@ -1101,15 +1023,10 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 				result_value = LLVMBuildPointerCast((*c).builder, src_value, dest_llvm_type, "");
 			};
 		};
-		let v = Variable{};
-		v.value = result_value;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = dest_node_type;
+		let v = Variable{value: result_value, type: cast(LLVMTypeRef, null), node: expression, node_type: dest_node_type, stack_level: null};
 		return codegen_create_variable(c, v);
 	};
-	
+
 	if ((*expression).type == NODE_SIZEOF_STATEMENT) {
 		let exp = *cast(*NODE_SIZEOF_STATEMENT_DATA, (*expression).data);
 		let typ = codegen_get_llvm_type(c, exp.typ);
@@ -1117,20 +1034,12 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let size_in_bytes = LLVMStoreSizeOfType((*c).llvm_target_data, *typ);
 		let size_val = LLVMConstInt(LLVMInt64Type(), size_in_bytes, 0);
 
-		let node_type = Node{};
-		node_type.type = NODE_TYPE_SIMPLE_TYPE;
-
 		let d = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*d).name = "i64";
 		(*d).underlying_type = null;
-		node_type.data = cast(*void, d);
+		let node_type = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, d), line: 0};
 
-		let v = Variable{};
-		v.value = size_val;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = codegen_create_node(c, node_type);
+		let v = Variable{value: size_val, type: cast(LLVMTypeRef, null), node: expression, node_type: codegen_create_node(c, node_type), stack_level: null};
 		return codegen_create_variable(c, v);
 	};
 
@@ -1139,20 +1048,13 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let dd = cast(*NODE_TYPE_SIMPLE_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_SIMPLE_TYPE_DATA)));
 		(*dd).name = name;
 		(*dd).underlying_type = expression;
-		let n = Node{};
-		n.type = NODE_TYPE_SIMPLE_TYPE;
-		n.data = cast(*void, dd);
+		let n = Node{type: NODE_TYPE_SIMPLE_TYPE, data: cast(*void, dd), line: 0};
 		let simple_type_node = codegen_create_node(c, n);
 
 		let struc_type = LLVMStructCreateNamed((*c).llvm_context, name);
 
 		if name != null {
-			let v = Variable{};
-			v.value = cast(LLVMValueRef, null);
-			v.type = struc_type;
-			v.stack_level = null;
-			v.node = expression;
-			v.node_type = simple_type_node;
+			let v = Variable{value: cast(LLVMValueRef, null), type: struc_type, node: expression, node_type: simple_type_node, stack_level: null};
 			environment_add_variable((*c).environment, name, codegen_create_variable(c, v));
 		};
 
@@ -1170,12 +1072,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		LLVMStructSetBody(struc_type, llvm_types, i, 0);
 
-		let v = Variable{};
-		v.value = cast(LLVMValueRef, null);
-		v.type = struc_type;
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = simple_type_node;
+		let v = Variable{value: cast(LLVMValueRef, null), type: struc_type, node: expression, node_type: simple_type_node, stack_level: null};
 		return codegen_create_variable(c, v);
 	};
 
@@ -1183,12 +1080,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let simple_type_data = *cast(*NODE_TYPE_SIMPLE_TYPE_DATA, (*expression).data);
 		let typ = codegen_get_llvm_type(c, simple_type_data.underlying_type);
 		assert(typ != null);
-		let v = Variable{};
-		v.value = cast(LLVMValueRef, null);
-		v.type = *typ;
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = simple_type_data.underlying_type;
+		let v = Variable{value: cast(LLVMValueRef, null), type: *typ, node: expression, node_type: simple_type_data.underlying_type, stack_level: null};
 		return codegen_create_variable(c, v);
 	};
 	
@@ -1249,12 +1141,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		/* Load and return the struct value */
 		let loaded = LLVMBuildLoad2((*c).builder, *llvm_type, alloca, "");
 
-		let v = Variable{};
-		v.value = loaded;
-		v.type = *llvm_type;
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = (*type_var).node_type;
+		let v = Variable{value: loaded, type: *llvm_type, node: expression, node_type: (*type_var).node_type, stack_level: null};
 		return codegen_create_variable(c, v);
 	};
 
@@ -1265,12 +1152,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let t = codegen_get_llvm_type(c, (*x).type);
 		assert(t != null);
 		let loaded = LLVMBuildLoad2((*c).builder, *t, (*x).value, "");
-		let v = Variable{};
-		v.value = loaded;
-		v.type = cast(LLVMTypeRef, null);
-		v.stack_level = null;
-		v.node = expression;
-		v.node_type = (*x).type;
+		let v = Variable{value: loaded, type: cast(LLVMTypeRef, null), node: expression, node_type: (*x).type, stack_level: null};
 		return codegen_create_variable(c, v);
 	};
 
@@ -1331,15 +1213,9 @@ let codegen_generate_assignment_statement = (c: *codegen, stmt: *NODE_ASSIGNMENT
 			assert(v != null);
 			ptr = (*v).value;
 		};
-	
-		let new_variable = Variable{};
 
-		new_variable.value = ptr;
-		new_variable.type = (*variable).type;
-		new_variable.stack_level = null;
-		new_variable.node = (*variable).node;
-		new_variable.node_type = typ;
-		
+		let new_variable = Variable{value: ptr, type: (*variable).type, node: (*variable).node, node_type: typ, stack_level: null};
+
 		if (*stmt).is_declaration {
 			environment_add_variable((*c).environment, identifier, codegen_create_variable(c, new_variable));
 		};
@@ -1482,13 +1358,7 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 
 	let function_return_type = get_function_return_type(c, (*function).node_type);
 
-	let v = Variable{};
-
-	v.value = res;
-	v.type = cast(LLVMTypeRef, null);
-	v.stack_level = null;
-	v.node = node;
-	v.node_type = function_return_type;
+	let v = Variable{value: res, type: cast(LLVMTypeRef, null), node: node, node_type: function_return_type, stack_level: null};
 
 	return codegen_create_variable(c, v);
 };

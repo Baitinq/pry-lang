@@ -594,8 +594,6 @@ let tokenizer_tokenize = (t: *tokenizer) => slice {
 		tokens_len = tokens_len + 1;
 	};
 
-	let res = slice{};
-	res.data = cast(*void, tokens);
-	res.data_len = tokens_len;
+	let res = slice{data: cast(*void, tokens), data_len: tokens_len};
 	return res;
 };
