@@ -58,6 +58,8 @@ StructDefinition ::= "struct" LBRACE (StructField ("," StructField)*)? RBRACE
 
 StructField ::= IDENTIFIER ":" Type
 
-StructInstantiation ::= IDENTIFIER LBRACE RBRACE
+StructInstantiation ::= IDENTIFIER LBRACE (StructFieldInit ("," StructFieldInit)*)? RBRACE
+
+StructFieldInit ::= IDENTIFIER ":" Expression
 
 FieldAccess ::= Expression DOT IDENTIFIER
