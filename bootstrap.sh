@@ -9,15 +9,15 @@ llc bootstrap/output.ll && cc $(llvm-config --libs) bootstrap/output.s -o stage0
 
 echo "Building stage 1..."
 
-./stage0 src/main.pry && cc $(llvm-config --libs) bootstrap_output.o -o stage1
+./stage0 src/main.pry -O2 && cc $(llvm-config --libs) bootstrap_output.o -o stage1
 
 echo "Building stage 2..."
 
-./stage1 src/main.pry && cc $(llvm-config --libs) bootstrap_output.o -o stage2
+./stage1 src/main.pry -O2 && cc $(llvm-config --libs) bootstrap_output.o -o stage2
 
 echo "Building stage 3..."
 
-./stage2 src/main.pry && cc $(llvm-config --libs) bootstrap_output.o -o stage3
+./stage2 src/main.pry -O2 && cc $(llvm-config --libs) bootstrap_output.o -o stage3
 
-echo "Regenerating stage 0..."
-./stage3 src/main.pry --generate-ir && mv output.ll bootstrap/output.ll
+echo "Regenerating stage 0 (with -O2)..."
+./stage3 src/main.pry --generate-ir -O2 && mv output.ll bootstrap/output.ll

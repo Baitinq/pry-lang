@@ -35,6 +35,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 	};
 
 	let generate_ir = false;
+	let opt_level = -1;
 	let filename = cast(*i8, null);
 
 	let i = 0;
@@ -44,6 +45,21 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 		if strcmp(arg, "--generate-ir") {
 		    generate_ir = true;
+		    continue;
+		};
+
+		if strcmp(arg, "-O") or strcmp(arg, "-O1") {
+		    opt_level = 1;
+		    continue;
+		};
+
+		if strcmp(arg, "-O0") {
+		    opt_level = 0;
+		    continue;
+		};
+
+		if strcmp(arg, "-O2") {
+		    opt_level = 2;
 		    continue;
 		};
 
@@ -68,7 +84,7 @@ let main = (argc: i64, argv: **i8) => i64 {
 
 	let c = codegen_init(alloc);
 	let res = codegen_generate(c, ast);
-	let res = codegen_compile(c, generate_ir);
+	let res = codegen_compile(c, generate_ir, opt_level);
 	codegen_deinit(c);
 
 	arena_free(alloc);

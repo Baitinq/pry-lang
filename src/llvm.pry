@@ -366,3 +366,13 @@ extern LLVMGetIntTypeWidth = (LLVMTypeRef) => i64;
 let LLVMIntegerTypeKind = 8;
 let LLVMPointerTypeKind = 12;
 
+/* PassBuilder API for optimization */
+let LLVMPassBuilderOptionsRef = newtype *void;
+let LLVMErrorRef = newtype *void;
+
+extern LLVMCreatePassBuilderOptions = () => LLVMPassBuilderOptionsRef;
+extern LLVMDisposePassBuilderOptions = (LLVMPassBuilderOptionsRef) => void;
+extern LLVMRunPasses = (LLVMModuleRef, *i8, LLVMTargetMachineRef, LLVMPassBuilderOptionsRef) => LLVMErrorRef;
+extern LLVMGetErrorMessage = (LLVMErrorRef) => *i8;
+extern LLVMDisposeErrorMessage = (*i8) => void;
+

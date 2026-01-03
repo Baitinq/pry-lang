@@ -1519,15 +1519,10 @@ let codegen_generate = (c: *codegen, ast: *Node) => i64 {
 	return 0;
 };
 
-let codegen_compile = (c: *codegen, dump_ir: bool) => i64 {
+let codegen_compile = (c: *codegen, dump_ir: bool, opt_level: i64) => i64 {
         /* Dump module */
 	LLVMDumpModule((*c).llvm_module);
 	let message = cast(**i8, null);
-
-	if dump_ir {
-		LLVMPrintModuleToFile((*c).llvm_module, "output.ll", message);
-		return 0;
-	};
 
 	/* Generate code */
         let triple = LLVMGetDefaultTargetTriple();
@@ -1547,6 +1542,33 @@ let codegen_compile = (c: *codegen, dump_ir: bool) => i64 {
             LLVMCodeModelDefault,
         );
         LLVMDisposeMessage(triple);
+
+        /* Run optimization passes if -O flag was set */
+        if opt_level >= 0 {
+            let pass_options = LLVMCreatePassBuilderOptions();
+            let passes = "default<O0>";
+            if opt_level == 1 {
+                passes = "default<O1>";
+            };
+            if opt_level == 2 {
+                passes = "default<O2>";
+            };
+            let err = LLVMRunPasses((*c).llvm_module, passes, target_machine, pass_options);
+            if err != cast(LLVMErrorRef, null) {
+                let err_msg = LLVMGetErrorMessage(err);
+                printf("Optimization error: %s\n", err_msg);
+                LLVMDisposeErrorMessage(err_msg);
+            };
+            LLVMDisposePassBuilderOptions(pass_options);
+        };
+
+        /* If dumping IR, write optimized IR and exit */
+        if dump_ir {
+            LLVMPrintModuleToFile((*c).llvm_module, "output.ll", message);
+            LLVMDisposeTargetMachine(target_machine);
+            return 0;
+        };
+
         result = LLVMVerifyModule((*c).llvm_module, LLVMAbortProcessAction, message);
         if result != 0 {
             printf("Verification output: %s\n", *message);
