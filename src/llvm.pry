@@ -355,3 +355,14 @@ extern LLVMStoreSizeOfType = (LLVMTargetDataRef, LLVMTypeRef) => i64;
 extern LLVMStructCreateNamed = (LLVMContextRef, *i8) => LLVMTypeRef;
 extern LLVMStructSetBody = (LLVMTypeRef, *LLVMTypeRef, i64, i64) => void;
 
+extern LLVMBuildTrunc = (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, *i8) => LLVMValueRef;
+extern LLVMBuildSExt = (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, *i8) => LLVMValueRef;
+extern LLVMBuildPointerCast = (LLVMBuilderRef, LLVMValueRef, LLVMTypeRef, *i8) => LLVMValueRef;
+
+extern LLVMTypeOf = (LLVMValueRef) => LLVMTypeRef;
+extern LLVMGetTypeKind = (LLVMTypeRef) => i64;
+extern LLVMGetIntTypeWidth = (LLVMTypeRef) => i64;
+
+let LLVMIntegerTypeKind = 8;
+let LLVMPointerTypeKind = 12;
+

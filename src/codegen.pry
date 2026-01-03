@@ -1075,12 +1075,38 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		let exp = *cast(*NODE_CAST_STATEMENT_DATA, (*expression).data);
 		let val = codegen_generate_expression_value(c, exp.expression, "");
 		assert(val != null);
+		let src_value = (*val).value;
+		let dest_node_type = exp.typ;
+		let src_llvm_type = LLVMTypeOf(src_value);
+		let dest_llvm_type_ptr = codegen_get_llvm_type(c, dest_node_type);
+		assert(dest_llvm_type_ptr != null);
+		let dest_llvm_type = *dest_llvm_type_ptr;
+		let src_type_kind = LLVMGetTypeKind(src_llvm_type);
+		let dest_type_kind = LLVMGetTypeKind(dest_llvm_type);
+		let result_value = src_value;
+		if src_type_kind == LLVMIntegerTypeKind {
+			if dest_type_kind == LLVMIntegerTypeKind {
+				let src_width = LLVMGetIntTypeWidth(src_llvm_type);
+				let dest_width = LLVMGetIntTypeWidth(dest_llvm_type);
+				if src_width > dest_width {
+					result_value = LLVMBuildTrunc((*c).builder, src_value, dest_llvm_type, "");
+				};
+				if src_width < dest_width {
+					result_value = LLVMBuildSExt((*c).builder, src_value, dest_llvm_type, "");
+				};
+			};
+		};
+		if src_type_kind == LLVMPointerTypeKind {
+			if dest_type_kind == LLVMPointerTypeKind {
+				result_value = LLVMBuildPointerCast((*c).builder, src_value, dest_llvm_type, "");
+			};
+		};
 		let v = Variable{};
-		v.value = (*val).value; /* TODO: Do real casting */
+		v.value = result_value;
 		v.type = cast(LLVMTypeRef, null);
 		v.stack_level = null;
 		v.node = expression;
-		v.node_type = exp.typ;
+		v.node_type = dest_node_type;
 		return codegen_create_variable(c, v);
 	};
 	

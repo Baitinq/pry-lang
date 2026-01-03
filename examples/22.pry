@@ -16,7 +16,7 @@ let main = () => i64 {
 	inst.x = 2;
 	inst.z = true;
 	inst.y = malloc(1);
-	(*(inst.y)) = 5;
+	(*(inst.y)) = cast(i8, 5);
 
 	let x = 0;
 
