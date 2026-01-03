@@ -184,7 +184,7 @@ let NODE_FUNCTION_DEFINITION_DATA = struct {
     statements_len: i64,
     parameters: **Node,
     parameters_len: i64,
-    retur_type: *Node,
+    return_type: *Node,
 };
 
 let NODE_STRUCT_INSTANCIATION_DATA = struct {
@@ -207,7 +207,7 @@ let NODE_TYPE_SIMPLE_TYPE_DATA = struct {
 let NODE_TYPE_FUNCTION_TYPE_DATA = struct {
     parameters: **Node,
     parameters_len: i64,
-    retur_type: *Node,
+    return_type: *Node,
 };
 
 let NODE_TYPE_POINTER_TYPE_DATA = struct {
@@ -445,15 +445,15 @@ let parser_parse_function_type = (p: *parser) => *Node {
 		return null;
 	};
 
-	let retur_typ = parser_parse_type(p);
-	if retur_typ == null {
+	let return_type = parser_parse_type(p);
+	if return_type == null {
 		return null;
 	};
 
 	let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, arena_alloc((*p).arena, sizeof(NODE_TYPE_FUNCTION_TYPE_DATA)));
 	(*d).parameters = parameters;
 	(*d).parameters_len = parameters_len;
-	(*d).retur_type = retur_typ;
+	(*d).return_type = return_type;
 
 	let r = Node{type: NODE_TYPE_FUNCTION_TYPE, data: cast(*void, d), line: parser_current_line(p)};
 
@@ -729,8 +729,8 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	if parser_accept_token(p, TOKEN_ARROW) == null {
 		return null;
 	};
-	let retur_type = parser_parse_type(p);
-	if retur_type == null {
+	let return_type = parser_parse_type(p);
+	if return_type == null {
 		return null;
 	};
 	if parser_accept_token(p, TOKEN_LBRACE) == null {
@@ -767,7 +767,7 @@ let parser_parse_function_definition = (p: *parser) => *Node {
 	(*d).statements_len = i;
 	(*d).parameters = cast(**Node, (*params).data);
 	(*d).parameters_len = (*params).data_len;
-	(*d).retur_type = retur_type;
+	(*d).return_type = return_type;
 
 	let n = Node{type: NODE_FUNCTION_DEFINITION, data: cast(*void, d), line: parser_current_line(p)};
 

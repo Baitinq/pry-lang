@@ -27,10 +27,10 @@ let codegen = struct {
 	arena: *arena,
 	environment: *Environment,
 
-	whil_loop_exit: LLVMBasicBlockRef,
-	whil_block: LLVMBasicBlockRef,
+	while_loop_exit: LLVMBasicBlockRef,
+	while_block: LLVMBasicBlockRef,
 	current_function: LLVMValueRef,
-	current_function_retur_type: *Node,
+	current_function_return_type: *Node,
 	llvm_target_data: LLVMTargetDataRef,
 };
 
@@ -75,7 +75,7 @@ let compare_types = (c: *codegen, a: *Node, b: *Node, is_dereference: bool) => b
 		let function_type_b = *cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*b).data);
 
 
-		if !compare_types(c, function_type_a.retur_type, function_type_b.retur_type, false) {
+		if !compare_types(c, function_type_a.return_type, function_type_b.return_type, false) {
 			printf("Function return types do not match\n");
 			return false;
 		};
@@ -303,11 +303,11 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 	
 	if (*node).type == NODE_TYPE_FUNCTION_TYPE {
 		let function_type = *cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*node).data);
-		let f_retur = function_type.retur_type;
-		let retur_type = codegen_get_llvm_type(c, f_retur);
-		assert(retur_type != null);
-		if (*f_retur).type == NODE_TYPE_FUNCTION_TYPE {
-			(*retur_type) = LLVMPointerType(*retur_type, 0);
+		let f_return = function_type.return_type;
+		let return_type = codegen_get_llvm_type(c, f_return);
+		assert(return_type != null);
+		if (*f_return).type == NODE_TYPE_FUNCTION_TYPE {
+			(*return_type) = LLVMPointerType(*return_type, 0);
 		};
 
 		let paramtypes = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef) * 20));
@@ -336,7 +336,7 @@ let codegen_get_llvm_type = (c: *codegen, node: *Node) => *LLVMTypeRef {
 
 			i = i + 1;
 		};
-		let llvm_function_type = LLVMFunctionType(*retur_type, paramtypes, paramtypes_len, is_varargs);
+		let llvm_function_type = LLVMFunctionType(*return_type, paramtypes, paramtypes_len, is_varargs);
 		let r = cast(*LLVMTypeRef, arena_alloc((*c).arena, sizeof(LLVMTypeRef)));
 		*r = llvm_function_type;
 		return r;
@@ -623,11 +623,11 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			i = i + 1;
 		};
 		
-		let f_ret = function_definition.retur_type;
-		let retur_type = codegen_get_llvm_type(c, f_ret);
-		assert(retur_type != null);
+		let f_ret = function_definition.return_type;
+		let return_type = codegen_get_llvm_type(c, f_ret);
+		assert(return_type != null);
 		if (*f_ret).type == NODE_TYPE_FUNCTION_TYPE {
-			(*retur_type) = LLVMPointerType(*retur_type, 0);
+			(*return_type) = LLVMPointerType(*return_type, 0);
 		};
 
 		let function = cast(LLVMValueRef, null);
@@ -638,7 +638,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 			};
 		};
 		if function == cast(LLVMValueRef, null) {
-			let function_type = LLVMFunctionType(*retur_type, llvm_param_types, i, is_varargs);
+			let function_type = LLVMFunctionType(*return_type, llvm_param_types, i, is_varargs);
 			let n_name = name;
 			if name == null {
 				n_name = "unnamed_func";
@@ -652,15 +652,15 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 		environment_create_scope((*c).environment);
 		let last_function = (*c).current_function;
 		(*c).current_function = function;
-		let last_function_retur_type = (*c).current_function_retur_type;
-		(*c).current_function_retur_type = function_definition.retur_type;
+		let last_function_return_type = (*c).current_function_return_type;
+		(*c).current_function_return_type = function_definition.return_type;
 
 		/* TODO: Defer. For now we do at the end */
 
 		let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, arena_alloc((*c).arena, sizeof(NODE_TYPE_FUNCTION_TYPE_DATA)));
 		(*d).parameters = param_types;
 		(*d).parameters_len = i;
-		(*d).retur_type = function_definition.retur_type;
+		(*d).return_type = function_definition.return_type;
 		let n = Node{type: NODE_TYPE_FUNCTION_TYPE, data: cast(*void, d), line: 0};
 		let node_type = codegen_create_node(c, n);
 
@@ -709,7 +709,7 @@ let codegen_generate_expression_value = (c: *codegen, expression: *Node, name: *
 
 		/* TODO: Move to defer */
 		(*c).current_function = last_function;
-		(*c).current_function_retur_type = last_function_retur_type;
+		(*c).current_function_return_type = last_function_return_type;
 		environment_drop_scope((*c).environment);
 
 		return codegen_create_variable(c, v);
@@ -1269,7 +1269,7 @@ let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEME
 	let val = codegen_generate_expression_value(c, expression, null);
 	assert(val != null);
 
-	assert(compare_types(c, (*c).current_function_retur_type, (*val).node_type, false));
+	assert(compare_types(c, (*c).current_function_return_type, (*val).node_type, false));
 
 	LLVMBuildRet((*c).builder, (*val).value);
 
@@ -1279,7 +1279,7 @@ let codegen_generate_return_statement = (c: *codegen, stmt: *NODE_RETURN_STATEME
 let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 	if (*fun).type == NODE_FUNCTION_DEFINITION {
 		let d = cast(*NODE_FUNCTION_DEFINITION_DATA, (*fun).data);
-		return (*d).retur_type;
+		return (*d).return_type;
 	};
 	if (*fun).type == NODE_PRIMARY_EXPRESSION_IDENTIFIER {
 		let d = cast(*NODE_PRIMARY_EXPRESSION_IDENTIFIER_DATA, (*fun).data);
@@ -1294,7 +1294,7 @@ let get_function_return_type = (ic: *codegen, fun: *Node) => *Node {
 	};
 	if (*fun).type == NODE_TYPE_FUNCTION_TYPE  {
 		let d = cast(*NODE_TYPE_FUNCTION_TYPE_DATA, (*fun).data);
-		return (*d).retur_type;
+		return (*d).return_type;
 	};
 	printf("Error at line %d: Cannot determine function return type\n", (*fun).line);
 	exit(1);
@@ -1364,14 +1364,14 @@ let codegen_generate_function_call_statement = (c: *codegen, statement: *Node) =
 };
 
 let codegen_generate_break_statement = (c: *codegen) => i64 {
-	assert((*c).whil_loop_exit != cast(LLVMBasicBlockRef, null));
-	LLVMBuildBr((*c).builder, (*c).whil_loop_exit);
+	assert((*c).while_loop_exit != cast(LLVMBasicBlockRef, null));
+	LLVMBuildBr((*c).builder, (*c).while_loop_exit);
 	return 0;
 };
 
 let codegen_generate_continue_statement = (c: *codegen) => i64 {
-	assert((*c).whil_block != cast(LLVMBasicBlockRef, null));
-	LLVMBuildBr((*c).builder, (*c).whil_block);
+	assert((*c).while_block != cast(LLVMBasicBlockRef, null));
+	LLVMBuildBr((*c).builder, (*c).while_block);
 	return 0;
 };
 
@@ -1412,9 +1412,9 @@ let codegen_generate_if_statement = (c: *codegen, statement: *NODE_IF_STATEMENT_
 };
 
 let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STATEMENT_DATA) => *void {
-	let whil_block = LLVMAppendBasicBlock((*c).current_function, "while_block");
-	LLVMBuildBr((*c).builder, whil_block);
-	LLVMPositionBuilderAtEnd((*c).builder, whil_block);
+	let while_block = LLVMAppendBasicBlock((*c).current_function, "while_block");
+	LLVMBuildBr((*c).builder, while_block);
+	LLVMPositionBuilderAtEnd((*c).builder, while_block);
 	
 	let condition_value = codegen_generate_expression_value(c, (*statement).condition, null);
 	assert(condition_value != null);
@@ -1423,8 +1423,8 @@ let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STAT
 	let outer_block = LLVMAppendBasicBlock((*c).current_function, "outer_block");
         LLVMBuildCondBr((*c).builder, (*condition_value).value, inner_block, outer_block);
 
-	(*c).whil_loop_exit = outer_block;
-	(*c).whil_block = whil_block;
+	(*c).while_loop_exit = outer_block;
+	(*c).while_block = while_block;
 	
 	LLVMPositionBuilderAtEnd((*c).builder, inner_block);
 
@@ -1440,11 +1440,11 @@ let codegen_generate_while_statement = (c: *codegen, statement: *NODE_WHILE_STAT
 	
 	environment_drop_scope((*c).environment);
 	
-	LLVMBuildBr((*c).builder, whil_block);
+	LLVMBuildBr((*c).builder, while_block);
 	LLVMPositionBuilderAtEnd((*c).builder, outer_block);
 
-	(*c).whil_loop_exit = cast(LLVMBasicBlockRef, null);
-	(*c).whil_block = cast(LLVMBasicBlockRef, null);
+	(*c).while_loop_exit = cast(LLVMBasicBlockRef, null);
+	(*c).while_block = cast(LLVMBasicBlockRef, null);
 	
 	return null;
 };
