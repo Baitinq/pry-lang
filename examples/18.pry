@@ -5,9 +5,9 @@ import "!stdlib.pry";
 
 let main = () => i64 {
 	let x = cast(*i8, malloc(24));
-	(*(x+cast(*i8, 0))) = 10;
-	(*(x+cast(*i8, 1))) = 20;
-	(*(x+cast(*i8, 2))) = 40;
+	(*(x+cast(*i8, 0))) = cast(i8, 10);
+	(*(x+cast(*i8, 1))) = cast(i8, 20);
+	(*(x+cast(*i8, 2))) = cast(i8, 40);
 	printf("%p\n", x);
 	printf("%d\n", *(x+cast(*i8, 0)));
 	printf("%d\n", *(x+cast(*i8, 1)));
